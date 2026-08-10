@@ -1,0 +1,79 @@
+<div class="patch-page">
+  <div class="patch-container">
+    <header class="patch-header" role="banner">
+      <div class="patch-left">
+        <img src="/assets/img/actualizacion.png" alt="Actualización" class="patch-icon" />
+      </div>
+      <div class="patch-title">
+        <h1>Actualización <span class="version">2.4.0</span></h1>
+        <p class="sub">Mejoras en validación de archivos y experiencia visual (tema azul & blanco).</p>
+      </div>
+    </header>
+
+    <main class="patch-body" role="main">
+      <p class="lead">Se realizaron cambios en el flujo de validación de archivos. Abajo verás cada cambio con su imagen explicativa. Haz click en una imagen para verla en grande.</p>
+
+      <ul class="patch-list" aria-live="polite">
+        <li class="patch-item">
+          <div class="point">
+            <div class="text">
+              <strong>Validación de archivos:</strong>
+              <p>Ahora los archivos subidos por los proveedores pueden ser validados uno por uno. Los archivos pueden tener tres estados: Válido (verde), No Válido (rojo) y Pendiente de Revisión (amarillo).</p>
+            </div>
+            <div class="gif-wrap">
+              <img
+                [src]="images[0].src"
+                [alt]="images[0].alt"
+                class="gif clickable"
+                (click)="openImage(images[0].src, images[0].alt)"
+              />
+            </div>
+          </div>
+        </li>
+
+        <li class="patch-item">
+          <div class="point">
+            <div class="text">
+              <strong>Nuevos estados:</strong>
+              <p>Se agregaron 2 nuevos estados de archivo al resumen: GRIS — "Vacío" y AMARILLO — "En revisión".</p>
+            </div>
+            <div class="gif-wrap">
+              <img
+                [src]="images[1].src"
+                [alt]="images[1].alt"
+                class="gif clickable"
+                (click)="openImage(images[1].src, images[1].alt)"
+              />
+            </div>
+          </div>
+        </li>
+
+        <li class="patch-item">
+          <div class="point">
+            <div class="text">
+              <strong>Función Cambiada:</strong>
+              <p>Se removió el botón de validación global; ahora solo se puede validar al proveedor si todos los archivos están en estado verde o gris.</p>
+            </div>
+            <div class="gif-wrap">
+              <img
+                [src]="images[2].src"
+                [alt]="images[2].alt"
+                class="gif clickable"
+                (click)="openImage(images[2].src, images[2].alt)"
+              />
+            </div>
+          </div>
+        </li>
+      </ul>
+    </main>
+  </div>
+</div>
+
+<!-- Lightbox / imagen ampliada -->
+<div class="img-lightbox" *ngIf="selectedImage" (click)="closeImage()">
+  <div class="img-wrap" (click)="$event.stopPropagation()">
+    <button class="img-close" (click)="closeImage()" aria-label="Cerrar imagen">×</button>
+    <img [src]="selectedImage?.src" [alt]="selectedImage?.alt" />
+    <p class="img-caption" *ngIf="selectedImage?.alt">{{ selectedImage.alt }}</p>
+  </div>
+</div>

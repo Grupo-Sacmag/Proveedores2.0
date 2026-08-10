@@ -1,0 +1,345 @@
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.alert.naranja {
+  background-color: #FFA726;
+  color: #fff;
+}
+
+.alert.azul {
+  background-color: #2196F3;
+  color: #fff;
+}
+
+.alert.blanco {
+  background-color: #F5F5F5;
+  color: #333;
+}
+
+/* Contenedor de la botonera */
+.botonera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+/* Botones generales */
+.botonera button,
+.botonera a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* espacio entre icono y texto */
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Iconos dentro de los botones */
+.botonera button img,
+.botonera a img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Botones primarios (acciones importantes: Nuevo Proveedor/Usuario) */
+.botonera .btn-primario {
+  background-color: #0052cc;
+  color: #fff;
+  border: 1px solid #0041a3;
+}
+
+.botonera .btn-primario:hover {
+  background-color: #0041a3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Botones secundarios (filtrado y acciones normales) */
+.botonera .btn-secundario {
+  background-color: #f4f5f7;
+  color: #0052cc;
+  border: 1px solid #dfe1e6;
+}
+
+.botonera .btn-secundario:hover {
+  background-color: #e9ebee;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive: en móviles, los botones apilan verticalmente */
+@media (max-width: 768px) {
+  .botonera {
+    flex-direction: column;
+  }
+  .botonera button,
+  .botonera a {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* --- Alerta de Mantenimiento --- */
+.maintenance-alert {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffffff, #faffc8e7);
+  color: rgb(0, 0, 0);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  cursor: pointer;
+  width: 350px;
+  height: auto;
+}
+
+.maintenance-alert .alert-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 15px;
+}
+
+.maintenance-alert img {
+  width: 40px;
+  height: 40px;
+  animation: pulse 2s infinite;
+}
+
+.maintenance-alert .text-content {
+  flex-grow: 1;
+}
+
+.maintenance-alert strong {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.maintenance-alert p {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+  max-height: 200px; /* Altura máxima para el texto */
+  opacity: 1;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.maintenance-alert .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.maintenance-alert .close-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Estado encogido */
+.maintenance-alert.shrunk {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  /* --- Centrar el contenido (la imagen) --- */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.maintenance-alert.shrunk .alert-content {
+  padding: 0; /* Quitar padding para que la imagen se centre bien */
+  gap: 0;
+}
+
+
+/* --- Alerta d e actualizacion --- */
+
+.update-alert {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #85ff4d, #47fb00);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  cursor: pointer;
+  width: 350px;
+  height: auto;
+}
+
+.update-alert .alert-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 15px;
+}
+
+.update-alert img {
+  width: 40px;
+  height: 40px;
+  animation: pulse 2s infinite;
+}
+
+.update-alert .text-content {
+  flex-grow: 1;
+}
+
+.update-alert strong {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.update-alert p {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+  max-height: 200px; /* Altura máxima para el texto */
+  opacity: 1;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.update-alert .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.update-alert .close-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Estado encogido */
+.update-alert.shrunk {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  /* --- Centrar el contenido (la imagen) --- */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.update-alert.shrunk .update-content {
+  padding: 0; /* Quitar padding para que la imagen se centre bien */
+  gap: 0;
+}
+
+/* --- Estilos para las Notas del Parche --- */
+
+/* El fondo oscuro detrás del modal */
+.patch-notes-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* El modal (la ventana) */
+.patch-notes-modal {
+  background-color: #fff;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 650px; /* Ancho máximo */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  max-height: 80vh; /* Altura máxima */
+  overflow-y: auto; /* Scroll si el contenido es muy largo */
+}
+
+.patch-notes-modal h2 {
+  color: #0052cc; /* Un azul corporativo */
+  margin-top: 0;
+  font-size: 24px;
+  font-weight: 700;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.patch-notes-modal p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.patch-notes-modal ul {
+  list-style-type: disc;
+  padding-left: 25px;
+  margin: 20px 0;
+}
+
+.patch-notes-modal li {
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #444;
+}
+
+/* El botón para cerrar */
+.btn-cerrar-notas {
+  display: block;
+  margin-left: auto; /* Lo alinea a la derecha */
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #0052cc;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-cerrar-notas:hover {
+  background-color: #0041a3;
+  transform: translateY(-2px);
+}
+
+.maintenance-alert.shrunk p,
+.maintenance-alert.shrunk strong,
+.maintenance-alert.shrunk .close-btn {
+  display: none;
+  opacity: 0;
+  max-height: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}

@@ -1,0 +1,253 @@
+<section class="registro">
+  <div *ngIf="cargando" class="pantalla-carga">
+    <div class="contenido-carga">
+      <p>Validando usuario, por favor espere...</p>
+    </div>
+  </div>
+
+  <!-- Mensaje -->
+  <div *ngIf="mensaje" class="mensaje-modal">
+    <div
+      class="mensaje-contenido"
+      [ngClass]="{
+        'mensaje-error': tipoMensaje === 'error',
+        'mensaje-exito': tipoMensaje === 'exito',
+        'mensaje-info': tipoMensaje === 'info'
+      }"
+    >
+      <p>{{ mensaje }}</p>
+      <button (click)="cerrarMensaje()">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div *ngIf="confirmando" class="confirm-modal">
+    <div class="confirm-content">
+      <h2>Confirmación</h2>
+      <p>¿Deseas enviar la información?</p>
+      <div class="confirm-buttons">
+        <button class="btn-sí" (click)="confirmarEnviar()">Sí</button>
+        <button class="btn-no" (click)="cancelarEnviar()">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="circle"></div>
+  <div class="box">
+    <div class="image">
+      <h1>
+        {{ title }}<br />
+        <span>Proveedor</span>
+      </h1>
+      <img src="../../../assets/img/register.svg" alt="" />
+    </div>
+
+    <div class="register">
+      <form #vendorForm="ngForm" (ngSubmit)="onSubmit(vendorForm)">
+        <!-- Paso 1: Selección de Régimen Fiscal -->
+        <div class="boton">
+          <label for="regimenF">Régimen fiscal</label>
+          <select
+            id="regimenF"
+            name="regimenF"
+            #regimenF="ngModel"
+            [(ngModel)]="vendor.regimenFiscal"
+            required
+            (change)="onRegimenChange($event)"
+          >
+            <option value="" disabled selected>Seleccione una opción</option>
+            <option value="fisica">Persona Física</option>
+            <option value="moral">Persona Moral</option>
+          </select>
+          <span *ngIf="!regimenF.valid && regimenF.touched" class="rojo">
+            Este campo no puede estar vacío.
+          </span>
+        </div>
+
+        <!-- Preguntar si tiene Registro Patronal (Solo para Persona Física) -->
+        <div
+          *ngIf="vendor.regimenFiscal === 'fisica' && tieneRegistroPatronal === null"
+          class="boton"
+        >
+          <label>¿Cuenta con Registro Patronal?</label>
+          <div class="confirm-buttons">
+            <button type="button" class="btn-sí" (click)="confirmarRegistroPatronal(true)">
+              Sí
+            </button>
+            <button type="button" class="btn-no" (click)="confirmarRegistroPatronal(false)">
+              No
+            </button>
+          </div>
+        </div>
+
+        <!-- Registro Patronal -->
+        <div
+          *ngIf="(vendor.regimenFiscal === 'fisica' && tieneRegistroPatronal !== null) || vendor.regimenFiscal === 'moral'"
+          class="boton"
+        >
+          <label for="regP">Registro patronal</label>
+          <input
+            type="text"
+            id="regP"
+            name="regP"
+            #regP="ngModel"
+            [(ngModel)]="vendor.registroPatronal"
+            maxlength="11"
+            minlength="11"
+            [readonly]="!tieneRegistroPatronal"
+            required
+          />
+          <span
+            *ngIf="(!regP.valid && regP.touched) || regP.value?.trim() == ''"
+            class="rojo"
+          >
+            Registro patronal incorrecto, el registro patronal debe de tener 11
+            Caracteres
+          </span>
+        </div>
+
+        <!-- Todo el resto del formulario: si es moral no se requiere preguntar registro patronal -->
+        <div *ngIf="vendor.regimenFiscal === 'moral' || tieneRegistroPatronal !== null">
+          <div class="boton">
+            <label for="rfc">Rfc</label>
+            <input
+              type="text"
+              name="rfc"
+              id="rfc"
+              #rfc="ngModel"
+              [(ngModel)]="vendor.rfc"
+              maxlength="13"
+              minlength="12"
+              (change)="valid()"
+              required
+            />
+            <span
+              *ngIf="(!rfc.valid && rfc.touched) || rfc.value?.trim() == ''"
+              class="rojo"
+            >
+              Rfc incorrecto, el RFC debe de tener 13 Caracteres
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="razonS">Razón social</label>
+            <input
+              type="text"
+              id="razonS"
+              name="razonS"
+              #razonS="ngModel"
+              [(ngModel)]="vendor.razonSocial"
+              required
+            />
+            <span
+              *ngIf="(!razonS.valid && razonS.touched) || razonS.value?.trim() == ''"
+              class="rojo"
+            >
+              Razón social incorrecto, la razón social no puede estar vacío.
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="tipoP">Tipo de proveedor</label>
+            <select
+              id="tipoP"
+              name="tipoP"
+              #tipoP="ngModel"
+              [(ngModel)]="vendor.tipoProveedor"
+              required
+            >
+              <option value="ingeniería">INGENIERÍA</option>
+              <option value="estudios mecánica de suelos">
+                ESTUDIOS MECÁNICA DE SUELOS
+              </option>
+              <option value="estudios topografía">ESTUDIOS TOPOGRAFÍA</option>
+              <option value="otros">OTROS</option>
+            </select>
+            <span *ngIf="!tipoP.valid && tipoP.touched" class="rojo">
+              Este campo no puede estar vacío.
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="datosC">Nombre del contacto</label>
+            <input
+              type="text"
+              id="datosC"
+              name="datosC"
+              #datosC="ngModel"
+              [(ngModel)]="vendor.nombreContacto"
+              required
+            />
+            <span
+              *ngIf="(!datosC.valid && datosC.touched) || datosC.value?.trim() == ''"
+              class="rojo"
+            >
+              Nombre del contacto incorrecto
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="correo">Correo</label>
+            <input
+              type="email"
+              id="correo"
+              name="correo"
+              #correo="ngModel"
+              [(ngModel)]="vendor.correo"
+              required
+              email
+            />
+            <span *ngIf="!correo.valid && correo.touched" class="rojo">
+              El correo debe tener un formato correcto tal como
+              "correo@outlook.com"
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="telefono">Teléfono del contacto</label>
+            <input
+              type="number"
+              id="telefono"
+              name="telefono"
+              #telefono="ngModel"
+              [(ngModel)]="vendor.telefono"
+              min="1000000000"
+              max="9999999999"
+              required
+            />
+            <span *ngIf="!telefono.valid && telefono.touched" class="rojo">
+              El telefono debe de tener 10 digitos
+            </span>
+          </div>
+
+          <div class="boton">
+            <label for="obser">Observaciones</label>
+            <textarea
+              id="obser"
+              name="obser"
+              #obser="ngModel"
+              [(ngModel)]="vendor.observaciones"
+            ></textarea>
+          </div>
+
+          <div style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 10px; color: #555;">📋 Archivos Requeridos para el Alta</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background-color: #fcfcfc;">
+              <label *ngFor="let doc of catalogoDocumentos" style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; font-weight: normal; color: #333; margin: 0;">
+                <input type="checkbox" [checked]="isArchivoRequerido(doc.id)" (change)="toggleRequisito(doc.id)" />
+                {{ doc.id }}. {{ doc.nombre }}
+              </label>
+            </div>
+          </div>
+
+          <input
+            id="boton"
+            type="submit"
+            value="Enviar"
+            [disabled]="!vendorForm.form.valid"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

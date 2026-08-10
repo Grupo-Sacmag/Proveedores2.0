@@ -1,0 +1,66 @@
+﻿# ===========================
+# ARCHIVOS SENSIBLES
+# ===========================
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.cert
+
+# ===========================
+# NODE MODULES (regenerables con npm install)
+# ===========================
+node_modules/
+api-rest-node/node_modules/
+client_dev/node_modules/
+
+# ===========================
+# UPLOADS (archivos privados de proveedores)
+# ===========================
+api-rest-node/uploads/
+api-rest-node/validArch/
+
+# ===========================
+# ARCHIVOS COMPRIMIDOS PESADOS
+# ===========================
+*.zip
+*.rar
+*.tar.gz
+
+# ===========================
+# BUILD DEL FRONTEND (generado con ng build)
+# ===========================
+client_dev/dist/
+api-rest-node/client/
+
+# ===========================
+# LOGS
+# ===========================
+*.log
+npm-debug.log*
+*.csv
+*.ndjson
+
+# ===========================
+# ARCHIVOS DE IDE
+# ===========================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===========================
+# OTROS QUE NO VAN EN GITHUB
+# ===========================
+quarantine/
+AppLoginmovil/
+api-rest-node/quarantine/
+ssh_logs_to_json.py
+api-rest-node/controllers/project.js.save
+api-rest-node/controllers/logo.png
+api-rest-node/log_archivo8_validos.*
+api-rest-node/Collection\ Mongo/

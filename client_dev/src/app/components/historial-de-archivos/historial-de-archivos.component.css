@@ -1,0 +1,83 @@
+/* Contenedor principal */
+div {
+  font-family: 'Arial', sans-serif;
+  margin: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Título de la sección */
+h4 {
+  font-size: 1.5em;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Títulos de cada archivo (descripción) */
+h5 {
+  font-size: 1.2em;
+  color: #34495e;
+  margin-bottom: 10px;
+  background-color: #ecf0f1;
+  padding: 8px;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+}
+
+/* Botones de archivo */
+button {
+  display: inline-block;
+  background-color: #0881C1;
+  color: white;
+  font-size: 1em;
+  padding: 12px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s ease;
+  text-align: center;
+  width: 100%;
+}
+
+button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+button:focus {
+  outline: none;
+}
+
+/* Estilo para el contenedor de archivos */
+div > div {
+  margin-bottom: 15px;
+}
+
+/* Agregar separación entre las listas */
+div > div:not(:last-child) {
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 15px;
+}
+
+/* Asegurarse que el botón se vea bien en pantallas pequeñas */
+@media (max-width: 600px) {
+  button {
+    width: 100%;
+    padding: 10px 15px;
+  }
+
+  h4 {
+    font-size: 1.2em;
+  }
+
+  h5 {
+    font-size: 1em;
+  }
+}

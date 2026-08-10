@@ -1,0 +1,1872 @@
+<section class="archivos">
+  <h1>
+    Perfil de <br />
+    <span style="color: #1976d2">{{ vendor.razonSocial | uppercase }}</span>
+  </h1>
+
+  <!-- Pestañas de Empresa si el proveedor pertenece a más de una -->
+  <div *ngIf="vendor.empresa && vendor.empresa.length > 1 && (identity.rol === 'administrador_premium' || identity.rol === 'proveedor' || (identity.rol === 'administrador' && identity.empresa.toLowerCase().trim() === 'todas'))" 
+       style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px;">
+    <button 
+      *ngFor="let emp of vendor.empresa" 
+      (click)="cambiarEmpresaActiva(emp)"
+      [style.background-color]="empresaActiva === emp.toLowerCase().trim() ? '#1976d2' : '#f0f0f0'"
+      [style.color]="empresaActiva === emp.toLowerCase().trim() ? '#fff' : '#333'"
+      style="padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+    >
+      🏢 {{ emp }}
+    </button>
+  </div>
+  
+  <div *ngIf="empresaActiva" style="margin-bottom: 20px; font-size: 13px; font-weight: bold; color: #666; text-align: left;">
+    📍 EXPEDIENTE ACTIVO: <span style="text-transform: uppercase; color: #1976d2; border: 1.5px solid #1976d2; padding: 2px 8px; border-radius: 4px; background-color: rgba(25, 118, 210, 0.05);">{{ empresaActiva }}</span>
+  </div>
+
+  <div>
+    <h6>Estatus de proveedor:</h6>
+
+    <span *ngIf="archivos?._id && !archivos.validar" class="alert rojo">
+      📂 Archivos Enviados Pendientes De Revisión
+    </span>
+
+    <span *ngIf="archivos?._id && archivos.validar" class="alert verde">
+      ✅ Archivos Aceptados
+    </span>
+
+    <span *ngIf="!archivos?._id" class="alert negro">
+      ❌ Sin Archivos, enviar los archivos Correspondientes
+    </span>
+
+    <div class="contenedor-botones">
+      <br />
+
+      <button
+        class="btn-accion1 btn-secundario"
+        (click)="descargarZip()"
+        *ngIf="
+          archivos._id != '' &&
+          identity.rol != 'proveedor' &&
+          identity.rol != 'usuariolec'
+        "
+      >
+        <img src="./../../../assets/img/downloading.png" alt="Descargar" />
+        Descargar Documentos
+      </button>
+
+      <button
+        class="btn-accion btn-secundario"
+        (click)="irAHistorial(vendor.rfc)"
+        *ngIf="
+          archivos._id != '' &&
+          identity.rol != 'proveedor' &&
+          identity.rol != 'usuariolec'
+        "
+      >
+        <img src="../../../assets/img/archivo.png" alt="Historial" />
+        Ver Historial
+      </button>
+
+      <button
+        class="btn-accion btn-secundario"
+        (click)="imprimir()"
+        *ngIf="
+          archivos._id != '' &&
+          identity.rol != 'proveedor' &&
+          identity.rol != 'usuariolec'
+        "
+      >
+        <img src="./../../../assets/img/impresora.png" alt="Imprimir" />
+        Imprimir Resumen
+      </button>
+
+      <button (click)="toggle()" class="btn-accion btn-primario">
+        <img
+          [src]="
+            mostrar
+              ? './../../../assets/img/edicircle.png'
+              : './../../../assets/img/regresar.png'
+          "
+          [alt]="mostrar ? 'Editar' : 'Regresar'"
+        />
+        {{
+          mostrar === undefined
+            ? "Click aqui para mostrar informacion"
+            : mostrar
+            ? "Editar Archivos"
+            : "Regresar"
+        }}
+      </button>
+    </div>
+  </div>
+  <section id="resumen-imprimir">
+    <div class="perfil-container" *ngIf="mostrar">
+      <!-- Lado izquierdo -->
+      <div class="perfil-info">
+        <h5>ℹ️ Información del Proveedor</h5>
+        <br />
+        <br />
+        <br />
+        <form (ngSubmit)="onSubmitU()" #vendorForm="ngForm">
+          <label for="rfc">RFC</label>
+          <input
+            type="text"
+            id="rfc"
+            name="rfc"
+            [value]="vendor.rfc | uppercase"
+            readonly
+          />
+
+          <label for="regpat">Registro patronal</label>
+          <input
+            type="text"
+            id="regpat"
+            name="registroPatronal"
+            [value]="vendor.registroPatronal | uppercase"
+            readonly
+          />
+
+          <label for="razon">Razón social</label>
+          <input
+            type="text"
+            id="razon"
+            name="razonSocial"
+            [value]="vendor.razonSocial | uppercase"
+            readonly
+          />
+
+          <label for="nombre">Nombre del contacto</label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombreContacto"
+            [(ngModel)]="vendor.nombreContacto"
+            [readonly]="!canEditData"
+          />
+
+          <label for="correo">Correo del contacto</label>
+          <input
+            type="email"
+            id="correo"
+            name="correo"
+            text-transform: uppercase
+            [(ngModel)]="vendor.correo"
+            [readonly]="!canEditData"
+          />
+
+          <label for="tel">Teléfono del contacto</label>
+          <input
+            type="number"
+            id="tel"
+            name="telefono"
+            [(ngModel)]="vendor.telefono"
+            [readonly]="!canEditData"
+          />
+
+          <label for="tipo">Tipo de proveedor</label>
+          <input
+            type="text"
+            id="tipo"
+            name="tipoProveedor"
+            [value]="vendor.tipoProveedor | uppercase"
+            readonly
+          />
+
+          <label for="regimen">Régimen fiscal</label>
+          <select
+            id="regimen"
+            name="regimenFiscal"
+            [(ngModel)]="vendor.regimenFiscal"
+            [disabled]="!canEditData"
+          >
+            <option value="" disabled>Selecciona régimen fiscal</option>
+            <option value="fisica">FISICA</option>
+            <option value="moral">MORAL</option>
+
+          </select>
+
+          <label for="obs">📝 Observaciones</label>
+          <textarea
+            id="obs"
+            name="observaciones"
+            placeholder="Escribe aquí cualquier observación..."
+            rows="4"
+            [(ngModel)]="vendor.observaciones"
+            [readonly]="!canEditData"
+          ></textarea>
+
+          <button
+            type="submit"
+            class="btn-accion btn-primario"
+            *ngIf="canEditData"
+          >
+            Guardar cambios
+          </button>
+        </form>
+
+        <div *ngIf="!canEditData" class="alert amarillo" style="margin-top: 10px;">
+          Sólo el proveedor y el administrador pueden editar estos datos.
+        </div>
+
+        <div *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+          <h5>⚙️ Configurar Archivos Requeridos</h5>
+          <br>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
+            <label *ngFor="let doc of catalogoDocumentos" style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; color: #333;">
+              <input type="checkbox" [checked]="isArchivoRequerido(doc.id)" (change)="toggleRequisito(doc.id)" />
+              {{ doc.id }}. {{ doc.nombre }}
+            </label>
+          </div>
+          <br>
+          <button type="button" class="btn-accion btn-primario" (click)="guardarRequisitos()">
+            Guardar Requisitos de Archivos
+          </button>
+        </div>
+      </div>
+
+      <!-- Lado derecho -->
+      <div>
+        <h5>📑 Resumen de Documentos</h5>
+        <br>
+        <div class="leyenda-estados">
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-valido"></span>
+            <span class="leyenda-texto">Archivo Validado</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-rechazado"></span>
+            <span class="leyenda-texto">Archivo Rechazado</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-pendiente"></span>
+            <span class="leyenda-texto">Pendiente de Revisión</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-faltante"></span>
+            <span class="leyenda-texto">Sin archivo</span>
+          </span>
+        </div>
+        <div class="perfil-resumen">
+          <ol>
+            <li *ngIf="isArchivoRequerido(1)" [ngClass]="{
+                  'estado-valido': archivos.archivo1 && archivos.validacion1 === true,
+                  'estado-rechazado': archivos.archivo1 && archivos.validacion1 === false,
+                  'estado-pendiente': archivos.archivo1 && archivos.validacion1 === null,
+                  'estado-faltante': !archivos.archivo1
+                }">
+              Formato requisitado para alta de Proveedor
+              <a href="{{ url + 'archivos/' + archivos.archivo1 }}" *ngIf="archivos.archivo1 && archivos.validacion1 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo1 }}" *ngIf="archivos.archivo1 && archivos.validacion1 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo1 }}" *ngIf="archivos.archivo1 && archivos.validacion1 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo1" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(2)" [ngClass]="{
+                  'estado-valido': archivos.archivo2 && archivos.validacion2 === true,
+                  'estado-rechazado': archivos.archivo2 && archivos.validacion2 === false,
+                  'estado-pendiente': archivos.archivo2 && archivos.validacion2 === null,
+                  'estado-faltante': !archivos.archivo2
+                }">
+              Constancia de situación fiscal SAT 
+              <a href="{{ url + 'archivos/' + archivos.archivo2 }}" *ngIf="archivos.archivo2 && archivos.validacion2 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo2 }}" *ngIf="archivos.archivo2 && archivos.validacion2 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo2 }}" *ngIf="archivos.archivo2 && archivos.validacion2 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo2" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(3)" [ngClass]="{
+                  'estado-valido': archivos.archivo3 && archivos.validacion3 === true,
+                  'estado-rechazado': archivos.archivo3 && archivos.validacion3 === false,
+                  'estado-pendiente': archivos.archivo3 && archivos.validacion3 === null,
+                  'estado-faltante': !archivos.archivo3
+                }">
+              Alta imss registro patronal
+              <a href="{{ url + 'archivos/' + archivos.archivo3 }}" *ngIf="archivos.archivo3 && archivos.validacion3 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo3 }}" *ngIf="archivos.archivo3 && archivos.validacion3 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo3 }}" *ngIf="archivos.archivo3 && archivos.validacion3 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo3" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(4)" [ngClass]="{
+                  'estado-valido': archivos.archivo4 && archivos.validacion4 === true,
+                  'estado-rechazado': archivos.archivo4 && archivos.validacion4 === false,
+                  'estado-pendiente': archivos.archivo4 && archivos.validacion4 === null,
+                  'estado-faltante': !archivos.archivo4
+                }">
+              Ine representante legal
+              <a href="{{ url + 'archivos/' + archivos.archivo4 }}" *ngIf="archivos.archivo4 && archivos.validacion4 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo4 }}" *ngIf="archivos.archivo4 && archivos.validacion4 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo4 }}" *ngIf="archivos.archivo4 && archivos.validacion4 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo4" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(5)" [ngClass]="{
+                  'estado-valido': archivos.archivo5 && archivos.validacion5 === true,
+                  'estado-rechazado': archivos.archivo5 && archivos.validacion5 === false,
+                  'estado-pendiente': archivos.archivo5 && archivos.validacion5 === null,
+                  'estado-faltante': !archivos.archivo5
+                }">
+              Acta constitutiva, poder rep legal
+              <a href="{{ url + 'archivos/' + archivos.archivo5 }}" *ngIf="archivos.archivo5 && archivos.validacion5 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo5 }}" *ngIf="archivos.archivo5 && archivos.validacion5 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo5 }}" *ngIf="archivos.archivo5 && archivos.validacion5 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo5" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(6)" [ngClass]="{
+                  'estado-valido': archivos.archivo6 && archivos.validacion6 === true,
+                  'estado-rechazado': archivos.archivo6 && archivos.validacion6 === false,
+                  'estado-pendiente': archivos.archivo6 && archivos.validacion6 === null,
+                  'estado-faltante': !archivos.archivo6
+                }">
+              Comprobante de domicilio del domicilio fiscal vigente
+              <a href="{{ url + 'archivos/' + archivos.archivo6 }}" *ngIf="archivos.archivo6 && archivos.validacion6 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo6 }}" *ngIf="archivos.archivo6 && archivos.validacion6 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo6 }}" *ngIf="archivos.archivo6 && archivos.validacion6 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo6" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(7)" [ngClass]="{
+                  'estado-valido': archivos.archivo7 && archivos.validacion7 === true,
+                  'estado-rechazado': archivos.archivo7 && archivos.validacion7 === false,
+                  'estado-pendiente': archivos.archivo7 && archivos.validacion7 === null,
+                  'estado-faltante': !archivos.archivo7
+                }">
+              Estado de cuenta con cuenta clabe
+              <a href="{{ url + 'archivos/' + archivos.archivo7 }}" *ngIf="archivos.archivo7 && archivos.validacion7 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo7 }}" *ngIf="archivos.archivo7 && archivos.validacion7 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo7 }}" *ngIf="archivos.archivo7 && archivos.validacion7 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo7" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(8)" [ngClass]="{
+                  'estado-valido': archivos.archivo8 && archivos.validacion8 === true,
+                  'estado-rechazado': archivos.archivo8 && archivos.validacion8 === false,
+                  'estado-pendiente': archivos.archivo8 && archivos.validacion8 === null,
+                  'estado-faltante': !archivos.archivo8
+                }">
+              Opinion de cumplimiento 32D SAT
+              <a href="{{ url + 'archivos/' + archivos.archivo8 }}" *ngIf="archivos.archivo8 && archivos.validacion8 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo8 }}" *ngIf="archivos.archivo8 && archivos.validacion8 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo8 }}" *ngIf="archivos.archivo8 && archivos.validacion8 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo8" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(9)" [ngClass]="{
+                  'estado-valido': archivos.archivo9 && archivos.validacion9 === true,
+                  'estado-rechazado': archivos.archivo9 && archivos.validacion9 === false,
+                  'estado-pendiente': archivos.archivo9 && archivos.validacion9 === null,
+                  'estado-faltante': !archivos.archivo9
+                }">
+              Opinion de cumplimiento 32D IMSS
+              <a href="{{ url + 'archivos/' + archivos.archivo9 }}" *ngIf="archivos.archivo9 && archivos.validacion9 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo9 }}" *ngIf="archivos.archivo9 && archivos.validacion9 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo9 }}" *ngIf="archivos.archivo9 && archivos.validacion9 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo9" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(10)" [ngClass]="{
+                  'estado-valido': archivos.archivo10 && archivos.validacion10 === true,
+                  'estado-rechazado': archivos.archivo10 && archivos.validacion10 === false,
+                  'estado-pendiente': archivos.archivo10 && archivos.validacion10 === null,
+                  'estado-faltante': !archivos.archivo10
+                }">
+              Opinion de cumplimiento 32D INFONAVIT
+              <a href="{{ url + 'archivos/' + archivos.archivo10 }}" *ngIf="archivos.archivo10 && archivos.validacion10 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo10 }}" *ngIf="archivos.archivo10 && archivos.validacion10 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo10 }}" *ngIf="archivos.archivo10 && archivos.validacion10 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo10" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(11)" [ngClass]="{
+                  'estado-valido': archivos.archivo11 && archivos.validacion11 === true,
+                  'estado-rechazado': archivos.archivo11 && archivos.validacion11 === false,
+                  'estado-pendiente': archivos.archivo11 && archivos.validacion11 === null,
+                  'estado-faltante': !archivos.archivo11
+                }">
+              Curriculum/cédula de empresa o persona fisica
+              <a href="{{ url + 'archivos/' + archivos.archivo11 }}" *ngIf="archivos.archivo11 && archivos.validacion11 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo11 }}" *ngIf="archivos.archivo11 && archivos.validacion11 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo11 }}" *ngIf="archivos.archivo11 && archivos.validacion11 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo11" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(12)" [ngClass]="{
+                  'estado-valido': archivos.archivo12 && archivos.validacion12 === true,
+                  'estado-rechazado': archivos.archivo12 && archivos.validacion12 === false,
+                  'estado-pendiente': archivos.archivo12 && archivos.validacion12 === null,
+                  'estado-faltante': !archivos.archivo12
+                }">
+              Registro de prestadoras de servicio REPSE
+              <a href="{{ url + 'archivos/' + archivos.archivo12 }}" *ngIf="archivos.archivo12 && archivos.validacion12 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo12 }}" *ngIf="archivos.archivo12 && archivos.validacion12 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo12 }}" *ngIf="archivos.archivo12 && archivos.validacion12 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo12" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(13)" [ngClass]="{
+                  'estado-valido': archivos.archivo13 && archivos.validacion13 === true,
+                  'estado-rechazado': archivos.archivo13 && archivos.validacion13 === false,
+                  'estado-pendiente': archivos.archivo13 && archivos.validacion13 === null,
+                  'estado-faltante': !archivos.archivo13
+                }">
+              Especificaciones de calibracion de equipos
+              <a href="{{ url + 'archivos/' + archivos.archivo13 }}" *ngIf="archivos.archivo13 && archivos.validacion13 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo13 }}" *ngIf="archivos.archivo13 && archivos.validacion13 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo13 }}" *ngIf="archivos.archivo13 && archivos.validacion13 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo13" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(14)" [ngClass]="{
+                  'estado-valido': archivos.archivo14 && archivos.validacion14 === true,
+                  'estado-rechazado': archivos.archivo14 && archivos.validacion14 === false,
+                  'estado-pendiente': archivos.archivo14 && archivos.validacion14 === null,
+                  'estado-faltante': !archivos.archivo14
+                }">
+              Contrato de servicios y codigo de ética
+              <a href="{{ url + 'archivos/' + archivos.archivo14 }}" *ngIf="archivos.archivo14 && archivos.validacion14 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo14 }}" *ngIf="archivos.archivo14 && archivos.validacion14 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="15" height="15" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo14 }}" *ngIf="archivos.archivo14 && archivos.validacion14 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo14" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+
+            <li *ngIf="isArchivoRequerido(15)" [ngClass]="{
+                  'estado-valido': archivos.archivo15 && archivos.validacion15 === true,
+                  'estado-rechazado': archivos.archivo15 && archivos.validacion15 === false,
+                  'estado-pendiente': archivos.archivo15 && archivos.validacion15 === null,
+                  'estado-faltante': !archivos.archivo15
+                }">
+              Ultima declaracion anual
+              <a href="{{ url + 'archivos/' + archivos.archivo15 }}" *ngIf="archivos.archivo15 && archivos.validacion15 === true" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/reemplazar.png" width="15" height="15" style="margin-left: 10px" alt="Validado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo15 }}" *ngIf="archivos.archivo15 && archivos.validacion15 === false" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/cancelar.png" width="20" height="20" style="margin-left: 10px" alt="Rechazado" />
+              </a>
+              <a href="{{ url + 'archivos/' + archivos.archivo15 }}" *ngIf="archivos.archivo15 && archivos.validacion15 === null" target="_blank" style="background-color: transparent">
+                <img src="../../../assets/img/tiempo-de-procesamiento.png" width="19" height="19" style="margin-left: 10px" alt="Pendiente" />
+              </a>
+              <span *ngIf="!archivos.archivo15" style="background-color: transparent">
+                <img src="../../../assets/img/carpeta-vacia.png" width="20" height="20" style="margin-left: 10px" alt="Faltante" />
+              </span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Aqui empieza el bloque de archivos -->
+
+  <!-- fisica y moral-->
+
+  <form
+    #ArchivesForm="ngForm"
+    (ngSubmit)="onSubmit()"
+    *ngIf="vendor.regimenFiscal != 'repse' && !mostrar"
+  >
+    <!--boton de actualizacion
+
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == false"
+      class="alert rojo"
+    >
+      Archivos Enviados Pendientes De Revisión</span
+    >
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == true"
+      class="alert verde"
+    >
+      Archivos Aceptados</span
+    >
+    <span *ngIf="archivos._id == ''" class="alert negro">
+      Enviar Archivos Correspondientes
+    </span>
+-->
+    <!-- Bloque de acciones de archivos y archivos-flex -->
+    <div class="separador-archivos">
+      <!--      <div
+        class="acciones-archivos"
+        <*ngIf="
+          archivos._id != '' &&
+          identity.rol != 'proveedor' &&
+          identity.rol != 'usuariolec'
+        "
+      >
+        <button
+          class="btn-accion1 verde"
+          (click)="validar()"
+          <*ngIf="archivos.validar != true"
+        >
+          <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+          Validar Archivos
+        </button>
+
+        <button class="btn-accion rojo" (click)="rechazar()">
+          <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+          Rechazar Archivos
+        </button>
+      </div>-->
+ <br>
+        <div class="leyenda-estados">
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-valido"></span>
+            <span class="leyenda-texto">Validado</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-rechazado"></span>
+            <span class="leyenda-texto">Rechazado</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-pendiente"></span>
+            <span class="leyenda-texto">Pendiente</span>
+          </span>
+          <span class="leyenda-item">
+            <span class="leyenda-color estado-faltante"></span>
+            <span class="leyenda-texto">Faltante</span>
+          </span>
+        </div>
+        <br>
+      <div class="archivos-flex">
+
+
+<details *ngIf="isArchivoRequerido(1)" [open]="openedDetails[0]" (toggle)="toggleDetails(0, $event)">
+          <summary>
+            1. Formato requisitado para alta del proveedor
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo1 }}" *ngIf="archivos.archivo1" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo1 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion1 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion1 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo1 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion1 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo1">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file1" accept="application/pdf" (change)="fileChangeEvent1($event)" />
+            </div>
+            <input *ngIf="archivos.archivo1" type="file" placeholder="Selecciona un archivo para actualizar" class="file file1" accept="application/pdf" (change)="fileChangeEvent1($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo1 }}" *ngIf="archivos.archivo1 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo1 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo1"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo1 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo1">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo1 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo1">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo1"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(1)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion1 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(1)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion1 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(2)" [open]="openedDetails[1]" (toggle)="toggleDetails(1, $event)">
+          <summary>
+            2. Constancia de situación fiscal SAT 
+          <span style="font-size: 0.8rem; color: #666; margin-left: 8px; font-weight: normal;">
+            (No condicionante para pago) <!--Al momento de pasar x los contadores, los archivos deben ser validados-->
+          </span>     
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo2 }}" *ngIf="archivos.archivo2" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+      
+       <img *ngIf="archivos.archivo2 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion2 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion2 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo2 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion2 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo2">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file2" accept="application/pdf" (change)="fileChangeEvent2($event)" />
+            </div>
+            <input *ngIf="archivos.archivo2" type="file" placeholder="Selecciona un archivo para actualizar" class="file file2" accept="application/pdf" (change)="fileChangeEvent2($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo2 }}" *ngIf="archivos.archivo2 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo2 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo2"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo2 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo2">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo2 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo2">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo2"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(2)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion2 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(2)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion2 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(3)" [open]="openedDetails[2]" (toggle)="toggleDetails(2, $event)">
+          <summary>
+            3. Alta imss registro patronal
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo3 }}" *ngIf="archivos.archivo3" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo3 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion3=== true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion3 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo3 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion3 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo3">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file3" accept="application/pdf" (change)="fileChangeEvent3($event)" />
+            </div>
+            <input *ngIf="archivos.archivo3" type="file" placeholder="Selecciona un archivo para actualizar" class="file file3" accept="application/pdf" (change)="fileChangeEvent3($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo3 }}" *ngIf="archivos.archivo3 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo3 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo3"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo3 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo3">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo3 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo3">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo3"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(3)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion3 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(3)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion3 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(4)" [open]="openedDetails[3]" (toggle)="toggleDetails(3, $event)">
+          <summary>
+            4. Ine representante legal
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo4 }}" *ngIf="archivos.archivo4" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo4 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion4 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion4 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo4 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion4 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo4">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file4" accept="application/pdf" (change)="fileChangeEvent4($event)" />
+            </div>
+            <input *ngIf="archivos.archivo4" type="file" placeholder="Selecciona un archivo para actualizar" class="file file4" accept="application/pdf" (change)="fileChangeEvent4($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo4 }}" *ngIf="archivos.archivo4 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo4 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo4"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo4 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo4">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo4 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo4">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo4"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(4)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion4 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(4)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion4 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(5)" [open]="openedDetails[4]" (toggle)="toggleDetails(4, $event)">
+          <summary>
+            5. Acta constitutiva y modificaciones(persona moral) y poder del representante legal
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo5 }}" *ngIf="archivos.archivo5" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo5 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion5 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion5 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo5 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion5 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo5">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file5" accept="application/pdf" (change)="fileChangeEvent5($event)" />
+            </div>
+            <input *ngIf="archivos.archivo5" type="file" placeholder="Selecciona un archivo para actualizar" class="file file5" accept="application/pdf" (change)="fileChangeEvent5($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo5 }}" *ngIf="archivos.archivo5 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo5 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo5"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo5 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo5">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo5 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo5">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo5"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(5)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion5 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(5)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion5 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(6)" [open]="openedDetails[5]" (toggle)="toggleDetails(5, $event)">
+          <summary>
+            6. Comprobante de domicilio del domicilio fiscal vigente
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo6 }}" *ngIf="archivos.archivo6" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+           <img *ngIf="archivos.archivo6 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion6 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion6 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo6 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion6 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo6">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file6" accept="application/pdf" (change)="fileChangeEvent6($event)" />
+            </div>
+            <input *ngIf="archivos.archivo6" type="file" placeholder="Selecciona un archivo para actualizar" class="file file6" accept="application/pdf" (change)="fileChangeEvent6($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo6 }}" *ngIf="archivos.archivo6 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo6 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo6"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo6 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo6">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo6 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo6">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo6"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(6)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion6 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(6)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion6 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(7)" [open]="openedDetails[6]" (toggle)="toggleDetails(6, $event)">
+          <summary>
+            7. Estado de cuenta con cuenta clabe, sólo caratula
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo7 }}" *ngIf="archivos.archivo7" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+           <img *ngIf="archivos.archivo7 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion7 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion7 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo7 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion7 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo7">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file7" accept="application/pdf" (change)="fileChangeEvent7($event)" />
+            </div>
+            <input *ngIf="archivos.archivo7" type="file" placeholder="Selecciona un archivo para actualizar" class="file file7" accept="application/pdf" (change)="fileChangeEvent7($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo7 }}" *ngIf="archivos.archivo7 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo7 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo7"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo7 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo7">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo7 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo7">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo7"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(7)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion7 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(7)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion7 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(8)" [open]="openedDetails[7]" (toggle)="toggleDetails(7, $event)">
+          <summary>
+            8. Opinión de cumplimiento de 32D SAT
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo8 }}" *ngIf="archivos.archivo8" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+ <img *ngIf="archivos.archivo8 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion8 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion8 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo8 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion8 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo8">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file8" accept="application/pdf" (change)="fileChangeEvent8($event)" />
+            </div>
+            <input *ngIf="archivos.archivo8" type="file" placeholder="Selecciona un archivo para actualizar" class="file file8" accept="application/pdf" (change)="fileChangeEvent8($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo8 }}" *ngIf="archivos.archivo8 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo8 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo8"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo8 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo8">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo8 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo8">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo8"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(8)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion8 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(8)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion8 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(9)" [open]="openedDetails[8]" (toggle)="toggleDetails(8, $event)">
+          <summary>
+            9. Opinión de cumplimiento de 32D IMSS
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo9 }}" *ngIf="archivos.archivo9" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+             <img *ngIf="archivos.archivo9 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion9 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion9 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo9 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion9 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo9">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file9" accept="application/pdf" (change)="fileChangeEvent9($event)" />
+            </div>
+            <input *ngIf="archivos.archivo9" type="file" placeholder="Selecciona un archivo para actualizar" class="file file9" accept="application/pdf" (change)="fileChangeEvent9($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo9 }}" *ngIf="archivos.archivo9 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo9 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo9"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo9 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo9">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo9 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo9">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo9"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(9)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion9 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(9)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion9 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(10)" [open]="openedDetails[9]" (toggle)="toggleDetails(9, $event)">
+          <summary>
+            10. Opinión de cumplimiento de 32D INFONAVIT
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo10 }}" *ngIf="archivos.archivo10" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+             <img *ngIf="archivos.archivo10 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion10 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion10 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo10 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion10 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo10">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file10" accept="application/pdf" (change)="fileChangeEvent10($event)" />
+            </div>
+            <input *ngIf="archivos.archivo10" type="file" placeholder="Selecciona un archivo para actualizar" class="file file10" accept="application/pdf" (change)="fileChangeEvent10($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo10 }}" *ngIf="archivos.archivo10 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo10 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo10"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo10 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo10">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo10 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo10">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo10"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(10)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion10 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(10)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion10 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(11)" [open]="openedDetails[10]" (toggle)="toggleDetails(10, $event)">
+          <summary>
+            11. Curriculum de la empresa o persona fisica y/o cédula de las personas que realizarán el proyecto
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo11 }}" *ngIf="archivos.archivo11" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+             <img *ngIf="archivos.archivo11 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion11 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion11 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo11 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion11 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo11">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file11" accept="application/pdf" (change)="fileChangeEvent11($event)" />
+            </div>
+            <input *ngIf="archivos.archivo11" type="file" placeholder="Selecciona un archivo para actualizar" class="file file11" accept="application/pdf" (change)="fileChangeEvent11($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo11 }}" *ngIf="archivos.archivo11 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo11 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo11"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo11 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo11">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo11 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo11">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo11"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(11)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion11 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(11)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion11 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(12)" [open]="openedDetails[11]" (toggle)="toggleDetails(11, $event)">
+          <summary>
+            12. Registro de prestadoras de servicios especializados u obras especializadas (REPSE)
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo12 }}" *ngIf="archivos.archivo12" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo12 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion12 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion12 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo12 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion12 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo12">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file12" accept="application/pdf" (change)="fileChangeEvent12($event)" />
+            </div>
+            <input *ngIf="archivos.archivo12" type="file" placeholder="Selecciona un archivo para actualizar" class="file file12" accept="application/pdf" (change)="fileChangeEvent12($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo12 }}" *ngIf="archivos.archivo12 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo12 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo12"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo12 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo12">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo12 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo12">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo12"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(12)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion12 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(12)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion12 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(13)" [open]="openedDetails[12]" (toggle)="toggleDetails(12, $event)">
+          <summary>
+            13. Especificaciones de calibración de equipos y certificaciones en caso de contar con equipo
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo13 }}" *ngIf="archivos.archivo13" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+             <img *ngIf="archivos.archivo13 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion13 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion13 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo13 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion13 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo13">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file13" accept="application/pdf" (change)="fileChangeEvent13($event)" />
+            </div>
+            <input *ngIf="archivos.archivo13" type="file" placeholder="Selecciona un archivo para actualizar" class="file file13" accept="application/pdf" (change)="fileChangeEvent13($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo13 }}" *ngIf="archivos.archivo13 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo13 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo13"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo13 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo13">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo13 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo13">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo13"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(13)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion13 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(13)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion13 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(14)" [open]="openedDetails[13]" (toggle)="toggleDetails(13, $event)">
+          <summary>
+            14. Contrato de servicios y código de ética firmado por representante legal
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo14 }}" *ngIf="archivos.archivo14" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+             <img *ngIf="archivos.archivo14 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion14 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion14 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo14 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion14 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo14">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file14" accept="application/pdf" (change)="fileChangeEvent14($event)" />
+            </div>
+            <input *ngIf="archivos.archivo14" type="file" placeholder="Selecciona un archivo para actualizar" class="file file14" accept="application/pdf" (change)="fileChangeEvent14($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo14 }}" *ngIf="archivos.archivo14 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo14 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo14"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo14 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo14">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo14 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo14">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo14"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(14)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion14 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(14)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion14 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+
+        <details *ngIf="isArchivoRequerido(15)" [open]="openedDetails[14]" (toggle)="toggleDetails(14, $event)">
+          <summary>
+            15. Última declaración anual y estados financieros del año(cualquiera de los últimos 3 meses)
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo15 }}" *ngIf="archivos.archivo15" target="_blank" style="background-color: transparent">
+              <img src="../../../assets/img/pdfefefe.png" width="25" height="25" style="margin-left: 10px" />
+            </a>
+            <img *ngIf="archivos.archivo15 && identity.rol !== 'proveedor'"
+              [src]="archivos.validacion15 === true ? '../../../assets/img/aceptarapruv.png' :
+                     (archivos.validacion15 === false ? '../../../assets/img/cancelar.png' :
+                     archivos.archivo15 === '' ? '../../../assets/img/carpeta-vacia.png' : '../../../assets/img/tiempo-de-procesamiento.png')"
+              alt="Estado de validación" width="20" height="20" style="margin-left: 10px" />
+          </summary>
+          <div *ngIf="identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium'">
+            <div *ngIf="archivos.validacion15 === false" class="rejection-message">
+              <strong>Archivo Rechazado</strong><br>
+              <span>Por favor, actualice su archivo.</span>
+            </div>
+            <div class="file-upload-container" *ngIf="!archivos.archivo15">
+              <br /><br />
+              <h5>Arrastra tu archivo en esta zona</h5>
+              <img src="../../../assets/img/arrastra-y-suelta.png" alt="arrastrar" width="65" height="65" />
+              <input type="file" placeholder="Selecciona o arrastra el archivo" class="file file15" accept="application/pdf" (change)="fileChangeEvent15($event)" />
+            </div>
+            <input *ngIf="archivos.archivo15" type="file" placeholder="Selecciona un archivo para actualizar" class="file file15" accept="application/pdf" (change)="fileChangeEvent15($event)" style="margin-top: 10px;" />
+            <a class="gris" href="{{ url + 'archivos/' + archivos.archivo15 }}" *ngIf="archivos.archivo15 && identity.rol == 'proveedor'" target="_blank">
+              Ver archivo
+            </a>
+            <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo15 && identity.rol == 'proveedor'">
+              Ultima actualización:
+              <span class="fecha">{{ fechArchivo["archivo15"] }}</span>
+            </div>
+          </div>
+          <div *ngIf="identity.rol !== 'proveedor'">
+            <p *ngIf="!archivos.archivo15 && identity.rol !== 'administrador' && identity.rol !== 'administrador_premium'" style="margin-top: 10px; font-style: italic; color: #666;">
+              El proveedor no ha subido este archivo.
+            </p>
+            <div *ngIf="archivos.archivo15">
+              <a class="gris" href="{{ url + 'archivos/' + archivos.archivo15 }}" target="_blank">
+                Ver archivo
+              </a>
+              <div class="ultima-actualizacion" *ngIf="fechArchivo.archivo15">
+                Ultima actualización:
+                <span class="fecha">{{ fechArchivo["archivo15"] }}</span>
+              </div>
+              <div class="admin-actions">
+                <button (click)="validarArchivo(15)" class="btn-accion btn-validacion verde" [disabled]="archivos.validacion15 === true" type="button">
+                  <img src="./../../../assets/img/comprobado.png" alt="Validar" />
+                  Validar
+                </button>
+                <button (click)="rechazarArchivo(15)" class="btn-accion btn-validacion rojo" [disabled]="archivos.validacion15 === false" type="button">
+                  <img src="./../../../assets/img/cancelar (1).png" alt="Rechazar" />
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br /><br />
+        </details>
+      </div>
+    </div>
+
+    <!--Aqui termina el bloque funcional de datos-->
+
+    <span>
+      <button
+        (click)="onSubmitUpdate()"
+        *ngIf="archivos._id != ''"
+        style="
+          display: block;
+          margin: 20px auto;
+          font-size: 1.2em;
+          background-color: orange;
+          color: white;
+          padding: 10px 90px;
+          border: none;
+          border-radius: 80px;
+          cursor: pointer;
+        "
+      >
+        Actualizar Archivos
+      </button>
+    </span>
+    <input
+      type="submit"
+      name=""
+      value="Enviar"
+      [disabled]="!ArchivesForm.form.valid"
+      *ngIf="archivos._id == ''"
+    />
+    <!-- <input
+    type="submit"
+    name=""
+    value="Actualizar archivos"
+    [disabled]="!ArchivesForm.form.valid"
+    ngIf="archivos._id != ''"
+    style="background-color: #df6f09; color: white; padding: 10px 20px; border: none; border-radius: 5px;"
+  />-->
+  </form>
+
+  <!-- repse moral -->
+
+  <form
+    #ArchivesForm="ngForm"
+    (ngSubmit)="onSubmit()"
+    *ngIf="vendor.regimenFiscal == 'repse-moral'"
+  >
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == false"
+      class="alert rojo"
+    >
+      Archivos Enviados Pendientes De Revisión</span
+    >
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == true"
+      class="alert verde"
+    >
+      Archivos Aceptados</span
+    >
+    <span *ngIf="archivos._id == ''" class="alert negro">
+      Enviar Archivos Correspondientes
+    </span>
+    <details>
+      <summary>1. Formato requisitado para alta del proveedor</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo1 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br /><br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent1($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo1 }}"
+        *ngIf="archivos.archivo1 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo1 }}</span>
+    </details>
+
+    <details>
+      <summary>2. Comprobante de Domicilio</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo2 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br /><br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent2($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo2 }}"
+        *ngIf="archivos.archivo2 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo2 }}</span>
+    </details>
+    <details>
+      <summary>3. CFDI</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo3 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br /><br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          src="../../../assets/img/cerrar (1)aaaa.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent3($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo3 }}"
+        *ngIf="archivos.archivo3 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo3 }}</span>
+    </details>
+    <details>
+      <summary>4. Codigo de Etica</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo4 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br /><br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+
+        <input
+          type="file"
+          placeholder="Seleccionar o arrastrar el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent4($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo4 }}"
+        *ngIf="archivos.archivo4 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo4 }}</span>
+    </details>
+
+    <input
+      type="submit"
+      name=""
+      value="Enviar"
+      [disabled]="!ArchivesForm.form.valid"
+      *ngIf="archivos._id == ''"
+    />
+  </form>
+
+  <!-- repse fisica -->
+
+  <form
+    #ArchivesForm="ngForm"
+    (ngSubmit)="onSubmit()"
+    *ngIf="vendor.regimenFiscal == 'repse'"
+  >
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == false"
+      class="alert rojo"
+    >
+      Archivos Enviados Pendientes De Revisión</span
+    >
+    <span
+      *ngIf="archivos._id != '' && archivos.validar == true"
+      class="alert verde"
+    >
+      Archivos Aceptados</span
+    >
+    <span *ngIf="archivos._id == ''" class="alert negro">
+      Enviar Archivos Correspondientes
+    </span>
+    <details>
+      <summary>1. Formato requisitado para alta del proveedor</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo1 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br />
+        <br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent1($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo1 }}"
+        *ngIf="archivos.archivo1 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo1 }}</span>
+    </details>
+
+    <details>
+      <summary>2. Comprobante de Domicilio</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo2 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br />
+        <br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent2($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo2 }}"
+        *ngIf="archivos.archivo2 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo2 }}</span>
+    </details>
+    <details>
+      <summary>3. CFDI</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo3 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br />
+        <input
+          type="file"
+          placeholder="Selecciona o arrastra el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent3($event)"
+        />
+        <br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo3 }}"
+        *ngIf="archivos.archivo3 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo3 }}</span>
+    </details>
+    <details>
+      <summary>4. Codigo de Etica</summary>
+      <div class="file-upload-container" *ngIf="archivos.archivo4 == '' && (identity.rol == 'proveedor' || identity.rol == 'administrador' || identity.rol == 'administrador_premium')">
+        <br /><br />
+        <h5>Arrastra tu archivo en esta zona</h5>
+        <img
+          src="../../../assets/img/arrastra-y-suelta.png"
+          alt="arrastrar"
+          width="65"
+          height="65"
+        />
+
+        <input
+          type="file"
+          placeholder="Seleccionar o arrastrar el archivo"
+          class="file file1"
+          accept="application/pdf"
+          (change)="fileChangeEvent4($event)"
+        />
+      </div>
+      <a
+        class="gris"
+        href="{{ url + 'archivos/' + archivos.archivo4 }}"
+        *ngIf="archivos.archivo4 != ''"
+        target="_blank"
+        >Ver archivo</a
+      >
+      <span>{{ archivos.archivo4 }}</span>
+    </details>
+
+    <input
+      type="submit"
+      name=""
+      value="Enviar"
+      [disabled]="!ArchivesForm.form.valid"
+      *ngIf="archivos._id == ''"
+    />
+  </form>
+</section>

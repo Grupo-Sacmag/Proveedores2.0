@@ -1,0 +1,211 @@
+/* ====== FORMULARIO PRINCIPAL ====== */
+.register {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 1.5px 6px rgba(0,0,0,0.07);
+  padding: 30px 28px;
+  max-width: 650px;
+  margin: 20px auto;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.register:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 36px rgba(25, 118, 210, 0.25), 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Campos del formulario */
+.boton {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label elegante */
+.register label {
+  font-weight: 600;
+  font-size: 0.95em;
+  color: #4f779e;
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Inputs & Selects */
+.register input,
+.register select,
+.register textarea {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1em;
+  background: #fafafa;
+  color: #333;
+  width: 100%;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  resize: none;
+}
+
+.register input:focus,
+.register select:focus,
+.register textarea:focus {
+  border-color: #1976d2;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.15);
+  outline: none;
+}
+
+.register input[readonly] {
+  background: #f5f5f5;
+  color: #444;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+/* Mensajes de error */
+.rojo {
+  color: #dc3545;
+  font-size: 0.9em;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Botón principal de envío */
+#boton {
+  display: block;
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #457dbe, #2f6266);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 15px;
+}
+
+#boton:hover {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+#boton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ====== BOTONES SÍ / NO ====== */
+.confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+}
+
+.confirm-buttons .btn-sí,
+.confirm-buttons .btn-no {
+  padding: 10px 20px;
+  font-size: 0.95em;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirm-buttons .btn-sí {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: #fff;
+}
+
+.confirm-buttons .btn-sí:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+}
+
+.confirm-buttons .btn-no {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: #fff;
+}
+
+.confirm-buttons .btn-no:hover {
+  background: linear-gradient(135deg, #c82333, #a71d2a);
+  transform: translateY(-2px);
+}
+
+/* ====== MODALES ====== */
+.mensaje-modal,
+.pantalla-carga,
+.confirm-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.mensaje-contenido,
+.contenido-carga,
+.confirm-content {
+  background-color: #fff;
+  padding: 25px 35px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  min-width: 320px;
+  max-width: 500px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: scaleUp 0.3s ease-in-out;
+}
+
+/* Encabezados de modales */
+.mensaje-contenido h2,
+.confirm-content h2 {
+  margin-bottom: 5px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+/* Texto de modales */
+.mensaje-contenido p,
+.contenido-carga p,
+.confirm-content p {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+/* Variantes */
+.mensaje-error { border-top: 5px solid #dc3545; }
+.mensaje-exito { border-top: 5px solid #28a745; }
+.mensaje-info  { border-top: 5px solid #007bff; }
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+/* ====== SOLO MOVER LADO IZQUIERDO ====== */
+.box {
+  display: flex;
+  align-items: flex-start; /* sube ambos lados al inicio */
+}
+
+.box .image {
+  margin-top: 0; /* ajusta según quieras subirlo un poco más */
+}
+

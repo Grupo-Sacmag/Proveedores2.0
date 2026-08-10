@@ -1,0 +1,53 @@
+<div *ngIf="archivoOld && getObjectKeys(archivoOld).length; else noFiles">
+  <h4>Archivos encontrados:</h4>
+
+  <!-- Iteramos sobre las claves del objeto archivoOld (archivo1, archivo2, etc.) -->
+  <div *ngFor="let key of getObjectKeys(archivoOld)">
+    <h5>{{ archivoDescripcion[key] }}</h5> <!-- Mostrar la descripción correspondiente al archivo -->
+
+    <!-- Mostrar los archivos dentro de cada grupo -->
+    <div *ngFor="let archivo of archivoOld[key]; let i = index">
+      <!-- Mostrar "Ver archivo 1", "Ver archivo 2", etc. usando el índice -->
+      <button (click)="verArchivo(archivo.ruta)">
+        Ver archivo {{ i + 1 }} <!-- El índice comienza desde 0, por lo que sumamos 1 -->
+        <br>
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #noFiles>
+  <div style="
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 700px; /* Altura mínima reducida a 700px */
+    text-align: center;
+    padding: 20px;
+    background-color: #ffffff; /* Cambiado a blanco */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 30px; /* Espacio superior */
+  ">
+    <h3 style="color: #555; margin-bottom: 15px;">¡Atención!</h3>
+    <p style="
+      font-size: 1.2em;
+      color: #777;
+      margin-bottom: 30px;
+    ">
+      No hay archivos disponibles para mostrar en este momento.
+    </p>
+
+    <!-- Pie de página conceptual para esta sección -->
+    <div style="
+      width: 100%;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      color: #999;
+      font-size: 0.9em;
+    ">
+      <p>Para cualquier consulta, contacte a soporte técnico.</p>
+    </div>
+  </div>
+</ng-template>

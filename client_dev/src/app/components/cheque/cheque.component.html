@@ -1,0 +1,95 @@
+<div class="cheque-upload-container" style="max-width: 500px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); padding: 32px;">
+  <h2 style="text-align:center; color:#1976d2; margin-bottom: 24px;">
+    Subir comprobante de pago
+    <span style="display:block; font-size:0.8em; color:#888;">(JPG o PNG, máx. 5MB)</span>
+  </h2>
+  <form (ngSubmit)="subirCheque()">
+    <div style="margin-bottom: 12px;">
+      <input type="text" [(ngModel)]="concepto" name="concepto" placeholder="Concepto" required style="width:100%;padding:8px;margin-bottom:8px;">
+      <input type="number" [(ngModel)]="monto" name="monto" placeholder="Monto" required style="width:100%;padding:8px;margin-bottom:8px;">
+      <input type="text" [(ngModel)]="pago" name="pago" placeholder="Pago" required style="width:100%;padding:8px;margin-bottom:8px;">
+    </div>
+    <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+      <input
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        (change)="onFileSelected($event)"
+        required
+        style="padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #f9f9f9;"
+      />
+    </div>
+    <button
+      type="submit"
+      [disabled]="!chequeFile"
+      style="width:100%;padding:10px;background:#1976d2;color:#fff;border:none;border-radius:6px;transition:background 0.2s;"
+      (click)="showButtonAnimation($event)"
+    >
+      Subir cheque
+    </button>
+  </form>
+  <div *ngIf="uploading" style="text-align:center; margin-top:10px; color:#1976d2;">
+    Subiendo cheque, por favor espera...
+  </div>
+  <div *ngIf="uploadError" style="text-align:center; margin-top:10px; color:#d32f2f;">
+    {{uploadError}}
+  </div>
+
+  <div class="uploaded-files-list" *ngIf="uploadedFiles.length > 0" style="margin-top: 20px;">
+    <h3 style="color:#333; font-size:1.1em; margin-bottom: 18px;">Archivo seleccionado:</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 18px;">
+      <div
+        *ngFor="let file of uploadedFiles"
+        style="background: #f5f7fa; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 14px 12px; display: flex; flex-direction: column; align-items: center; width: 140px; position: relative;"
+      >
+        <img
+          *ngIf="file.preview"
+          [src]="file.preview"
+          alt="Previsualización"
+          style="max-width: 120px; max-height: 120px; border-radius: 8px; margin-bottom: 8px;"
+        />
+        <div style="margin-top: 10px; text-align:center;">
+          <span style="font-size:0.95em; color:#222;">{{ file.name }}</span>
+          <br>
+          <span style="font-size:0.85em; color:#888;">{{ file.size | number:'1.0-2' }} MB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="cheques.length > 0" style="margin-top: 32px;">
+    <h3 style="color:#1976d2;">Resumen de imágenes subidas</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 18px;">
+      <div *ngFor="let c of cheques" style="background:#f5f7fa; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.07); padding:16px; margin-bottom:18px; width:180px;">
+        <img [src]="c.url" alt="{{c.nombre}}" style="max-width:150px;max-height:120px;border-radius:8px;margin-bottom:8px;display:block;margin:auto;" />
+        <div style="font-size:0.95em; color:#222; text-align:center;">{{c.nombre}}</div>
+        <div style="font-size:0.85em; color:#888; text-align:center;">{{c.fecha | date:'short'}}</div>
+        <div style="font-size:0.85em; color:#1976d2; text-align:center;">Concepto: {{c.concepto}}</div>
+        <div style="font-size:0.85em; color:#1976d2; text-align:center;">Monto: {{c.monto}}</div>
+        <div style="font-size:0.85em; color:#1976d2; text-align:center;">Pago: {{c.pago}}</div>
+        <div style="text-align:center;">
+          <button type="button" (click)="previewCheque(c)" style="margin-top:8px;">Previsualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de previsualización -->
+  <div
+    *ngIf="previewSrc"
+    style="
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    "
+    (click)="closePreview()"
+  >
+    <img
+      [src]="previewSrc"
+      alt="Previsualización"
+      style="max-width: 90vw; max-height: 90vh; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);"
+    />
+  </div>
+</div>
+

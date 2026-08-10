@@ -1,0 +1,69 @@
+<section class="recInfo">
+
+    <div class="modal">
+
+
+        <h4>Cambiar contraseña</h4>
+        <form #changeForm="ngForm" (ngSubmit)="onSubmit(changeForm)">
+            <div class="input">
+                <label for="name">Rfc</label>
+                <div class="inputView">
+                    <input type="texto" id="rfc" name="rfc" #rfc="ngModel" [(ngModel)]="usuario.rfc" maxlength="13" minlength="12" required readonly>
+                    <span *ngIf="!rfc.valid && rfc.touched || rfc.value.trim() == ''" class="rojo">
+                        Rfc incorrecto
+                    </span>
+
+                </div>
+
+            </div>
+            <div class="input">
+                <label for="name">Correo</label>
+                <div class="inputView">
+                    <input type="email" id="email" name="correo" #correo="ngModel" [(ngModel)]="usuario.correo" required email readonly>
+
+
+                </div>
+                <span *ngIf="!correo.valid && correo.touched" class="rojo">
+                    Correo incorrecto
+                </span>
+
+            </div>
+            <div class="input" *ngIf="this.identity != '{}'">
+                <label for="name">Contraseña actual</label>
+                <div class="inputView">
+                    <input type="password" id="conActual" name="password" #password="ngModel" [(ngModel)]="usuario.password" minlength="8" maxlength="20" required>
+                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conActual')">
+
+                </div>
+                <span *ngIf="!password.valid && password.touched" class="rojo">
+                    Es obligatoria la contraseña, mínimo 8 caracteres
+                </span>
+
+            </div>
+            <div class="input">
+                <label for="name">Nueva contraseña</label>
+                <div class="inputView">
+                    <input type="password" id="conNue" name="newPassword" [(ngModel)]="newPassword" (keyup)="validate()" minlength="8" maxlength="20" required>
+                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conNue')">
+                </div>
+                <span *ngIf="validate1" class="rojo">
+                    Es obligatoria la contraseña, mínimo 8 caracteres
+                </span>
+            </div>
+            <div class="input">
+                <label for="name">Confirmar nueva contraseña</label>
+                <div class="inputView">
+                    <input type="password" id="conNueAfi" name="newPasswordCon" [(ngModel)]="newPasswordCon" (keyup)="validateNew()" minlength="8" maxlength="20" required>
+                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conNueAfi')">
+
+                </div>
+                <span *ngIf="validate2" class="rojo">
+                    Las contraseñas no coinciden
+                </span>
+            </div>
+            <input type="submit" [disabled]="!changeForm.form.valid || validate2">
+
+        </form>
+    </div>
+
+</section>

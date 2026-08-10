@@ -1,0 +1,57 @@
+<header class="main-header">
+  <div class="header-content">
+    <div class="logo">
+      <a [routerLink]="['/inicio']">
+        <img
+          src="../assets/img/Logos GRUPO SACMAG copia.gif"
+          alt="Logo Grupo SACMAG"
+        />
+      </a>
+    </div>
+    <div class="toggle" (click)="menu()" *ngIf="identity != '{}'"></div>
+    <nav *ngIf="identity != '{}'" class="navigation">
+      <a
+        [routerLink]="['/inicio']"
+        (click)="menu()"
+        [routerLinkActive]="['active']"
+        *ngIf="rol != 'proveedor'"
+        >Inicio</a
+      >
+      <a
+        [routerLink]="['/datos']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+        >Cuenta</a
+      >
+      <a
+        [routerLink]="['/proveedores']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+        *ngIf="rol != 'proveedor'"
+        >Lista de Proveedores</a
+      >
+      <a
+        [routerLink]="['/archivos']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+        *ngIf="rol == 'proveedor'"
+        >Archivos</a
+      >
+      <a
+        [routerLink]="['/archivos-all']"
+        [routerLinkActive]="['active']"
+        class="archivos-globales"
+        *ngIf="rol == 'administrador' || rol == 'contador'"
+      >
+        <img
+          src="../assets/img/carpeta.png"
+          alt="Descargar todo"
+          style="width: 24px; height: 24px; vertical-align: middle"
+        />
+        Archivos Globales
+      </a>
+      <a (click)="logOut()" href="#">Cerrar Sesión</a>
+    </nav>
+  </div>
+</header>
+<router-outlet></router-outlet>

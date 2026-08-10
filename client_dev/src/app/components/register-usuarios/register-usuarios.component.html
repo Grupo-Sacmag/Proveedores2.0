@@ -1,0 +1,101 @@
+<section class="registro">
+
+    <div class="circle"></div>
+    <div class="box">
+        <div class="image">
+
+            <h1>Registrar
+                <!--  --><br> <span>Usuario</span></h1>
+            <img src="../../../assets/img/register.svg" alt="">
+        </div>
+        <div class="register">
+
+            <form #registerUserForm="ngForm" (ngSubmit)="onSubmit(registerUserForm)">
+                <div class="boton">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" name="usuario" id="usuario" #usuario="ngModel" [(ngModel)]="us.usuario" required>
+                    <span *ngIf="!usuario.valid && usuario.touched || usuario.value.trim() == ''" class="rojo">
+                        Usuario requerido
+                    </span>
+                </div>
+                <div class="boton">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" #nombre="ngModel" [(ngModel)]="us.nombre" required>
+                    <span *ngIf="!nombre.valid && nombre.touched || nombre.value.trim() == ''" class="rojo">
+                        Nombre requerido
+                    </span>
+                </div>
+                <div class="boton">
+                    <label for="apellidoP">Apellido paterno</label>
+                    <input type="text" id="apellidoP" name="apellidoP" #apellidoP="ngModel" [(ngModel)]="us.apellidoP" required>
+                    <span *ngIf="!apellidoP.valid && apellidoP.touched || apellidoP.value.trim() == ''" class="rojo">
+                        Apellido paterno requerido
+                    </span>
+                </div>
+                <div class="boton">
+                    <label for="apellidoM">Apellido materno</label>
+                    <input type="text" id="apellidoM" name="apellidoM" #apellidoM="ngModel" [(ngModel)]="us.apellidoM" required>
+                    <span *ngIf="!apellidoM.valid && apellidoM.touched || apellidoM.value.trim() == ''" class="rojo">
+                        Apellido materno requerido
+                    </span>
+                </div>
+
+                <div class="boton">
+                    <label for="correo">Correo</label>
+                    <input type="email" id="correo" name="correo" #correo="ngModel" [(ngModel)]="us.correo" required email>
+                    <span *ngIf="!correo.valid && correo.touched" class="rojo">
+                        Correo incorrecto
+                    </span>
+                </div>
+
+                <div class="boton">
+                    <label for="rfc">Rfc</label>
+                    <input type="text" id="rfc" name="rfc" #rfc="ngModel" [(ngModel)]="us.rfc" (change)="valid()" maxlength="13" minlength="12" required>
+                    <span *ngIf="!rfc.valid && rfc.touched" class="rojo">
+                        Rfc incorrecto
+                    </span>
+                </div>
+                <div class="boton">
+                    <label for="tipoEmpresa">Empresa</label>
+                    <select id="tipoEmpresa" class="bton" name="tipoEmpresa" #tipoEmpresa="ngModel" [(ngModel)]="us.empresa" required>
+                        <option value="sacmag">SACMAG</option>
+                        <option value="supervisa">SUPERVISA</option>
+                        <option value="cordina">CORDINA</option>
+                        <option value="geoambiente">GEOAMBIENTE</option>
+                        <option value="control">CONTROL</option>
+                        <option value="epesa">EPESA</option>
+                        <option value="consulte">CONSULTE</option>
+                        <option value="ingenial">INGENIAL</option>
+                        <option value="supter">SUPTER</option>
+                    </select>
+                    <span *ngIf="!tipoEmpresa.valid && tipoEmpresa.touched" class="rojo">
+                        Empresa incorrecto
+                    </span>
+                </div>
+                <div class="boton">
+                    <label for="rol">Rol</label>
+                    <select id="rol" name="rol" #rol="ngModel" [(ngModel)]="us.rol" (change)="mostrar()" required>
+                        <option value="usuario">Usuario</option>
+                        <option value="usuarioLec">Usuario Lectura</option>
+                        <option value="administrador">Administrador</option>
+                     
+                    </select>
+                    <span *ngIf="!rol.valid && rol.touched" class="rojo">
+                        Rol incorrecto
+                    </span>
+                </div>
+                <div class="boton" id="passw">
+                    <label for="pass">Contraseña</label>
+                    <input type="password" id="pass" name="pass" #pass="ngModel" [(ngModel)]="us.password">
+                    <span *ngIf="!pass.valid && pass.touched" class="rojo">
+                        Es necesario el password
+                    </span>
+                </div>
+
+                <input id="boton" type="submit" value="Enviar" [disabled]="!registerUserForm.form.valid">
+
+            </form>
+
+        </div>
+    </div>
+</section>

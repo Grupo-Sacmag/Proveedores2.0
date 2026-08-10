@@ -1,0 +1,107 @@
+<div class="feedback-wrap">
+  <div class="card-feedback">
+    <div>
+      <h1>Reportar Problema o Enviar Comentario</h1>
+      <p class="subtitle">Gracias por ayudarnos a mejorar — por favor describe el problema con la mayor cantidad de detalle posible.</p>
+
+      <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+          <label class="form-label" for="reportType">Tipo de Reporte</label>
+          <select id="reportType" formControlName="reportType" class="form-control">
+            <option value="">Seleccionar...</option>
+            <option value="bug">Bug / Error</option>
+            <option value="feature">Solicitud de Función</option>
+            <option value="improvement">Mejora</option>
+            <option value="comment">Comentario General</option>
+          </select>
+          <div class="muted">*Requerido</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="subject">Asunto</label>
+          <input id="subject" type="text" formControlName="subject" class="form-control" placeholder="Resumen breve del problema" />
+          <div class="muted">*Requerido</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Descripción Detallada</label>
+          <textarea id="description" formControlName="description" class="form-control" placeholder="Describe el problema o comentario en detalle..."></textarea>
+          <div class="muted">*Requerido — mínimo {{ minDescriptionWords }} palabras</div>
+          <div *ngIf="feedbackForm.get('description')?.touched" class="muted">Palabras: {{ descriptionWordCount() }} / {{ minDescriptionWords }}</div>
+          <div *ngIf="feedbackForm.get('description')?.touched && descriptionWordCount() < minDescriptionWords" class="rojo">La descripción debe tener al menos {{ minDescriptionWords }} palabras.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="module">Sección</label>
+          <select id="module" formControlName="module" class="form-control">
+            <option value="">Seleccionar...</option>
+            <option value="archivos">Envio de archivos</option>
+            <option value="validacion">Validacion de archivos</option>
+            <option value="proveedores">Proveedor no aparece</option>
+            <option value="registro">Registro de proveedor</option>
+            <option value="descarga">Descarga de documentos</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email (opcional)</label>
+          <input id="email" type="email" formControlName="email" class="form-control" placeholder="Tu correo para que podamos contactarte" />
+          <div class="muted">Para que podamos brindarte seguimiento si es necesario</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="images">Imágenes (opcional)</label>
+          <p class="muted">Puedes mandar de una a tres imágenes</p>
+          <input 
+            *ngIf="selectedFiles.length < 3"
+            id="images" 
+            type="file" 
+            multiple 
+            accept="image/*" 
+            (change)="onFileSelected($event)" 
+            class="form-control"
+          />
+          <div class="muted">Máximo 3 imágenes. Formatos: JPG, PNG, GIF, WebP</div>
+        </div>
+
+        <!-- Previsualizadores de imágenes -->
+        <div *ngIf="previewImages.length > 0" class="image-preview-container">
+          <div class="preview-label">Imágenes seleccionadas ({{ selectedFiles.length }}/3):</div>
+          <div class="image-previews">
+            <div *ngFor="let preview of previewImages; let i = index" class="image-preview-item">
+              <img [src]="preview" alt="Preview {{ i + 1 }}" class="preview-img" />
+              <button 
+                type="button" 
+                class="btn-remove-image" 
+                (click)="removeImage(i)"
+                title="Eliminar imagen"
+              >
+                ×
+              </button>
+              <span class="image-name">{{ selectedFiles[i].name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary" [disabled]="!feedbackForm.valid || isSubmitting">
+            <span *ngIf="isSubmitting"><span class="spinner"></span>Enviando...</span>
+            <span *ngIf="!isSubmitting">Enviar Reporte</span>
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="onReset()">Limpiar</button>
+        </div>
+
+        <div *ngIf="successMessage" class="alert alert-success" role="alert">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

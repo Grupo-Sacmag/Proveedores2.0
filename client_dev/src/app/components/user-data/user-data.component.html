@@ -1,0 +1,99 @@
+<section class="usuario">
+  <div class="circle"></div>
+  <div class="box">
+    <div class="image">
+      <h1>
+        Datos Generales<br />
+        <span *ngIf="user.nombre != undefined">{{
+          user.nombre + " " + user.apellidoP
+        }}</span>
+      </h1>
+      <img src="../../../assets/img/male.svg" alt="" />
+    </div>
+
+    <div class="register">
+
+
+      <form #userForm="ngForm">
+        <div class="user" *ngIf="user.usuario != undefined">
+          <label for="user">Usuario</label>
+
+          <!--  <input type="text" id="user" name="user" #user="ngModel" [(ngModel)]="user.usuario" readonly> -->
+          <input
+            type="text"
+            name="usuario"
+            #usuario="ngModel"
+            [(ngModel)]="user.usuario"
+            id=""
+            readonly
+          />
+        </div>
+        <div class="name" *ngIf="user.nombre != undefined">
+          <label for="name">Nombre</label>
+          <input
+            type="text"
+            name="nombre"
+            #nombre="ngModel"
+            [(ngModel)]="
+              user.nombre + ' ' + user.apellidoP + ' ' + user.apellidoM
+            "
+            id=""
+            readonly
+          />
+        </div>
+        <div class="regP" *ngIf="user.correo != undefined">
+          <label for="regP">Correo</label>
+          <input
+            type="text"
+            name="correo"
+            #correo="ngModel"
+            [(ngModel)]="user.correo"
+            id=""
+            readonly
+          />
+        </div>
+
+        <div class="rfc" *ngIf="user.rfc != undefined">
+          <label for="rfc">Rfc</label>
+          <input
+            type="text"
+            name="rfc"
+            #rfc="ngModel"
+            [(ngModel)]="user.rfc"
+            id=""
+            readonly
+          />
+        </div>
+        <div class="rol" *ngIf="user.rol != undefined">
+          <label for="rol">Rol</label>
+          <input
+            type="text"
+            name="rol"
+            #rfc="ngModel"
+            [(ngModel)]="user.rol"
+            id=""
+            readonly
+          />
+        </div>
+        <div class="empresa" *ngIf="user.empresa != undefined">
+          <label for="empresa">Empresa</label>
+          <input
+            type="text"
+            name="empresa"
+            #rfc="ngModel"
+            [(ngModel)]="user.empresa"
+            id=""
+            readonly
+          />
+        </div>
+      </form>
+      <button
+        class="submit"
+        id="changePass"
+        [routerLink]="['/recuperar-info', user.rfc, user.correo]"
+      >
+        Cambiar contraseña
+      </button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,140 @@
+form input[type="text"],
+form input[type="password"],
+form input[type="submit"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-con-icono {
+  position: relative;
+}
+
+.input-con-icono i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0462a0;
+}
+
+.inicio .box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.left-side {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.login-side {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 420px;
+}
+
+.login {
+  width: 100%;
+  max-width: 480px;           /* Más ancho */
+  min-width: 340px;
+  margin-bottom: 0;
+  padding: 48px 40px 36px 40px; /* Más padding */
+  font-size: 1.25em;          /* Texto más grande */
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(31, 38, 135, 0.10);
+}
+
+.login input[type="text"],
+.login input[type="password"] {
+  font-size: 1.1em;
+  padding: 16px;
+}
+
+.login-actions-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 32px; /* Espacio entre login y botones */
+  margin-left: 80px; /* Empuja todo el bloque a la derecha */
+}
+
+.index-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-top: 40px; /* Más espacio debajo del login */
+}
+
+.index-action-btn {
+  width: 180px;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  padding: 32px 0;
+  background: #ffffff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.index-action-btn img {
+  width: 32px;
+  height: 32px;
+}
+
+.index-action-btn:hover {
+  background: #dfdfdf;
+}
+
+/* Aumenta el tamaño del texto "Proveedores" */
+.left-side .text h1 span {
+  font-size: 1.8em; /* antes probablemente era 2em o 2.5em */
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+/* Aumenta el tamaño de la imagen debajo de "Proveedores" */
+.left-side .text img {
+  width: 220px;   /* antes probablemente era 200px o 240px */
+  max-width: 100%;
+  margin-top: 50px;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .inicio .box {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 0;
+  }
+  .login-side, .left-side {
+    min-width: 0;
+    width: 100%;
+    align-items: center;
+  }
+}

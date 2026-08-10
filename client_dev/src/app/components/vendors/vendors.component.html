@@ -1,0 +1,482 @@
+<!-- Alerta de Mantenimiento -->
+<!--
+<div
+  //*ngIf="maintenanceAlertVisible"
+  class="maintenance-alert"
+  [ngClass]="{ shrunk: maintenanceAlertShrunk }"
+>
+  <div class="alert-content" (click)="toggleMaintenanceAlert()">
+    <img src="../../../assets/img/ano-nuevo.png" alt="Mantenimiento" />
+    <div class="text-content">
+      <strong>¡FELIZ AÑO NUEVO!</strong>
+      <p>
+        Agradecemos a todos los coolaboradores por el correcto uso de la plataforma durante el 2025, y les deseamos un próspero año nuevo lleno de éxitos y logros.
+        <br>
+        Seguimos trabajando para su beneficio.
+      </p>
+    </div>
+  </div>
+  <span class="close-btn" (click)="closeMaintenanceAlert()">&times;</span>
+</div>-->
+<!-- Termina alerta -->
+<!-- Nueva Versión -->
+<!-- ...existing code... -->
+<!--<div
+  *ngIf="maintenanceAlertVisible"
+  class="update-alert"
+  [ngClass]="{ shrunk: maintenanceAlertShrunk }"
+>
+  <div class="update-content" (click)="toggleMaintenanceAlert()">
+    <img src="../../../assets/img/navidad.png" alt="actualizacion" />
+    <div class="text-content">
+      <strong>Actualización 2.4.0</strong>
+      <p>
+        Hemos realizado una actualización en la plataforma para mejorar la experiencia del usuario,
+        <a
+          [routerLink]="['/patch-notes']"
+          (click)="$event.stopPropagation()"
+          class="patch-link"
+          >Da click aquí</a
+        >
+        para ver las notas de la versión.
+        <br><br>
+        Seguimos trabajando para su beneficio.
+      </p>
+    </div>
+  </div>
+  <span class="close-btn" (click)="closeMaintenanceAlert()">&times;</span>
+</div>-->
+<!-- ...existing code... -->
+<!-- Termina alerta -->
+<!-- Nueva Versión -->
+<div
+  *ngIf="maintenanceAlertVisible"
+  class="maintenance-alert"
+  [ngClass]="{ shrunk: maintenanceAlertShrunk }"
+>
+  <div class="alert-content" (click)="toggleMaintenanceAlert()">
+    <img src="../../../assets/img/signo-de-admiracion.png" alt="Mantenimiento" />
+    <div class="text-content">
+      <strong>¿Necesitas Ayuda?</strong>
+      <p>
+        Si existe algún problema con la plataforma, recuerda que puedes hacernosla saber ingresando en el siguiente formulario.
+
+        <a
+          [routerLink]="['/feedback']"
+          (click)="$event.stopPropagation()"
+          class="patch-link"
+          >Da click aquí</a
+        >
+        <br>
+        Quedamos pendientes para ayudarte.
+      </p>
+    </div>
+  </div>
+  <span class="close-btn" (click)="closeMaintenanceAlert()">&times;</span>
+</div>
+
+<!-- Termina alerta --> 
+<!--
+<div *ngIf="showPatchNotes" class="patch-notes-overlay" >
+  <div class="patch-notes-modal">
+
+    <h2>Nueva Actualización, Version 2.4.0</h2>
+
+    <p>Estimado usuario,</p>
+    <p>Hemos realizado un par de cambios en la página:</p>
+
+    <ul>
+      <li>
+        <strong>Validación de archivos:</strong> Ahora los archivos subidos por los proveedores pueden ser validados uno por uno. Los archivos pueden tener tres estados: Válido (verde), No Válido (rojo) y Pendiente de Revisión (amarillo).
+      </li>
+      <li>
+        <strong>Nuevos estados:</strong> Se agregaron 2 nuevos estados de archivo al resumen de archivos, los cuales son GRIS, "Vacio" y "En revisión", AMARILLO.
+      </li>
+      <li>
+        <strong>Función Cambiada:</strong> Se removió el botón de validacion general de archivos, ahora solo se puede validar al proveedor si todos los archivos son verdes o grises.
+      </li>
+    </ul>
+
+    <p>Agradecemos su comprensión y confianza. Seguimos trabajando para usted.</p>
+
+    <button (click)="closePatchNotes()" class="btn-cerrar-notas">
+      Entendido, cerrar
+    </button>
+  </div>
+</div>
+-->
+<section class="proveedores">
+  <div class="circle"></div>
+  <h1>Proveedores<br /><span>Registrados</span></h1>
+
+  <mat-form-field class="example-full-width" appearance="fill">
+    <input
+      [formControl]="search"
+      (input)="handleSearch(search.value)"
+      matInput
+      placeholder="Buscar Proveedor"
+    />
+    <i class="fa fa-search"></i>
+  </mat-form-field>
+
+  <!-- Botonera -->
+
+  <div class="botonera">
+    <div>
+      <img
+        src="../../../assets/img/aceptarapruv.png"
+        (click)="filterValidArchives()"
+        alt="Archivos Válidos"
+        class="btn-descarga"
+      /><br />
+      <p class="textobotonera">
+        Archivos<br />
+        validados
+      </p>
+    </div>
+    <div>
+      <img
+        src="../../../assets/img/tiempo-de-procesamiento.png"
+        (click)="filterPendingArchives()"
+        alt="Archivos No Válidos"
+        class="btn-descarga"
+      /><br />
+      <p class="textobotonera">
+        Validacion <br />
+        Pendiente
+      </p>
+    </div>
+    <div>
+      <img
+        src="../../../assets/img/cancelar.png"
+        (click)="filterInvalidArchives()"
+        alt="Archivos No Válidos"
+        class="btn-descarga"
+      /><br />
+      <p class="textobotonera">
+        Sin <br />
+        Archivos
+      </p>
+    </div>
+
+    <!-- A mas tardar viernes 24 de mayo -->
+    <!-- Filtros de Regimen  -->
+
+    <!--    <div>
+      <img
+        src="../../../assets/img/museo.png"
+        (click)="filterRegimenR()"
+        alt="Mostrar Repse"
+        class="btn-descarga"
+      />
+      <p class="textobotonera">
+        Filtrado <br />
+        REPSE
+      </p>
+    </div> -->
+    <!--  <div>
+      <img
+        src="../../../assets/img/edificio-de-oficinas.png"
+        (click)="filterRegimenM()"
+        alt="Mostrar Moral"
+        class="btn-descarga"
+      />
+      <p class="textobotonera">
+        Filtrado <br />
+        MORAL
+      </p>
+    </div>
+    <div>
+      <img
+        src="../../../assets/img/trabajador.png"
+        (click)="filterRegimenF()"
+        alt="Mostrar Fisica"
+        class="btn-descarga"
+      />
+      <p class="textobotonera">
+        Filtrado <br />
+        FISICA
+      </p>
+    </div>
+-->
+    <!-- Limpia los filtros -->
+
+    <div>
+      <img
+        src="../../../assets/img/todas.png"
+        (click)="showAllVendors()"
+        alt="Mostrar Todas"
+        class="btn-descarga"
+      /><br />
+      <p class="textobotonera">
+        Limpiar <br />
+        Filtros
+      </p>
+    </div>
+
+    <!-- Cambia entre vista mosaico y vista lista -->
+
+    <div>
+      <img
+        src="../../../assets/img/intercambiar.png"
+        (click)="toggleView()"
+        alt="Intercambiar Vista"
+        class="btn-descarga"
+      /><br />
+      <p class="textobotonera">
+        Alternar <br />
+        Vista
+      </p>
+    </div>
+    <div
+      style="margin-left: auto"
+      *ngIf="identity?.rol === 'administrador' || identity?.rol === 'administrador_premium' || identity.rol == 'usuario'"
+    >
+      <img
+        src="../../../assets/img/nuevo.png"
+        (click)="goToRegisterProv()"
+        alt="Intercambiar Vista"
+        class="btn-descarga"
+        [ngStyle]="{
+          'background-color': '#FFFFFF'
+        }"
+      /><br />
+      <p
+        class="textobotonera"
+        [ngStyle]="{
+          'background-color': '#FFFFFF'
+        }"
+      >
+        Nuevo <br />
+        Proveedor
+      </p>
+    </div>
+    <div *ngIf="identity?.rol === 'administrador' || identity?.rol === 'administrador_premium'">
+      <img
+        src="../../../assets/img/trabajando.png"
+        (click)="goToRegisterUse()"
+        alt="Intercambiar Vista"
+        class="btn-descarga"
+        [ngStyle]="{
+          'margin-left': '10PX',
+          'background-color': '#FFFFFF'
+        }"
+      /><br />
+      <p
+        class="textobotonera"
+        [ngStyle]="{
+          'margin-left': '10PX',
+          'background-color': '#FFFFFF'
+        }"
+      >
+        Nuevo <br />
+        Usuario
+      </p>
+    </div>
+  </div>
+
+  <!-- Vista Mosaico -->
+
+  <div *ngFor="let vendor of vendors | search : filtroValor">
+    <div
+      *ngIf="!mosaicoView"
+      class="proveedor"
+      [ngStyle]="{
+        'border-bottom-color': vendor.verificado ? '#0881C1' : '#FF0000'
+      }"
+    >
+      <a [routerLink]="['/proveedor', vendor._id]">
+        <div class="text">
+          <h2><br />{{ vendor.razonSocial.toUpperCase() }}</h2>
+          <h2>RFC: {{ vendor.rfc.toUpperCase() }}</h2>
+          <h2>REGIMEN: {{ vendor.regimenFiscal.toUpperCase() }}</h2>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Vista de tabla -->
+  <div *ngIf="mosaicoView" class="tabla-container">
+    <table style="overflow-x: auto">
+      <tr>
+        <th>Nombre</th>
+        <th>RFC</th>
+        <th>Regimen</th>
+        <th>Registro Patronal</th>
+        <th>Contacto</th>
+        <th>Telefono</th>
+        <th>Correo</th>
+        <th>Archivos</th>
+        <!--  <th *ngIf="identity.rol === 'administrador' ">RP correcto</th> -->
+        <th *ngIf="identity.rol === 'administrador_premium'">Empresa</th>
+
+        <!--<th>Empresa</th>-->
+      </tr>
+      <tr
+        *ngFor="let vendor of vendors | search : filtroValor"
+        [ngStyle]="{
+          'border-bottom-color': vendor.verificado ? '#0881C1' : '#FF0000'
+        }"
+      >
+        <td style="text-align: left">
+          <a [routerLink]="['/proveedor', vendor._id]">{{
+            vendor.razonSocial.toUpperCase()
+          }}</a>
+        </td>
+        <td>
+          <a [routerLink]="['/proveedor', vendor._id]">{{
+            vendor.rfc.toUpperCase()
+          }}</a>
+        </td>
+        <td>
+          <a [routerLink]="['/proveedor', vendor._id]">{{
+            vendor.regimenFiscal.toUpperCase()
+          }}</a>
+        </td>
+        <td
+          [ngStyle]="{
+            color:
+              vendor.registroPatronal?.toUpperCase() === 'SINREGISTRO'
+                ? '#FF5C5C'
+                : 'inherit',
+            'font-weight':
+              vendor.registroPatronal?.toUpperCase() === 'SINREGISTRO'
+                ? 'bold'
+                : 'normal'
+          }"
+        >
+          <a [routerLink]="['/proveedor', vendor._id]">
+            {{ vendor.registroPatronal.toUpperCase() }}
+          </a>
+        </td>
+
+        <td style="text-align: left">
+          <a [routerLink]="['/proveedor', vendor._id]">{{
+            vendor.nombreContacto.toUpperCase()
+          }}</a>
+        </td>
+        <td>
+          <a [routerLink]="['/proveedor', vendor._id]">{{
+            vendor.telefono.toString()
+          }}</a>
+        </td>
+
+        <td
+          style="
+            color: blue;
+            text-decoration: underline;
+            text-decoration-color: blue;
+            font-weight: bold;
+            text-align: left;
+          "
+        >
+          <a href="mailto:{{ vendor.correo }}" class="email-link">{{
+            vendor.correo.toUpperCase()
+          }}</a>
+        </td>
+        <!--Color de validado o no validado-->
+        <td
+          [ngStyle]="{
+            'border-left': '1.8px solid #000',
+            'border-bottom': '1.8px solid #000',
+            'border-right': '1.8px solid #000',
+            'border-top': '1.8px solid #000',
+            'text-align': 'center',
+            'background-color':
+              !archivosMap[vendor.rfc] || archivosMap[vendor.rfc]._id === ''
+                ? '#FF5C5C'
+                : archivosMap[vendor.rfc].validar === false
+                ? '#F4FF5C'
+                : archivosMap[vendor.rfc].validar === true
+                ? '#8DFF5C'
+                : '#F4FF5C'
+          }"
+        >
+          <!-- Vacío -->
+          <ng-container
+            *ngIf="
+              !archivosMap[vendor.rfc] || archivosMap[vendor.rfc]._id === ''
+            "
+          >
+            <i class="fas fa-upload fa-lg" style="color: #820000"></i><br />
+            <small>Sin Archivos</small>
+          </ng-container>
+
+          <!-- Pendiente -->
+          <ng-container
+            *ngIf="
+              archivosMap[vendor.rfc]?._id !== '' &&
+              archivosMap[vendor.rfc]?.validar === false
+            "
+          >
+            <i class="fas fa-hourglass-half fa-lg" style="color: #a7b300"></i
+            ><br />
+            <small>Revision de archivos pendiente</small>
+          </ng-container>
+
+          <!-- Aceptado -->
+          <ng-container
+            *ngIf="
+              archivosMap[vendor.rfc]?._id !== '' &&
+              archivosMap[vendor.rfc]?.validar === true
+            "
+          >
+            <i class="fas fa-check-circle fa-lg" style="color: #128700"></i
+            ><br />
+            <small>Aceptados</small>
+          </ng-container>
+
+          <!-- Caso extra: ninguno de los anteriores -->
+          <ng-container
+            *ngIf="
+              archivosMap[vendor.rfc] &&
+              archivosMap[vendor.rfc]._id !== '' &&
+              archivosMap[vendor.rfc].validar !== true &&
+              archivosMap[vendor.rfc].validar !== false
+            "
+          >
+            <i class="fas fa-hourglass-half fa-lg" style="color: #a7b300"></i
+            ><br />
+            <small>Revision de archivos pendiente</small>
+          </ng-container>
+        </td>
+
+        <!-- RP correcto
+        <td
+          *ngIf="identity.rol === 'administrador'"
+          [ngStyle]="{
+            'text-align': 'center',
+            'background-color':
+              esRFCyRegistroDiferente(vendor) === 'SI' ? 'orange' : 'purple',
+            color: 'white',
+            'font-weight': 'bold',
+            'font-size': '14px',
+            padding: '5px 10px'
+          }"
+        >
+          {{ esRFCyRegistroDiferente(vendor) }}
+        </td>-->
+
+        <!-- Empresa -->
+        <td
+          *ngIf="identity.rol === 'administrador_premium'"
+          style="
+            font-weight: bold;
+            text-align: center;
+            font-size: 10px;
+            background-color: rgb(162, 145, 253);
+            text-transform: uppercase;
+            border-color: black;
+            border-style: solid;
+            border-width: 3px;
+            border-right: 3px solid #000;
+            border-top: 3px solid #000;
+            border-bottom: 3px solid #000;
+          "
+        >
+          {{ vendor.empresa }}
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>
