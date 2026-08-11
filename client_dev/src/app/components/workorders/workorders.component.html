@@ -1,0 +1,220 @@
+<div class="wo-container">
+  <button class="btn-modern secondary" (click)="goBack()" style="margin-bottom: 20px;">
+    ⬅️ Volver al Perfil
+  </button>
+
+  <div class="wo-header">
+    <div>
+      <h2 class="wo-title">Órdenes de Trabajo - <span>{{ empresa }}</span></h2>
+      <h4 class="wo-subtitle" *ngIf="vendor">Proveedor: {{ vendor.razonSocial }} ({{ vendor.rfc }})</h4>
+    </div>
+  </div>
+  
+  <div class="wo-layout">
+    
+    <!-- LISTA DE ÓRDENES -->
+    <div class="wo-card">
+      <div class="wo-card-header">
+        <h4 class="wo-card-title">📝 Lista de O.T.</h4>
+        <button class="btn-modern" (click)="showCreateOT = !showCreateOT" *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'">
+          ➕ Nueva O.T.
+        </button>
+      </div>
+
+      <!-- FORMULARIO NUEVA OT -->
+      <div *ngIf="showCreateOT" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+        <div class="wo-form-group">
+          <input type="text" placeholder="Folio de la OT" [(ngModel)]="newOT.folio" class="wo-input">
+        </div>
+        <div class="wo-form-group">
+          <textarea placeholder="Descripción del trabajo..." [(ngModel)]="newOT.descripcion" rows="3" class="wo-input"></textarea>
+        </div>
+        <div class="wo-form-group">
+          <input type="number" placeholder="Monto Tope (Opcional)" [(ngModel)]="newOT.montoTotal" class="wo-input">
+        </div>
+        <button class="btn-modern success" style="width: 100%; justify-content: center;" (click)="createWorkOrder()">
+          Guardar Orden
+        </button>
+      </div>
+
+      <div *ngIf="workOrders.length === 0" class="wo-empty-state" style="padding: 20px 0;">
+        <p>No hay órdenes de trabajo registradas para esta empresa.</p>
+      </div>
+
+      <div>
+        <div *ngFor="let wo of workOrders" 
+             class="wo-list-item"
+             [class.active]="selectedWorkOrder?._id === wo._id"
+             (click)="selectWorkOrder(wo)">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong>Folio: {{ wo.folio }}</strong>
+            <span class="wo-badge" [ngClass]="wo.estatus === 'Activa' ? 'active' : 'inactive'">
+              {{ wo.estatus }}
+            </span>
+          </div>
+          <div style="font-size: 13px; color: #4b5563; line-height: 1.4;">{{ wo.descripcion }}</div>
+          <div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">{{ wo.fechaCreacion | date:'mediumDate' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETALLE DE OT Y FACTURAS -->
+    <div class="wo-card" style="min-height: 500px;">
+      
+      <div *ngIf="!selectedWorkOrder" class="wo-empty-state" style="margin-top: 80px;">
+        <span style="font-size: 48px; display: block; margin-bottom: 15px;">👈</span>
+        <h3>Selecciona una Orden de Trabajo</h3>
+        <p>Para visualizar y subir sus facturas (XML + PDF)</p>
+      </div>
+
+      <div *ngIf="selectedWorkOrder">
+        <h3 class="wo-title" style="font-size: 20px; margin-bottom: 8px;">Detalle de OT: {{ selectedWorkOrder.folio }}</h3>
+        <p class="wo-subtitle" style="margin-bottom: 25px;">{{ selectedWorkOrder.descripcion }}</p>
+
+        <!-- === SECCIÓN CONTRATO === -->
+        <div class="wo-card" style="background: #fafafa; border-left: 4px solid #4f46e5; padding: 15px 20px; margin-bottom: 25px; box-shadow: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h4 style="margin: 0; color: #312e81; font-size: 16px;">📄 Contrato</h4>
+            <span class="wo-badge" [ngClass]="{
+              'pending': selectedWorkOrder.estatusContrato === 'Sin Contrato' || selectedWorkOrder.estatusContrato === 'En Modificación',
+              'approved': selectedWorkOrder.estatusContrato === 'Aprobado',
+              'rejected': selectedWorkOrder.estatusContrato === 'Rechazado' || selectedWorkOrder.estatusContrato === 'Solicitud de Modificación'
+            }">{{ selectedWorkOrder.estatusContrato || 'Sin Contrato' }}</span>
+          </div>
+
+          <!-- Si NO hay contrato o está En Modificación (Solo Proveedor) -->
+          <div *ngIf="(!selectedWorkOrder.estatusContrato || selectedWorkOrder.estatusContrato === 'Sin Contrato' || selectedWorkOrder.estatusContrato === 'En Modificación') && identity.rol === 'proveedor'">
+            <div class="wo-upload-flex" style="align-items: center;">
+              <div class="wo-file-input-wrapper">
+                <input type="file" (change)="fileChangeEventContrato($event)" accept=".pdf" [disabled]="isUploadingContrato" class="wo-input" style="padding: 6px;">
+              </div>
+              <button class="btn-modern" style="background-color: #4f46e5; padding: 8px 16px;" (click)="uploadContrato()" [disabled]="isUploadingContrato">
+                {{ isUploadingContrato ? 'Subiendo...' : 'Agregar Contrato' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Mostrar archivo si ya se subió (No importa el estado) -->
+          <div *ngIf="selectedWorkOrder.archivoContrato" style="margin-top: 10px;">
+            <a [href]="url + 'archivos/' + selectedWorkOrder.archivoContrato" target="_blank" class="wo-link">
+              Ver Contrato Actual (PDF)
+            </a>
+          </div>
+
+          <!-- Mensajes y Acciones según Estatus -->
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+            
+            <!-- Si está Rechazado -->
+            <div *ngIf="selectedWorkOrder.estatusContrato === 'Rechazado'" style="color: #b91c1c; font-size: 13px;">
+              <strong>Motivo de rechazo:</strong> {{ selectedWorkOrder.observacionesContrato }}
+              <br><br>
+              <span *ngIf="identity.rol === 'proveedor'">Debes subir un nuevo contrato corrigiendo las observaciones. Contacta a un administrador para que habilite la subida solicitando una modificación.</span>
+            </div>
+
+            <!-- Botones Admin (Aprobar/Rechazar) si está Pendiente -->
+            <div *ngIf="selectedWorkOrder.estatusContrato === 'Pendiente de Validación' && (identity.rol === 'administrador' || identity.rol === 'administrador_premium')">
+              <button class="btn-modern success" style="margin-right: 10px;" (click)="validateContrato('Aprobado')">✅ Aprobar Contrato</button>
+              <button class="btn-modern" style="background-color: #ef4444;" (click)="validateContrato('Rechazado')">❌ Rechazar</button>
+            </div>
+
+            <!-- Botón Proveedor (Solicitar Modificación) si está Aprobado -->
+            <div *ngIf="(selectedWorkOrder.estatusContrato === 'Aprobado' || selectedWorkOrder.estatusContrato === 'Rechazado') && identity.rol === 'proveedor'">
+              <button class="btn-modern secondary" style="font-size: 12px; padding: 6px 12px;" (click)="requestContratoMod()">
+                Solicitar Modificación de Contrato
+              </button>
+            </div>
+
+            <!-- Solicitud de Modificación Pendiente (Mensaje para Proveedor) -->
+            <div *ngIf="selectedWorkOrder.estatusContrato === 'Solicitud de Modificación' && identity.rol === 'proveedor'" style="color: #d97706; font-size: 13px;">
+              ⏳ Has solicitado modificar el contrato. Espera a que un administrador lo autorice.
+            </div>
+
+            <!-- Botón Admin (Autorizar Modificación) -->
+            <div *ngIf="selectedWorkOrder.estatusContrato === 'Solicitud de Modificación' && (identity.rol === 'administrador' || identity.rol === 'administrador_premium')">
+              <p style="color: #b91c1c; font-size: 13px; margin-bottom: 10px;">⚠️ El proveedor ha solicitado modificar este contrato.</p>
+              <button class="btn-modern" style="background-color: #f59e0b;" (click)="approveContratoMod()">Autorizar Modificación</button>
+            </div>
+
+          </div>
+        </div>
+        <!-- === FIN SECCIÓN CONTRATO === -->
+
+        <div class="wo-upload-zone">
+          <h5 style="margin-top:0; color: #1e40af; font-size: 15px; margin-bottom: 5px;">📤 Subir Nueva Factura</h5>
+          <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Selecciona el XML del CFDI y su representación impresa (PDF).</p>
+          
+          <div class="wo-upload-flex">
+            <div class="wo-file-input-wrapper">
+              <label>Archivo XML:</label>
+              <input type="file" (change)="fileChangeEventXML($event)" accept=".xml" [disabled]="isUploading" class="wo-input" style="padding: 6px;">
+            </div>
+            <div class="wo-file-input-wrapper">
+              <label>Archivo PDF:</label>
+              <input type="file" (change)="fileChangeEventPDF($event)" accept=".pdf" [disabled]="isUploading" class="wo-input" style="padding: 6px;">
+            </div>
+            <button class="btn-modern" style="background-color: #f59e0b; padding: 10px 24px;" 
+                    (click)="uploadInvoice()" [disabled]="isUploading">
+              {{ isUploading ? 'Procesando XML...' : 'Subir Factura' }}
+            </button>
+          </div>
+        </div>
+
+        <h4 style="font-size: 16px; color: #1e293b; margin-bottom: 10px;">📄 Facturas Vinculadas ({{ invoices.length }})</h4>
+        
+        <table class="wo-table" *ngIf="invoices.length > 0">
+          <thead>
+            <tr>
+              <th>UUID (Folio Fiscal)</th>
+              <th>Fecha Emisión</th>
+              <th style="text-align: right;">Total</th>
+              <th style="text-align: center;">Estatus</th>
+              <th style="text-align: center;">Descargar</th>
+              <th style="text-align: center;">Detalles</th>
+              <th style="text-align: center;" *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'">Validación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let inv of invoices">
+              <td style="font-family: monospace; font-size: 12px; color: #475569;">{{ inv.uuid }}</td>
+              <td>{{ inv.fechaEmision | date:'shortDate' }}</td>
+              <td style="text-align: right; font-weight: 600; color: #0f172a;">{{ inv.total | currency:inv.moneda }}</td>
+              <td style="text-align: center;">
+                <span class="wo-badge"
+                      [ngClass]="{'approved': inv.estatusValidacion === 'Aprobada', 'rejected': inv.estatusValidacion === 'Rechazada', 'pending': inv.estatusValidacion !== 'Aprobada' && inv.estatusValidacion !== 'Rechazada'}">
+                  {{ inv.estatusValidacion }}
+                </span>
+                <div *ngIf="inv.observacionesRechazo" style="font-size: 11px; color: #dc2626; margin-top: 6px; max-width: 150px; margin-left: auto; margin-right: auto;">
+                  {{ inv.observacionesRechazo }}
+                </div>
+              </td>
+              <td style="text-align: center;">
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                  <a [href]="url + 'archivos/' + inv.archivoXML" target="_blank" class="wo-link">
+                    XML
+                  </a>
+                  <a [href]="url + 'archivos/' + inv.archivoPDF" target="_blank" class="wo-link danger">
+                    PDF
+                  </a>
+                </div>
+              </td>
+              <td style="text-align: center;">
+                <button class="btn-modern secondary" style="font-size: 11px; padding: 4px 8px;" (click)="viewInvoiceDetails(inv)">
+                  👁️ Ver Detalles
+                </button>
+              </td>
+              <td style="text-align: center;" *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'">
+                <button (click)="changeStatus(inv, 'Aprobada')" class="action-btn" title="Aprobar">✅</button>
+                <button (click)="changeStatus(inv, 'Rechazada')" class="action-btn" title="Rechazar">❌</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="invoices.length === 0" class="wo-empty-state">
+          <p>Esta orden no tiene facturas subidas todavía.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

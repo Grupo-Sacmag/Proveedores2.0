@@ -18,6 +18,8 @@ import { PatchNotesComponent } from './components/patch-notes/patch-notes.compon
 import { PatchnotesComponent } from './components/patchnotes/patchnotes.component';
 
 
+import { WorkordersComponent } from './components/workorders/workorders.component';
+
 const routes: Routes = [
   { path: '', component: IndexComponent },
   { path: 'inicio', component: IndexComponent },
@@ -47,6 +49,7 @@ const routes: Routes = [
   },
   { path: 'historial-archivos/:rfc', component: HistorialDeArchivosComponent },
   { path: 'cheque/:rfc', component: ChequeComponent, canActivate: [UserGuard] },
+  { path: 'workorders/:rfc/:empresa', component: WorkordersComponent, canActivate: [UserGuard] },
   { path: 'patch-notes', component: PatchNotesComponent },
   { path: 'patchnotes', component: PatchNotesComponent },
   { path: 'feedback', component: PatchnotesComponent },

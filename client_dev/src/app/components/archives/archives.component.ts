@@ -26,6 +26,7 @@ export class ArchivesComponent implements OnInit {
   public rfc: any;
   public charge: boolean;
   public changeDataEmail: boolean;
+  public mostrarConfiguracion: boolean = false;
   public identidad: any;
   public fechArchivo: { [key: string]: string } = {};
   public empresaActiva: string = '';
@@ -983,6 +984,10 @@ td {
 
   irAHistorial(rfc: string) {
     this._router.navigate(['/historial-archivos', rfc]);
+  }
+
+  irAWorkOrders() {
+    this._router.navigate(['/workorders', this.vendor.rfc, this.empresaActiva]);
   }
 
   openedDetails: boolean[] = Array(15).fill(false);

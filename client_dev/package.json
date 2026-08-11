@@ -29,6 +29,7 @@
     "pm2": "^5.3.1",
     "proveedores-sacmag": "file:",
     "rxjs": "~6.6.0",
+    "sweetalert2": "^11.26.25",
     "tslib": "^2.2.0",
     "typescript-fsa": "^3.0.0",
     "zone.js": "~0.11.4"

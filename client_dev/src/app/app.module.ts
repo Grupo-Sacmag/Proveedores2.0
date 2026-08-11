@@ -29,6 +29,7 @@ import { HistorialDeArchivosComponent } from './components/historial-de-archivos
 import { ChequeComponent } from './components/cheque/cheque.component';
 import { PatchNotesComponent } from './components/patch-notes/patch-notes.component';
 import { PatchnotesComponent } from './components/patchnotes/patchnotes.component';
+import { WorkordersComponent } from './components/workorders/workorders.component';
 
 
 @NgModule({
@@ -47,6 +48,7 @@ import { PatchnotesComponent } from './components/patchnotes/patchnotes.componen
     ChequeComponent,
     PatchNotesComponent,
     PatchnotesComponent,
+    WorkordersComponent,
   ],
   imports: [
     //Modulos

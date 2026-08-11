@@ -79,6 +79,15 @@
         Imprimir Resumen
       </button>
 
+      <button
+        class="btn-accion btn-secundario"
+        style="background-color: #673ab7; color: white;"
+        (click)="irAWorkOrders()"
+      >
+        <img src="./../../../assets/img/invoice_icon.png" alt="OTs y Facturas" onerror="this.src='./../../../assets/img/archivo.png'" />
+        Órdenes de Trabajo y Facturas
+      </button>
+
       <button (click)="toggle()" class="btn-accion btn-primario">
         <img
           [src]="
@@ -207,20 +216,6 @@
           Sólo el proveedor y el administrador pueden editar estos datos.
         </div>
 
-        <div *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
-          <h5>⚙️ Configurar Archivos Requeridos</h5>
-          <br>
-          <div style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
-            <label *ngFor="let doc of catalogoDocumentos" style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; color: #333;">
-              <input type="checkbox" [checked]="isArchivoRequerido(doc.id)" (change)="toggleRequisito(doc.id)" />
-              {{ doc.id }}. {{ doc.nombre }}
-            </label>
-          </div>
-          <br>
-          <button type="button" class="btn-accion btn-primario" (click)="guardarRequisitos()">
-            Guardar Requisitos de Archivos
-          </button>
-        </div>
       </div>
 
       <!-- Lado derecho -->
@@ -245,7 +240,47 @@
             <span class="leyenda-texto">Sin archivo</span>
           </span>
         </div>
-        <div class="perfil-resumen">
+        
+        <button *ngIf="identity.rol === 'administrador' || identity.rol === 'administrador_premium'" 
+                class="btn-accion" 
+                style="margin: 15px 0; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; background-color: #333; color: white; border-radius: 6px; padding: 10px;" 
+                (click)="mostrarConfiguracion = !mostrarConfiguracion">
+          <img src="../../../assets/img/edicircle.png" width="18" height="18" style="filter: brightness(0) invert(1);" />
+          {{ mostrarConfiguracion ? 'Cancelar Edición / Volver al Resumen' : 'Editar archivos requeridos' }}
+        </button>
+
+        <!-- CONFIGURACION DE ARCHIVOS -->
+        <div *ngIf="mostrarConfiguracion" style="animation: fadeIn 0.3s;">
+          <p style="font-size: 13px; color: #666; margin-bottom: 15px; font-weight: bold;">Selecciona los archivos obligatorios para este proveedor:</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; padding-right: 5px;">
+            
+            <label *ngFor="let doc of catalogoDocumentos" 
+                   style="display: flex; align-items: center; gap: 12px; font-size: 13px; cursor: pointer; padding: 12px 15px; border-radius: 6px; border: 1px solid #e0e0e0; transition: all 0.2s ease-in-out; user-select: none;"
+                   [style.background-color]="isArchivoRequerido(doc.id) ? '#f0f7ff' : '#fff'"
+                   [style.border-color]="isArchivoRequerido(doc.id) ? '#90caf9' : '#e0e0e0'"
+                   onmouseover="this.style.backgroundColor = this.querySelector('input').checked ? '#e3f2fd' : '#fafafa'"
+                   onmouseout="this.style.backgroundColor = this.querySelector('input').checked ? '#f0f7ff' : '#fff'">
+              
+              <input type="checkbox" 
+                     [checked]="isArchivoRequerido(doc.id)" 
+                     (change)="toggleRequisito(doc.id)" 
+                     style="width: 16px; height: 16px; cursor: pointer; accent-color: #1976d2; margin: 0;" />
+              
+              <span [style.font-weight]="isArchivoRequerido(doc.id) ? '600' : '400'" 
+                    [style.color]="isArchivoRequerido(doc.id) ? '#1565c0' : '#444'">
+                {{ doc.id }}. {{ doc.nombre }}
+              </span>
+            </label>
+
+          </div>
+          
+          <button type="button" class="btn-accion" style="margin-top: 15px; width: 100%; background-color: #2e7d32; color: white; padding: 12px; font-size: 14px; border-radius: 6px;" (click)="guardarRequisitos()">
+            💾 Guardar Cambios de Requisitos
+          </button>
+        </div>
+
+        <div class="perfil-resumen" *ngIf="!mostrarConfiguracion">
           <ol>
             <li *ngIf="isArchivoRequerido(1)" [ngClass]="{
                   'estado-valido': archivos.archivo1 && archivos.validacion1 === true,
