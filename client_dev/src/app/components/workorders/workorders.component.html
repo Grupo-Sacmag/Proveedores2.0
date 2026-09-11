@@ -24,13 +24,37 @@
       <!-- FORMULARIO NUEVA OT -->
       <div *ngIf="showCreateOT" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
         <div class="wo-form-group">
-          <input type="text" placeholder="Folio de la OT" [(ngModel)]="newOT.folio" class="wo-input">
+          <label style="font-size: 12px; font-weight: bold; color: #374151;">Folio de la O.T.:</label>
+          <input type="text" placeholder="Ej. OT-2026-001" [(ngModel)]="newOT.folio" class="wo-input" style="text-transform: uppercase;">
         </div>
         <div class="wo-form-group">
-          <textarea placeholder="Descripción del trabajo..." [(ngModel)]="newOT.descripcion" rows="3" class="wo-input"></textarea>
+          <label style="font-size: 12px; font-weight: bold; color: #374151;">No. de Proyecto (Puro número, máx. 5 dígitos):</label>
+          <input type="text" 
+                 placeholder="Ej. 12345" 
+                 [(ngModel)]="newOT.numeroProyecto" 
+                 (input)="filtrarNumeroProyecto($event)" 
+                 maxlength="5" 
+                 class="wo-input">
         </div>
         <div class="wo-form-group">
-          <input type="number" placeholder="Monto Tope (Opcional)" [(ngModel)]="newOT.montoTotal" class="wo-input">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 12px; font-weight: bold; color: #374151;">Descripción del Trabajo:</label>
+            <span style="font-size: 11px; color: #6b7280;">{{ (newOT.descripcion || '').length }} / 210</span>
+          </div>
+          <textarea placeholder="Descripción del trabajo..." 
+                    [(ngModel)]="newOT.descripcion" 
+                    maxlength="210" 
+                    rows="3" 
+                    class="wo-input" 
+                    style="text-transform: uppercase;"></textarea>
+        </div>
+        <div class="wo-form-group">
+          <label style="font-size: 12px; font-weight: bold; color: #374151;">Monto Inicial / Tope ($):</label>
+          <input type="number" 
+                 min="0.01" 
+                 placeholder="Ej. 50000 (Solo positivos)" 
+                 [(ngModel)]="newOT.montoTotal" 
+                 class="wo-input">
         </div>
         <button class="btn-modern success" style="width: 100%; justify-content: center;" (click)="createWorkOrder()">
           Guardar Orden
@@ -52,6 +76,9 @@
               {{ wo.estatus }}
             </span>
           </div>
+          <div *ngIf="wo.numeroProyecto" style="font-size: 12px; font-weight: bold; color: #4338ca; margin-bottom: 4px;">
+            📁 Proyecto: #{{ wo.numeroProyecto }}
+          </div>
           <div style="font-size: 13px; color: #4b5563; line-height: 1.4;">{{ wo.descripcion }}</div>
           <div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">{{ wo.fechaCreacion | date:'mediumDate' }}</div>
         </div>
@@ -68,8 +95,46 @@
       </div>
 
       <div *ngIf="selectedWorkOrder">
-        <h3 class="wo-title" style="font-size: 20px; margin-bottom: 8px;">Detalle de OT: {{ selectedWorkOrder.folio }}</h3>
-        <p class="wo-subtitle" style="margin-bottom: 25px;">{{ selectedWorkOrder.descripcion }}</p>
+        <h3 class="wo-title" style="font-size: 20px; margin-bottom: 4px;">Detalle de OT: {{ selectedWorkOrder.folio }}</h3>
+        <p *ngIf="selectedWorkOrder.numeroProyecto" style="font-size: 13px; color: #4338ca; font-weight: bold; margin: 0 0 8px 0;">
+          📁 PROYECTO ASOCIADO: #{{ selectedWorkOrder.numeroProyecto }}
+        </p>
+        <p class="wo-subtitle" style="margin-bottom: 15px;">{{ selectedWorkOrder.descripcion }}</p>
+
+        <!-- BANNER DE RESUMEN FINANCIERO Y PRESUPUESTO -->
+        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: flex-start;">
+            
+            <!-- Presupuesto Activo -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #10b981;">
+              <span style="font-size: 11px; color: #047857; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Presupuesto Activo</span>
+              <h2 style="margin: 4px 0 2px 0; color: #065f46; font-size: 22px;">${{ presupuestoActivo | number:'1.2-2' }}</h2>
+              <span style="font-size: 11px; color: #059669;">Fuente: <strong>{{ fuentePresupuesto }}</strong></span>
+            </div>
+
+            <!-- Facturado Aprobado -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #3b82f6;">
+              <span style="font-size: 11px; color: #1d4ed8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Facturado Aprobado</span>
+              <h2 style="margin: 4px 0 2px 0; color: #1e40af; font-size: 22px;">${{ totalFacturadoAprobado | number:'1.2-2' }}</h2>
+              <span style="font-size: 11px; color: #2563eb;">Ejercido: <strong>{{ porcentajeEjecutado }}%</strong></span>
+            </div>
+
+            <!-- Saldo Restante / Por Facturar -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #f59e0b;">
+              <span style="font-size: 11px; color: #b45309; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Saldo Disponible</span>
+              <h2 style="margin: 4px 0 2px 0; color: #92400e; font-size: 22px;">${{ montoRestante | number:'1.2-2' }}</h2>
+              <span style="font-size: 11px; color: #d97706;">Falta para agotar</span>
+            </div>
+
+            <!-- Vigencia Activa -->
+            <div *ngIf="fechaTerminoActiva" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #8b5cf6;">
+              <span style="font-size: 11px; color: #6d28d9; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Fecha Término</span>
+              <h3 style="margin: 4px 0 2px 0; color: #5b21b6; font-size: 18px;">{{ fechaTerminoActiva | date:'dd/MM/yyyy' }}</h3>
+              <span style="font-size: 11px; color: #7c3aed;">Vigencia activa O.T.</span>
+            </div>
+
+          </div>
+        </div>
 
         <!-- === SECCIÓN CONTRATO === -->
         <div class="wo-card" style="background: #fafafa; border-left: 4px solid #4f46e5; padding: 15px 20px; margin-bottom: 25px; box-shadow: none;">
@@ -82,13 +147,20 @@
             }">{{ selectedWorkOrder.estatusContrato || 'Sin Contrato' }}</span>
           </div>
 
-          <!-- Si NO hay contrato o está En Modificación (Solo Proveedor) -->
-          <div *ngIf="(!selectedWorkOrder.estatusContrato || selectedWorkOrder.estatusContrato === 'Sin Contrato' || selectedWorkOrder.estatusContrato === 'En Modificación') && identity.rol === 'proveedor'">
-            <div class="wo-upload-flex" style="align-items: center;">
-              <div class="wo-file-input-wrapper">
+          <!-- Si NO hay contrato o está En Modificación (Proveedor, Administradores, Usuarios) -->
+          <div *ngIf="(!selectedWorkOrder.estatusContrato || selectedWorkOrder.estatusContrato === 'Sin Contrato' || selectedWorkOrder.estatusContrato === 'En Modificación') && canManageContratoAnexo">
+            <div class="wo-upload-flex" style="align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              <div class="wo-file-input-wrapper" style="width: 100%;">
+                <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Archivo PDF del Contrato:</label>
                 <input type="file" (change)="fileChangeEventContrato($event)" accept=".pdf" [disabled]="isUploadingContrato" class="wo-input" style="padding: 6px;">
               </div>
-              <button class="btn-modern" style="background-color: #4f46e5; padding: 8px 16px;" (click)="uploadContrato()" [disabled]="isUploadingContrato">
+              <input type="number" [(ngModel)]="newContratoCosto" placeholder="Monto del contrato ($)" class="wo-input" style="width: 180px;">
+              <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 11px; font-weight: bold; color: #4b5563;">Fecha Estimada Término:</label>
+                <input type="date" [(ngModel)]="newContratoFecha" class="wo-input" style="width: 180px;" title="Fecha Estimada de Término">
+              </div>
+              
+              <button class="btn-modern" style="background-color: #4f46e5; padding: 8px 16px; align-self: flex-end;" (click)="uploadContrato()" [disabled]="isUploadingContrato">
                 {{ isUploadingContrato ? 'Subiendo...' : 'Agregar Contrato' }}
               </button>
             </div>
@@ -99,6 +171,9 @@
             <a [href]="url + 'archivos/' + selectedWorkOrder.archivoContrato" target="_blank" class="wo-link">
               Ver Contrato Actual (PDF)
             </a>
+            <span *ngIf="selectedWorkOrder.fechaTerminoContrato" style="font-size: 12px; color: #6b7280; margin-left: 15px;">
+              Fecha Estimada Término: <strong>{{ selectedWorkOrder.fechaTerminoContrato | date:'dd/MM/yyyy' }}</strong>
+            </span>
           </div>
 
           <!-- Mensajes y Acciones según Estatus -->
@@ -139,7 +214,36 @@
         </div>
         <!-- === FIN SECCIÓN CONTRATO === -->
 
-        <div class="wo-upload-zone">
+        <!-- === SECCIÓN ANEXOS === -->
+        <div class="wo-card" *ngIf="selectedWorkOrder.archivoContrato" style="background: #fafafa; border-left: 4px solid #f59e0b; padding: 15px 20px; margin-bottom: 25px; box-shadow: none;">
+          <h4 style="margin: 0; color: #b45309; font-size: 16px; margin-bottom: 15px;">📎 Anexos del Contrato</h4>
+          
+          <div *ngIf="selectedWorkOrder.anexos && selectedWorkOrder.anexos.length > 0">
+            <div *ngFor="let anexo of selectedWorkOrder.anexos; let i = index" style="background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="color: #374151;">Anexo #{{ i + 1 }}</strong><br>
+                <span style="font-size: 12px; color: #6b7280;">
+                  Nuevo Presupuesto: <strong style="color: #047857;">${{ anexo.monto | number }}</strong> | Fecha Estimada Término: <strong>{{ anexo.fechaTermino | date:'dd/MM/yyyy' }}</strong>
+                </span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <a [href]="url + 'archivos/' + anexo.archivoAnexo" target="_blank" class="btn-modern secondary" style="padding: 4px 10px; font-size: 12px;">Ver PDF</a>
+                <a *ngIf="anexo.archivoXML" [href]="url + 'archivos/' + anexo.archivoXML" target="_blank" class="btn-modern secondary" style="padding: 4px 10px; font-size: 12px; background: #e0f2fe; color: #0369a1; border-color: #7dd3fc;">Ver XML</a>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!selectedWorkOrder.anexos || selectedWorkOrder.anexos.length === 0" style="font-size: 13px; color: #6b7280; margin-bottom: 10px;">
+            No hay anexos registrados.
+          </div>
+
+          <!-- Subir anexo (Proveedor, Administradores, Usuarios) -->
+          <button *ngIf="canManageContratoAnexo" class="btn-modern" style="background-color: #f59e0b; padding: 6px 14px; font-size: 13px;" (click)="promptUploadAnexo()">
+            + Agregar Anexo
+          </button>
+        </div>
+        <!-- === FIN SECCIÓN ANEXOS === -->
+
+        <div class="wo-upload-zone" *ngIf="identity.rol !== 'usuariolec'">
           <h5 style="margin-top:0; color: #1e40af; font-size: 15px; margin-bottom: 5px;">📤 Subir Nueva Factura</h5>
           <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Selecciona el XML del CFDI y su representación impresa (PDF).</p>
           
@@ -159,7 +263,13 @@
           </div>
         </div>
 
-        <h4 style="font-size: 16px; color: #1e293b; margin-bottom: 10px;">📄 Facturas Vinculadas ({{ invoices.length }})</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h4 style="font-size: 16px; color: #1e293b; margin: 0;">📄 Facturas Vinculadas ({{ invoices.length }})</h4>
+          <div style="font-size: 12px; color: #475569; background: #f1f5f9; padding: 5px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            Aprobado: <strong style="color: #1e40af;">${{ totalFacturadoAprobado | number:'1.2-2' }}</strong> | 
+            Falta por facturar: <strong style="color: #b45309;">${{ montoRestante | number:'1.2-2' }}</strong>
+          </div>
+        </div>
         
         <table class="wo-table" *ngIf="invoices.length > 0">
           <thead>

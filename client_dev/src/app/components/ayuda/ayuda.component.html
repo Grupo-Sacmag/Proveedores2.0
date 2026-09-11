@@ -1,0 +1,108 @@
+<section class="ayuda-container">
+  <div class="ayuda-header">
+    <h1>Centro de Ayuda y Manuales</h1>
+    <p>Bienvenido al sistema de Portal de Proveedores de Grupo SACMAG. Aquí encontrarás toda la información necesaria para utilizar la plataforma correctamente según tu rol.</p>
+  </div>
+
+  <div class="ayuda-grid">
+    <!-- Tarjeta de Proveedor (Visible para todos) -->
+    <div class="ayuda-card">
+      <div class="card-icon">
+        <img src="../../../assets/img/archivo.png" alt="Proveedor">
+      </div>
+      <h2>Manual para Proveedor</h2>
+      <p>Si eres un proveedor, esta guía te enseñará cómo interactuar con nuestro portal.</p>
+      
+      <!-- Contenido Expandido -->
+      <div class="extended-info" *ngIf="showProveedorInfo" style="animation: fadeIn 0.3s; margin-bottom: 20px;">
+        <div style="background-color: #f4f9ff; padding: 15px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 15px; border-left: 4px solid #1976d2;">
+          <strong>¿De qué trata esta página?</strong><br>
+          Este portal permite a los proveedores de Grupo SACMAG subir toda la documentación fiscal y legal requerida para su proceso de alta y pago.<br><br>
+          <strong>Tu Rol:</strong><br>
+          Como proveedor, deberás mantener tus documentos actualizados, subiendo PDFs válidos en los apartados que se te soliciten.
+        </div>
+        
+        <div class="video-placeholder" style="background-color: #000; color: #fff; text-align: center; padding: 40px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+          <strong style="font-size: 1.1rem; letter-spacing: 1px;">▶️ VER VIDEO (Próximamente)</strong>
+        </div>
+
+        <button class="btn-descargar">
+          <a href="#" (click)="$event.preventDefault();" style="color: white; text-decoration: none;">⬇️ Descargar Manual PDF (Próximamente)</a>
+        </button>
+      </div>
+
+      <button class="btn-descargar" (click)="toggleProveedorInfo($event)" *ngIf="!showProveedorInfo" style="background-color: #fff; color: #1976d2; border: 2px solid #1976d2;">
+        📖 Ver Explicación y Manual
+      </button>
+      <button class="btn-descargar" (click)="toggleProveedorInfo($event)" *ngIf="showProveedorInfo" style="background-color: #f5f5f5; color: #333; margin-top: 10px;">
+        Ocultar
+      </button>
+    </div>
+
+    <!-- Tarjeta de Administrador (Oculto para el Proveedor) -->
+    <div class="ayuda-card" *ngIf="identity.rol !== 'proveedor'">
+      <div class="card-icon">
+        <img src="../../../assets/img/carpeta.png" alt="Administrador">
+      </div>
+      <h2>Manual para Administrador</h2>
+      <p>Si eres administrador o usuario revisor, esta guía te enseñará cómo gestionar los expedientes.</p>
+      
+      <!-- Contenido Expandido -->
+      <div class="extended-info" *ngIf="showAdminInfo" style="animation: fadeIn 0.3s; margin-bottom: 20px;">
+        <div style="background-color: #f4f2fa; padding: 15px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 15px; border-left: 4px solid #673ab7;">
+          <strong>¿De qué trata esta página?</strong><br>
+          Es el módulo central para la recepción, validación y gestión de los expedientes de todos los proveedores que trabajan con la empresa.<br><br>
+          <strong>Tu Rol:</strong><br>
+          Como administrador, debes dar de alta nuevos proveedores, definir los requisitos de cada uno, revisar los documentos subidos y aprobarlos o rechazarlos para mantener el cumplimiento.
+        </div>
+        
+        <div class="video-placeholder" style="background-color: #000; color: #fff; text-align: center; padding: 40px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+          <strong style="font-size: 1.1rem; letter-spacing: 1px;">▶️ VER VIDEO (Próximamente)</strong>
+        </div>
+
+        <button class="btn-descargar admin-btn">
+          <a href="#" (click)="$event.preventDefault();" style="color: white; text-decoration: none;">⬇️ Descargar Manual PDF (Próximamente)</a>
+        </button>
+      </div>
+
+      <button class="btn-descargar admin-btn" (click)="toggleAdminInfo($event)" *ngIf="!showAdminInfo" style="background-color: #fff; color: #673ab7; border: 2px solid #673ab7;">
+        📖 Ver Explicación y Manual
+      </button>
+      <button class="btn-descargar" (click)="toggleAdminInfo($event)" *ngIf="showAdminInfo" style="background-color: #f5f5f5; color: #333; margin-top: 10px;">
+        Ocultar
+      </button>
+    </div>
+
+    <!-- Tarjeta de Apariencia / Modo Oscuro -->
+    <div class="ayuda-card tema-card">
+      <div class="card-icon theme-icon">
+        <span style="font-size: 42px; display: inline-block; transition: transform 0.3s ease;">{{ isDarkMode ? '🌙' : '☀️' }}</span>
+      </div>
+      <h2>Tema de la Aplicación</h2>
+      <p>Personaliza la apariencia visual del portal para trabajar con mayor comodidad.</p>
+      
+      <div class="theme-switch-box">
+        <div class="theme-toggle-row">
+          <span class="theme-mode-text" [class.active-text]="!isDarkMode">☀️ Claro</span>
+          
+          <label class="switch">
+            <input type="checkbox" [checked]="isDarkMode" (change)="toggleTheme()">
+            <span class="slider round"></span>
+          </label>
+          
+          <span class="theme-mode-text" [class.active-text]="isDarkMode">🌙 Oscuro</span>
+        </div>
+        <p class="theme-hint">
+          Tema actual: <strong>{{ isDarkMode ? 'Modo Oscuro Activo' : 'Modo Claro Activo' }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaeaea;">
+    <p style="font-size: 1rem; color: #555; margin-bottom: 15px;">¿Tienes algún problema con el portal o encontraste un error?</p>
+    <a [routerLink]="['/feedback']" style="display: inline-block; padding: 12px 24px; background-color: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background-color 0.2s ease;">
+      🛠️ ¿Necesitas ayuda? Levanta un ticket aquí
+    </a>
+  </div>
+</section>

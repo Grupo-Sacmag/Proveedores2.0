@@ -19,7 +19,7 @@ import { PatchnotesComponent } from './components/patchnotes/patchnotes.componen
 
 
 import { WorkordersComponent } from './components/workorders/workorders.component';
-
+import { AyudaComponent } from './components/ayuda/ayuda.component';
 const routes: Routes = [
   { path: '', component: IndexComponent },
   { path: 'inicio', component: IndexComponent },
@@ -36,6 +36,7 @@ const routes: Routes = [
     component: ArchivesComponent,
     canActivate: [UserGuard],
   },
+  { path: 'recuperar-info', component: RecuperarInfoComponent },
   { path: 'recuperar-info/:rfc/:correo', component: RecuperarInfoComponent },
   {
     path: 'registro-usuarios',
@@ -53,6 +54,7 @@ const routes: Routes = [
   { path: 'patch-notes', component: PatchNotesComponent },
   { path: 'patchnotes', component: PatchNotesComponent },
   { path: 'feedback', component: PatchnotesComponent },
+  { path: 'ayuda', component: AyudaComponent },
   { path: '**', component: IndexComponent },
 ];
 

@@ -30,7 +30,7 @@ import { ChequeComponent } from './components/cheque/cheque.component';
 import { PatchNotesComponent } from './components/patch-notes/patch-notes.component';
 import { PatchnotesComponent } from './components/patchnotes/patchnotes.component';
 import { WorkordersComponent } from './components/workorders/workorders.component';
-
+import { AyudaComponent } from './components/ayuda/ayuda.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +49,7 @@ import { WorkordersComponent } from './components/workorders/workorders.componen
     PatchNotesComponent,
     PatchnotesComponent,
     WorkordersComponent,
+    AyudaComponent
   ],
   imports: [
     //Modulos

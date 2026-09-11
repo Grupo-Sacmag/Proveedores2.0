@@ -120,23 +120,60 @@ var AuthController = {
             var saveInformation = await login.save();
             saveInformation.password = undefined;
             var contentHtml = `
-                            <img src="cid:unique@kreata.ee">
-                            <h1>Proveedores Sacmag</h1>
-                            <h4>Datos del Usuario Para Entrar Al Sistema</h4>
-                            <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank" >Click aquí para entrar al Sitio Web</a>
-                            <ul>
-                                <li>Bienvenid@ a la plafaroma ${params.nombre
-                                  .toLowerCase()
-                                  .trim()}</li>
-                                <li>Usuario: ${params.usuario
-                                  .toLowerCase()
-                                  .trim()}</li>
-                                <li>Contraseña ${pass}</li>
-                                <br>
-                                <br>
-                                <p>No responder correo<p>
-                            </ul>
-                            `;
+              <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; color: #333333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                  <!-- Header Dark Blue -->
+                  <div style="background-color: #1a237e; color: #ffffff; padding: 40px 30px; text-align: center;">
+                      <p style="font-size: 12px; margin: 0 0 10px 0; color: #9fa8da; letter-spacing: 1px; text-transform: uppercase;">
+                          PORTAL DE PROVEEDORE<span style="background-color: #ffeb3b; color: #1a237e; padding: 0 2px;">S -</span> GRUPO SACMAG
+                      </p>
+                      <h1 style="margin: 0; font-size: 28px; font-weight: normal; font-family: 'Times New Roman', Times, serif;">
+                          Nuevas <span style="background-color: #ffeb3b; color: #1a237e; padding: 0 5px; font-weight: bold;">Credenciales</span> de Acceso
+                      </h1>
+                  </div>
+                  
+                  <!-- Subheader Folio -->
+                  <div style="background-color: #e8eaf6; padding: 20px 30px;">
+                      <p style="font-size: 12px; margin: 0 0 5px 0; color: #7986cb; letter-spacing: 1px; font-weight: bold;">USUARIO ASIGNADO</p>
+                      <h2 style="margin: 0; font-size: 24px; color: #1a237e; font-family: 'Times New Roman', Times, serif; letter-spacing: 1px;">
+                          ${params.usuario.toLowerCase().trim()}
+                      </h2>
+                  </div>
+
+                  <!-- Details Grid -->
+                  <div style="padding: 30px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                          <tr>
+                              <td width="50%" valign="top" style="padding-bottom: 20px;">
+                                  <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">NOMBRE ASIGNADO</p>
+                                  <p style="margin: 0; font-size: 15px; color: #333333;">${params.nombre.toUpperCase()} ${params.apellidoP.toUpperCase()}</p>
+                              </td>
+                              <td width="50%" valign="top" style="padding-bottom: 20px;">
+                                  <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">EMPRESA</p>
+                                  <p style="margin: 0; font-size: 15px; color: #333333;">${params.empresa.toUpperCase()}</p>
+                              </td>
+                          </tr>
+                      </table>
+
+                      <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 30px;" />
+
+                      <p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">CONTRASEÑA TEMPORAL</p>
+                      <div style="background-color: #fafafa; border-left: 4px solid #1a237e; padding: 15px; margin-bottom: 20px;">
+                          <p style="margin: 0; font-size: 20px; color: #ff6b00; font-weight: bold; font-family: monospace;">${pass}</p>
+                      </div>
+                      
+                      <div style="text-align: center; margin-top: 30px;">
+                          <a href="https://proveedores-grupo-sacmag.com.mx/" style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 12px 25px; font-weight: bold; border-radius: 4px; font-size: 14px;">Ingresar al Portal</a>
+                      </div>
+                  </div>
+
+                  <!-- Footer -->
+                  <div style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+                      <p style="margin: 0; font-size: 12px; color: #999999;">
+                          Mensaje automático — Portal de Proveedores - Grupo SACMAG
+                      </p>
+                  </div>
+              </div>
+            `;
             let transporter = nodemailer.createTransport({
               host: "smtp.gmail.com",
               port: 465,
@@ -190,15 +227,20 @@ var AuthController = {
         params.correo = params.correo.trim().toLowerCase();
         if (params.password) params.password = params.password.trim();
         newPass = newPass.trim();
-        const userFound = await Users.findOne({
+        const query = {
           rfc: params.rfc,
           correo: params.correo,
-        });
+        };
+        if (params.empresa && params.empresa.trim().toLowerCase() !== "todas") {
+          query.empresa = params.empresa.trim().toLowerCase();
+        }
+
+        const userFound = await Users.findOne(query);
 
         if (userFound == null) {
-          return res.status(500).send({
+          return res.status(404).send({
             message:
-              "Ocurrió un error: La información proporcionada es incorrecta",
+              "Ocurrió un error: Los datos ingresados (Correo, RFC/CURP o Empresa) no coinciden.",
           });
         }
         if (params.password) {
@@ -220,13 +262,13 @@ var AuthController = {
               });
             });
             const userUpdated = await Users.updateOne(
-              { rfc: params.rfc },
+              { _id: userFound._id },
               { $set: { password: hashedPassword } }
             );
             return res.status(200).send({ userUpdated });
           } else {
             return res.status(500).send({
-              message: "Ocurrió un error: La información no coincide",
+              message: "Ocurrió un error: La contraseña actual no coincide.",
             });
           }
         } else {
@@ -237,7 +279,7 @@ var AuthController = {
             });
           });
           const userUpdated = await Users.updateOne(
-            { rfc: params.rfc },
+            { _id: userFound._id },
             { $set: { password: hashedPassword } }
           );
           return res.status(200).send({ userUpdated });
@@ -264,13 +306,42 @@ var AuthController = {
       userFound.password = undefined;
       var correo = userFound.correo;
       var contentHtml = `
-                <img src="cid:unique@kreata.ee">
-                <h1>Proveedores Sacmag - Ingeniería y Supervisión</h1>
-                <a href="https://proveedores-grupo-sacmag.com.mx/recuperar-info/${userFound.rfc.toUpperCase()}/${userFound.correo.toUpperCase()}" target="_blank" >Click aquí para recuperar contraseña</a>
-                <br>
-                <br>
-                <p>Correo enviado automáticamente, no responder correo<p>
-                `;
+              <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; color: #333333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                  <!-- Header Dark Blue -->
+                  <div style="background-color: #1a237e; color: #ffffff; padding: 40px 30px; text-align: center;">
+                      <p style="font-size: 12px; margin: 0 0 10px 0; color: #9fa8da; letter-spacing: 1px; text-transform: uppercase;">
+                          PORTAL DE PROVEEDORE<span style="background-color: #ffeb3b; color: #1a237e; padding: 0 2px;">S -</span> GRUPO SACMAG
+                      </p>
+                      <h1 style="margin: 0; font-size: 28px; font-weight: normal; font-family: 'Times New Roman', Times, serif;">
+                          Recuperación de <span style="background-color: #ffeb3b; color: #1a237e; padding: 0 5px; font-weight: bold;">Contraseña</span>
+                      </h1>
+                  </div>
+                  
+                  <!-- Subheader Folio -->
+                  <div style="background-color: #e8eaf6; padding: 20px 30px;">
+                      <p style="font-size: 12px; margin: 0 0 5px 0; color: #7986cb; letter-spacing: 1px; font-weight: bold;">CUENTA SOLICITANTE</p>
+                      <h2 style="margin: 0; font-size: 24px; color: #1a237e; font-family: 'Times New Roman', Times, serif; letter-spacing: 1px;">
+                          ${userFound.usuario.toLowerCase().trim()}
+                      </h2>
+                  </div>
+
+                  <!-- Details Grid -->
+                  <div style="padding: 30px;">
+                      <p style="font-size: 15px; color: #555; line-height: 1.5; margin-bottom: 25px;">Hemos recibido una solicitud para recuperar la contraseña vinculada a este usuario. Si no fuiste tú, puedes ignorar este correo de forma segura.</p>
+
+                      <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+                          <a href="https://proveedores-grupo-sacmag.com.mx/recuperar-info/${userFound.rfc.toUpperCase()}/${userFound.correo.toUpperCase()}" style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 12px 25px; font-weight: bold; border-radius: 4px; font-size: 14px;">Reestablecer Contraseña</a>
+                      </div>
+                  </div>
+
+                  <!-- Footer -->
+                  <div style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+                      <p style="margin: 0; font-size: 12px; color: #999999;">
+                          Mensaje automático — Portal de Proveedores - Grupo SACMAG
+                      </p>
+                  </div>
+              </div>
+            `;
 
       let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",

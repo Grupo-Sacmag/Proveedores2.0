@@ -21,12 +21,17 @@ export class PatchnotesComponent implements OnInit {
     private formBuilder: FormBuilder,
     private projectService: ProjectService
   ) {
+    const identity = this.projectService.getIdentity();
+    const defaultEmail = identity ? identity.correo : '';
+    const defaultName = identity ? (identity.empresa || identity.nombre_contacto || identity.nombre || 'Ambos de la cuenta') : '';
+
     this.feedbackForm = this.formBuilder.group({
       reportType: ['', Validators.required],
       subject: ['', [Validators.required, Validators.minLength(5)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       module: [''],
-      email: ['', [Validators.email]]
+      userName: [{ value: defaultName, disabled: true }, Validators.required],
+      email: [{ value: defaultEmail, disabled: true }, [Validators.email, Validators.required]]
     });
   }
 
@@ -103,7 +108,10 @@ export class PatchnotesComponent implements OnInit {
     formData.append('subject', this.feedbackForm.get('subject')?.value);
     formData.append('description', this.feedbackForm.get('description')?.value);
     formData.append('module', this.feedbackForm.get('module')?.value);
-    formData.append('email', this.feedbackForm.get('email')?.value);
+    // Para campos disabled (readonly), usamos getRawValue() o accedemos directamente al control disabled 
+    const rawData = this.feedbackForm.getRawValue();
+    formData.append('userName', rawData.userName);
+    formData.append('email', rawData.email);
     formData.append('timestamp', new Date().toISOString());
     formData.append('userAgent', navigator.userAgent);
 

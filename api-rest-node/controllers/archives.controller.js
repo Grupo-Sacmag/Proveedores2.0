@@ -370,10 +370,12 @@ var ArchivesController = {
         usuario: vendorSearch.userAlta?.toLowerCase().trim(),
       });
 
-      const archivesRemoved = await Archives.deleteMany({
-        rfc: projectRfc.toLowerCase().trim(),
-        empresa: empresa.toLowerCase().trim()
-      });
+      // Ya no borramos los archivos
+      // const archivesRemoved = await Archives.deleteMany({
+      //   rfc: projectRfc.toLowerCase().trim(),
+      //   empresa: empresa.toLowerCase().trim()
+      // });
+      const archivesRemoved = []; // Dejamos esto vacío para que no rompa el return
 
       await Vendors.updateOne(
         { rfc: projectRfc.toLowerCase() },
@@ -446,9 +448,10 @@ var ArchivesController = {
             .status(404)
             .send({ message: "Error al borrar los archivos" });
         if (archivesUpdate) {
+          const userValidador = req.user ? req.user.usuario : "admin";
           Vendors.updateOne(
             { rfc: projectRfc.toLowerCase() },
-            { verificado: true },
+            { verificado: true, userVerifico: userValidador, fechaVerificado: new Date() },
             async (err, vendorUpdate) => {
               if (err)
                 return res
@@ -842,7 +845,11 @@ var ArchivesController = {
         updatedArchive.validar = true;
         await updatedArchive.save();
 
-        await Vendors.updateOne({ rfc: rfc }, { verificado: true });
+        const userValidador = req.user ? req.user.usuario : "admin";
+        await Vendors.updateOne(
+          { rfc: rfc },
+          { verificado: true, userVerifico: userValidador, fechaVerificado: new Date() }
+        );
 
         const vendor = await Vendors.findOne({ rfc: rfc });
         if (vendor && vendor.correo) {
@@ -891,7 +898,10 @@ var ArchivesController = {
         updatedArchive.validar = false;
         await updatedArchive.save();
 
-        await Vendors.updateOne({ rfc: rfc }, { verificado: false });
+        await Vendors.updateOne(
+          { rfc: rfc },
+          { verificado: false, userVerifico: null, fechaVerificado: null }
+        );
       }
 
       return res.status(200).send({

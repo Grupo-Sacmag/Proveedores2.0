@@ -1,0 +1,218 @@
+.ayuda-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.ayuda-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ayuda-header h1 {
+  font-size: 2.2rem;
+  color: #1976d2;
+  margin-bottom: 15px;
+}
+
+.ayuda-header p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.ayuda-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.ayuda-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-top: 5px solid #1976d2;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ayuda-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+.ayuda-card:nth-child(2) {
+  border-top-color: #673ab7;
+}
+
+.card-icon {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card-icon img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.ayuda-card h2 {
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.ayuda-card p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.ayuda-card ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.ayuda-card ul li {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.btn-descargar {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.btn-descargar:hover {
+  background-color: #1565c0;
+}
+
+.btn-descargar.admin-btn {
+  background-color: #673ab7;
+}
+
+.btn-descargar.admin-btn:hover {
+  background-color: #512da8;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .ayuda-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tarjeta de Tema y Switch */
+.tema-card {
+  border-top: 4px solid #00acc1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.theme-icon {
+  margin-bottom: 15px;
+}
+
+.theme-switch-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 15px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.theme-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.theme-mode-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.theme-mode-text.active-text {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Switch Deslizante */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 54px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s ease;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s ease;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: #6366f1;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.theme-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+

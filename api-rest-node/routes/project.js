@@ -15,7 +15,7 @@ router.post('/cambiar-info/:newPass', AuthController.changePassword);
 router.post('/forgot-pass/:usuario', AuthController.forgotPass);
 
 // rutas - Archives (Expedientes)
-router.post('/subir-archivos/:rfc/:empresa', ArchivesController.saveArchives);
+router.post('/subir-archivos/:rfc/:empresa', md_auth.ensureAuth, ArchivesController.saveArchives);
 router.get('/archivos/:file', ArchivesController.getArchive);
 router.get('/archivos-old/:file', ArchivesController.getArchiveOld);
 router.get('/obtener-archivos/:rfc/:empresa', md_auth.ensureAuth, ArchivesController.getArchivesRfc);

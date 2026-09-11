@@ -100,9 +100,17 @@ var VendorController = {
   getVendorRfc: function (req, res) {
     var vendorrfc = req.params.rfc.toLowerCase().trim();
     var rol_usuario = req.user.rol;
+    var empresa_usuario = req.user.empresa ? req.user.empresa.toLowerCase().trim() : null;
+
     if (vendorrfc == null)
       return res.status(404).send({ message: "Error al buscar proveedor" });
-    Vendors.findOne({ rfc: vendorrfc.toLowerCase() }, (err, vendor) => {
+
+    let query = { rfc: vendorrfc.toLowerCase() };
+    if (rol_usuario === 'proveedor' && empresa_usuario) {
+       query.empresa = empresa_usuario;
+    }
+
+    Vendors.findOne(query, (err, vendor) => {
       if (err)
         return res.status(500).send({ message: "El proveedor no existe" });
       if (!vendor)
@@ -133,132 +141,140 @@ var VendorController = {
         try {
           const resProv = await Vendors.find({
             rfc: params.rfc.toLowerCase().trim(),
+            empresa: params.empresa.toLowerCase().trim()
           }).exec();
-          if (resProv == "") {
-            var characters =
-              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            for (var i = 0; i < 8; i++) {
-              pass += characters.charAt(
-                Math.floor(Math.random() * characters.length)
-              );
-            }
-            const hashedPassword = await new Promise((resolve, reject) => {
-              bcrypt.hash(pass, null, null, function (err, hash) {
-                if (err) reject(err);
-                resolve(hash);
-              });
-            });
-            var vendor = new Vendors();
-            vendor.rfc = params.rfc.toLowerCase().trim();
-            vendor.registroPatronal = params.registroPatronal
-              .toLowerCase()
-              .trim();
-            vendor.razonSocial = params.razonSocial.toLowerCase().trim();
-            vendor.tipoProveedor = params.tipoProveedor.toLowerCase().trim();
-            vendor.regimenFiscal = params.regimenFiscal.toLowerCase().trim();
-            vendor.nombreContacto = params.nombreContacto.toLowerCase().trim();
-            vendor.correo = params.correo.toLowerCase().trim();
-            vendor.telefono = params.telefono;
-            vendor.empresa = params.empresa.toLowerCase().trim();
-            vendor.userAlta = userAlta.toLowerCase().trim();
-            if (params.archivosRequeridos && Array.isArray(params.archivosRequeridos)) {
-              vendor.archivosRequeridos = params.archivosRequeridos;
-            }
-            if (params.observaciones != null) {
-              if (params.observaciones.trim() != "")
-                vendor.observaciones = params.observaciones
-                  .toLowerCase()
-                  .trim();
-            } else {
-              vendor.observaciones = "";
-            }
-            vendor.borrado = false;
-            vendor.fechaAlta = moment();
-            login.usuario = params.rfc.toLowerCase().trim();
-            login.password = hashedPassword;
-            login.correo = params.correo.toLowerCase().trim();
-            login.rol = "proveedor";
-            login.nombre = params.razonSocial.toLowerCase().trim();
-            login.apellidoP = "";
-            login.apellidoM = "";
-            login.rfc = params.rfc.toLowerCase().trim();
-            login.alta = userAlta.toLowerCase().trim();
-            login.borrado = false;
-            var saveInformation = await login.save();
-            saveInformation.password = undefined;
-            var vendorInformation = await vendor.save();
-            var contentHtml = `
-                <img src="cid:unique@kreata.ee">
-                <h1>Proveedores Sacmag</h1>
-                 <h2>Bienvenid@ a la plafaroma ${params.razonSocial}</h2>
-                  
-                    <br>
-                    <h4>Datos del Usuario Para Entrar Al Sistema</h4>
-                    <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank" >Click aquí para entrar al Sitio Web</a>
-
-                    <ul>
-                   
-                    <br>
-                    <li><b>Usuario: ${params.rfc.toLowerCase().trim()}</b></li>
-                    <li><b>Contraseña ${pass}</b></li>
-                <ul>
-                    <br>
-                    <br>
-                    <h4>Archivos a enviar</h4>
-                    ${generarListaHtmlArchivos(vendor.archivosRequeridos)}
-                    
-                    <h4>Notas</h4>
-                    <ol>
-                    <li>Todos los campos son requeridos</li>
-                    <li>Sólo puedes subir archivos pdf y con un peso máximo de 5 MB por archivo</li>
-                    <li>En caso de que algún archivo no aplique, subir un archivo PDF con nombre "No aplica" vacío</li>
-                    </ol>
-                    
-                    <br><br><br><br><br><br>
-                    <p>Recuerda subir todos tus archivos al sistema para validarte como proveedor autorizado</p>
-                    <h5>Correo enviado automáticamente, no responder correo<h5>
-                
-                `;
-            let transporter = nodemailer.createTransport({
-              host: "smtp.gmail.com",
-              port: 465,
-              secure: true,
-              auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
-              },
-            });
-            let info = await transporter.sendMail({
-              from: '"Proveedores sacmag " <sacmag.proveedores@gmail.com>',
-              to: `${correoP} , ${params.correo
-                .toLowerCase()
-                .trim()} , ${emailUser}`,
-              subject: "Accesos para entrar a la plataforma de Proveedores",
-              html: contentHtml,
-              attachments: [
-                {
-                  filename: "image.png",
-                  path: __dirname + "/logo.png",
-                  cid: "unique@kreata.ee",
-                },
-              ],
-            });
-            console.log("Mensaje enviado", info.envelope);
-            return res.status(200).send({
-              vendor: vendorInformation,
-              user: saveInformation,
-            });
-          } else {
-            const resProv = await Vendors.updateOne(
-              { rfc: params.rfc.toLowerCase().trim() },
-              { $addToSet: { empresa: params.empresa } }
-            ).exec();
-            
-            return res.status(200).send({ 
-              message: "Proveedor existente actualizado. Se le ha habilitado el acceso para la empresa " + params.empresa,
-              vendor: resProv 
-            });
+          
+          if (resProv != "") {
+             return res.status(500).send({
+               message: "El proveedor ya está registrado para la empresa " + params.empresa,
+             });
           }
+
+          var characters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+          for (var i = 0; i < 8; i++) {
+            pass += characters.charAt(
+              Math.floor(Math.random() * characters.length)
+            );
+          }
+          const hashedPassword = await new Promise((resolve, reject) => {
+            bcrypt.hash(pass, null, null, function (err, hash) {
+              if (err) reject(err);
+              resolve(hash);
+            });
+          });
+          var vendor = new Vendors();
+          vendor.rfc = params.rfc.toLowerCase().trim();
+          vendor.registroPatronal = params.registroPatronal
+            .toLowerCase()
+            .trim();
+          vendor.razonSocial = params.razonSocial.toLowerCase().trim();
+          vendor.tipoProveedor = params.tipoProveedor.toLowerCase().trim();
+          vendor.regimenFiscal = params.regimenFiscal.toLowerCase().trim();
+          vendor.nombreContacto = params.nombreContacto.toLowerCase().trim();
+          vendor.correo = params.correo.toLowerCase().trim();
+          vendor.telefono = params.telefono;
+          vendor.empresa = params.empresa.toLowerCase().trim();
+          vendor.userAlta = userAlta.toLowerCase().trim();
+          if (params.archivosRequeridos && Array.isArray(params.archivosRequeridos)) {
+            vendor.archivosRequeridos = params.archivosRequeridos;
+          }
+          if (params.observaciones != null) {
+            if (params.observaciones.trim() != "")
+              vendor.observaciones = params.observaciones
+                .toLowerCase()
+                .trim();
+          } else {
+            vendor.observaciones = "";
+          }
+          vendor.borrado = false;
+          vendor.fechaAlta = moment();
+
+          // Generar nombre de usuario único
+          let baseUsername = params.rfc.toLowerCase().trim();
+          let finalUsername = baseUsername;
+          const userExist = await Users.find({ usuario: baseUsername }).exec();
+          if (userExist != "") {
+             finalUsername = baseUsername + "_" + params.empresa.toLowerCase().trim();
+          }
+
+          login.usuario = finalUsername;
+          login.password = hashedPassword;
+          login.correo = params.correo.toLowerCase().trim();
+          login.rol = "proveedor";
+          login.nombre = params.razonSocial.toLowerCase().trim();
+          login.apellidoP = "";
+          login.apellidoM = "";
+          login.rfc = params.rfc.toLowerCase().trim();
+          login.alta = userAlta.toLowerCase().trim();
+          login.borrado = false;
+          login.empresa = params.empresa.toLowerCase().trim(); // Guardamos empresa en el JWT
+
+          var saveInformation = await login.save();
+          saveInformation.password = undefined;
+          var vendorInformation = await vendor.save();
+          var contentHtml = `
+              <img src="cid:unique@kreata.ee">
+              <h1>Proveedores Sacmag</h1>
+               <h2>Bienvenid@ a la plataforma ${params.razonSocial}</h2>
+                
+                  <br>
+                  <h4>Datos del Usuario Para Entrar Al Sistema (${params.empresa.toUpperCase()})</h4>
+                  <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank" >Click aquí para entrar al Sitio Web</a>
+
+                  <ul>
+                 
+                  <br>
+                  <li><b>Usuario: ${finalUsername}</b></li>
+                  <li><b>Contraseña ${pass}</b></li>
+              <ul>
+                  <br>
+                  <br>
+                  <h4>Archivos a enviar</h4>
+                  ${generarListaHtmlArchivos(vendor.archivosRequeridos)}
+                  
+                  <h4>Notas</h4>
+                  <ol>
+                  <li>Todos los campos son requeridos</li>
+                  <li>Sólo puedes subir archivos pdf y con un peso máximo de 5 MB por archivo</li>
+                  <li>En caso de que algún archivo no aplique, subir un archivo PDF con nombre "No aplica" vacío</li>
+                  </ol>
+                  
+                  <br><br><br><br><br><br>
+                  <p>Recuerda subir todos tus archivos al sistema para validarte como proveedor autorizado</p>
+                  <h5>Correo enviado automáticamente, no responder correo<h5>
+              
+              `;
+          let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+              user: "sacmag.proveedores@gmail.com",
+              pass: "jvwezvognvounmdl",
+            },
+          });
+          let info = await transporter.sendMail({
+            from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
+            to: `${correoP} , ${params.correo
+              .toLowerCase()
+              .trim()} , ${emailUser}`,
+            subject: "Accesos para entrar a la plataforma de Proveedores (" + params.empresa.toUpperCase() + ")",
+            html: contentHtml,
+            attachments: [
+              {
+                filename: "image.png",
+                path: __dirname + "/logo.png",
+                cid: "unique@kreata.ee",
+              },
+            ],
+          });
+          console.log("Mensaje enviado", info.envelope);
+          return res.status(200).send({
+            vendor: vendorInformation,
+            user: saveInformation,
+          });
+
         } catch (error) {
           console.log("Ocurrió un error al registrar Proveedor " + error);
           return res.status(500).send({
@@ -312,15 +328,30 @@ var VendorController = {
             update.observaciones = String(update.observaciones).toLowerCase().trim();
           }
           try {
+            const oldVendor = await Vendors.findById(projectId);
+            const oldRfc = oldVendor ? oldVendor.rfc : null;
+
             const projectUpdated = await Vendors.findByIdAndUpdate(
               projectId,
               update,
               { new: true }
             );
-          const userUpdated = await Users.updateOne(
-            { rfc: update.rfc },
-            { $set: { razonSocial: update.razonSocial, correo: update.correo } }
-          );
+
+            if (oldRfc && update.rfc && oldRfc.toLowerCase() !== update.rfc.toLowerCase()) {
+              await Users.updateMany(
+                { rfc: oldRfc.toLowerCase() },
+                { $set: { rfc: update.rfc.toLowerCase(), usuario: update.rfc.toLowerCase(), razonSocial: update.razonSocial, correo: update.correo } }
+              );
+              await Archives.updateMany(
+                { rfc: oldRfc.toLowerCase() },
+                { $set: { rfc: update.rfc.toLowerCase() } }
+              );
+            } else {
+              await Users.updateOne(
+                { rfc: update.rfc },
+                { $set: { razonSocial: update.razonSocial, correo: update.correo } }
+              );
+            }
           if (send === 'true' || send === true) {
             var pass = "";
             var characters =
@@ -505,6 +536,7 @@ var VendorController = {
       subject: params.subject,
       description: params.description,
       module: params.module || "sin especificar",
+      userName: params.userName || "Ambos de la cuenta",
       email: params.email || "no proporcionado",
       timestamp: params.timestamp || new Date(),
       userAgent: params.userAgent || "desconocido",
@@ -539,18 +571,74 @@ var VendorController = {
       });
     }
 
+    const folioSeguimiento = `SACMAG-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
     let reportHtml = `
-      <h2>Nuevo Reporte de Feedback</h2>
-      <p><strong>Tipo:</strong> ${params.reportType}</p>
-      <p><strong>Asunto:</strong> ${params.subject}</p>
-      <p><strong>Módulo:</strong> ${params.module || "No especificado"}</p>
-      <p><strong>Email del Usuario:</strong> ${params.email || "No proporcionado"}</p>
-      <p><strong>Descripción:</strong></p>
-      <p>${params.description}</p>
-      <p><strong>Imágenes:</strong> ${savedImages.length > 0 ? savedImages.length + " imagen(es) adjunta(s)" : "Sin imágenes"}</p>
-      <hr/>
-      <p><strong>IP:</strong> ${req.ip || req.connection.remoteAddress}</p>
-      <p><strong>Fecha:</strong> ${new Date().toLocaleString()}</p>
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; color: #333333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          <!-- Header Dark Blue -->
+          <div style="background-color: #1a237e; color: #ffffff; padding: 40px 30px;">
+              <p style="font-size: 12px; margin: 0 0 10px 0; color: #9fa8da; letter-spacing: 1px; text-transform: uppercase;">
+                  SISTEMA DE TICKET<span style="background-color: #ffeb3b; color: #1a237e; padding: 0 2px;">S -</span> GRUPO SACMAG
+              </p>
+              <h1 style="margin: 0; font-size: 28px; font-weight: normal; font-family: 'Times New Roman', Times, serif;">
+                  Nuevo <span style="background-color: #ffeb3b; color: #1a237e; padding: 0 5px; font-weight: bold;">Ticket</span> Recibido
+              </h1>
+          </div>
+          
+          <!-- Subheader Folio -->
+          <div style="background-color: #e8eaf6; padding: 20px 30px;">
+              <p style="font-size: 12px; margin: 0 0 5px 0; color: #7986cb; letter-spacing: 1px; font-weight: bold;">FOLIO DE SEGUIMIENTO</p>
+              <h2 style="margin: 0; font-size: 24px; color: #1a237e; font-family: 'Times New Roman', Times, serif; letter-spacing: 1px;">
+                  ${folioSeguimiento}
+              </h2>
+          </div>
+
+          <!-- Details Grid -->
+          <div style="padding: 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                  <tr>
+                      <td width="50%" valign="top" style="padding-bottom: 20px;">
+                          <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">REPORTADO POR</p>
+                          <p style="margin: 0; font-size: 15px; color: #333333;">${params.userName || "No proporcionado"}</p>
+                          <a href="mailto:${params.email}" style="color: #1976d2; font-size: 13px; text-decoration: none;">${params.email || "No proporcionado"}</a>
+                      </td>
+                      <td width="50%" valign="top" style="padding-bottom: 20px;">
+                          <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">MÓDULO / APLICACIÓN</p>
+                          <p style="margin: 0; font-size: 15px; color: #333333;">${params.module || "No especificado"}</p>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td width="50%" valign="top">
+                          <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">TIPO DE REPORTE</p>
+                          <p style="margin: 0; font-size: 15px; color: #ff6b00; font-weight: bold;">${params.reportType}</p>
+                      </td>
+                      <td width="50%" valign="top">
+                          <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">FECHA</p>
+                          <p style="margin: 0; font-size: 15px; color: #333333;">${new Date().toLocaleString()}</p>
+                      </td>
+                  </tr>
+              </table>
+
+              <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 30px;" />
+
+              <p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">PROBLEMA REPORTADO</p>
+              <div style="background-color: #fafafa; border-left: 4px solid #1a237e; padding: 15px; margin-bottom: 20px;">
+                  <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #333333;">${params.subject}</p>
+                  <p style="margin: 0; font-size: 14px; color: #555555; white-space: pre-wrap;">${params.description}</p>
+              </div>
+              
+              <p style="font-size: 13px; color: #777777;">
+                  <span style="font-size: 16px; margin-right: 5px;">📎</span> ${savedImages.length > 0 ? "Las capturas de pantalla se adjuntan a este correo." : "Sin imágenes adjuntas."}
+              </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #999999;">
+                  Mensaje automático — Sistema de <span style="background-color: #ffeb3b; color: #000; padding: 0 2px;">Ticket</span>s - Grupo SACMAG
+              </p>
+          </div>
+      </div>
     `;
 
     let reportOptions = {
@@ -576,20 +664,61 @@ var VendorController = {
           to: params.email,
           subject: "Reporte recibido - " + params.subject,
           html: `
-            <h2>Gracias por tu retroalimentación</h2>
-            <p>Hemos recibido tu reporte con el siguiente contenido:</p>
-            <hr/>
-            <p><strong>Tipo:</strong> ${params.reportType}</p>
-            <p><strong>Asunto:</strong> ${params.subject}</p>
-            <p><strong>Módulo:</strong> ${params.module || "No especificado"}</p>
-            <p><strong>Descripción:</strong></p>
-            <p>${params.description}</p>
-            <p><strong>Imágenes adjuntas:</strong> ${savedImages.length}</p>
-            <hr/>
-            <br>
-            <p>Nos pondremos en contacto si es necesario obtener más información.</p>
-            <p>Saludos,<br/>Equipo de desarrollo de Proveedores Sacmag</p>
-            <p>Mensaje enviado automáticamente, por favor no responder a este correo.</p>
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; color: #333333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <!-- Header Dark Blue -->
+                <div style="background-color: #1a237e; color: #ffffff; padding: 40px 30px;">
+                    <p style="font-size: 12px; margin: 0 0 10px 0; color: #9fa8da; letter-spacing: 1px; text-transform: uppercase;">
+                        SISTEMA DE TICKET<span style="background-color: #ffeb3b; color: #1a237e; padding: 0 2px;">S -</span> GRUPO SACMAG
+                    </p>
+                    <h1 style="margin: 0; font-size: 28px; font-weight: normal; font-family: 'Times New Roman', Times, serif;">
+                        Ticket Recibido <span style="background-color: #ffeb3b; color: #1a237e; padding: 0 5px; font-weight: bold;">Exitosamente</span>
+                    </h1>
+                </div>
+                
+                <!-- Subheader Folio -->
+                <div style="background-color: #e8eaf6; padding: 20px 30px;">
+                    <p style="font-size: 12px; margin: 0 0 5px 0; color: #7986cb; letter-spacing: 1px; font-weight: bold;">TU FOLIO DE SEGUIMIENTO</p>
+                    <h2 style="margin: 0; font-size: 24px; color: #1a237e; font-family: 'Times New Roman', Times, serif; letter-spacing: 1px;">
+                        \${folioSeguimiento}
+                    </h2>
+                </div>
+
+                <!-- Details Grid -->
+                <div style="padding: 30px;">
+                    <h3 style="color: #333; margin-top: 0;">Hola, \${params.userName || "Usuario"}</h3>
+                    <p style="font-size: 15px; color: #555; line-height: 1.5; margin-bottom: 30px;">
+                        Hemos recibido tu reporte de manera exitosa. Nuestro equipo de soporte lo revisará a la brevedad y se pondrá en contacto contigo de ser necesario a este correo.
+                    </p>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px; background-color: #fafafa; border: 1px solid #eeeeee; padding: 15px;">
+                        <tr>
+                            <td width="50%" valign="top" style="padding-bottom: 15px;">
+                                <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">ASUNTO</p>
+                                <p style="margin: 0; font-size: 14px; color: #333333; font-weight: bold;">\${params.subject}</p>
+                            </td>
+                            <td width="50%" valign="top" style="padding-bottom: 15px;">
+                                <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">MÓDULO</p>
+                                <p style="margin: 0; font-size: 14px; color: #333333;">\${params.module || "No especificado"}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" valign="top">
+                                <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">TIPO DE REPORTE</p>
+                                <p style="margin: 0; font-size: 14px; color: #ff6b00; font-weight: bold;">\${params.reportType}</p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <p style="font-size: 13px; color: #777777;">Si deseas agregar más información, por favor responde a este correo manteniendo el folio en el asunto.</p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+                    <p style="margin: 0; font-size: 12px; color: #999999;">
+                        Mensaje automático — Sistema de <span style="background-color: #ffeb3b; color: #000; padding: 0 2px;">Ticket</span>s - Grupo SACMAG
+                    </p>
+                </div>
+            </div>
           `
         };
 

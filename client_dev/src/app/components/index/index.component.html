@@ -59,7 +59,7 @@
             <span *ngIf="!password.valid && password.touched" class="rojo">
               La contraseña es obligatoria
             </span>
-            <a href="#" (click)="olvidar()">¿Olvidaste la contraseña?</a>
+            <a [routerLink]="['/recuperar-info']">¿Olvidaste la contraseña?</a>
             <input
               type="submit"
               value="Ingresar"

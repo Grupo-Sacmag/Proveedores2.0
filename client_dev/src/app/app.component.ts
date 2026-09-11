@@ -5,6 +5,8 @@ import { Proveedor } from './models/vendor';
 import { JSDocComment } from '@angular/compiler';
 
 
+import { ThemeService } from './services/theme.service';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -19,48 +21,40 @@ export class AppComponent implements OnInit, DoCheck {
   public menuToggle: any;
   public navigation: any;
 
-
-
   title = 'Proveedores-Sacmag';
   constructor(
     private _projectService:ProjectService,
-    private _router: Router
+    private _router: Router,
+    public themeService: ThemeService
   ){
-    /* this.vendor = new Proveedor('','','','','','','','',0,'',false,false);
-     */
-
-
   }
+
+  get isDarkMode(): boolean {
+    return this.themeService.isDarkMode;
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
   ngOnInit(){
-
-
-
     this.identity= JSON.stringify(this._projectService.getIdentity());
-    /* this.vendor = this._projectService.getIdentity();
-    console.log(this.vendor); */
     this.rol = JSON.parse(this.identity);
     this.rol = this.rol['rol'];
-
-
-    /* this.tipo = this._projectService.getIdentity();
-    this.tipo = this.tipo['rol'];
-    console.log(this.tipo['rol']); */
   }
   ngDoCheck(){
-   /*  this.tipo= ''; */
     this.identity= JSON.stringify(this._projectService.getIdentity());
     this.rol = JSON.parse(this.identity);
     this.rol = this.rol['rol'];
-
-    /* this.tipo = this.tipo['rol'];
-    console.log(this.tipo['rol']);
-     */
   }
   logOut(){
+    const currentTheme = localStorage.getItem('theme');
     localStorage.clear();
+    if (currentTheme) {
+      localStorage.setItem('theme', currentTheme);
+    }
     this.identity= null;
     this._router.navigateByUrl('/login');
-
   }
 
 

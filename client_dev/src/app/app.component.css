@@ -12,6 +12,7 @@
   justify-content: space-between;
   padding: 0 1rem;
   flex-wrap: wrap;
+  min-height: 60px;
 }
 
 .logo img {
@@ -23,37 +24,65 @@
   display: none;
   width: 40px;
   height: 40px;
-  font-size: 2rem;
+  font-size: 1.8rem;
   line-height: 40px;
   text-align: center;
   cursor: pointer;
   user-select: none;
+  color: #333;
+}
+.toggle::before {
+  content: '☰'; /* Ícono de hamburguesa */
 }
 
 .navigation {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
-  transition: max-height 0.3s;
+  transition: all 0.3s ease;
 }
 
 .navigation a {
   text-decoration: none;
-  /*color: #333;*/
+  color: #333;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  transition: background 0.2s;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
 }
 
 .navigation a.active,
 .navigation a:hover {
   background: #2259a7;
+  color: #ffffff;
+}
+.navigation a.active img,
+.navigation a:hover img {
+  filter: brightness(0) invert(1);
 }
 
-@media (max-width: 768px) {
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 1.1rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.08);
+}
+
+@media (max-width: 900px) {
   .header-content {
-    flex-direction: column;
-    align-items: flex-start;
+    justify-content: space-between;
   }
   .toggle {
     display: block;
@@ -64,16 +93,22 @@
     gap: 0;
     max-height: 0;
     overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 0 0 8px 8px;
   }
   .navigation.active {
     max-height: 500px;
-    display: flex;
-    margin-bottom: 1rem;
+    padding: 10px 0;
   }
   .navigation a {
     width: 100%;
-    box-sizing: border-box;
-    padding: 1rem;
+    text-align: left;
+    padding: 12px 20px;
+    border-radius: 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .navigation a:last-child {
+    border-bottom: none;
   }
 }
-

@@ -16,6 +16,24 @@
   background-color: #2196F3;
   color: #fff;
 }
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.alert.naranja {
+  background-color: #FFA726;
+  color: #fff;
+}
+
+.alert.azul {
+  background-color: #2196F3;
+  color: #fff;
+}
 
 .alert.blanco {
   background-color: #F5F5F5;
@@ -342,4 +360,150 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
+}
+
+/* --- Estilos Modernos de Tabla --- */
+.tabla-container-modern {
+  margin-top: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-width: 1200px;
+}
+
+.modern-table thead th {
+  background-color: #1a237e;
+  color: white;
+  padding: 18px 15px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+}
+
+.modern-table tbody td {
+  padding: 15px 12px;
+  font-size: 14px;
+  color: #444;
+  border-bottom: 1px solid #eef0f5;
+  border-right: 1px solid transparent;
+  vertical-align: middle;
+}
+
+.modern-table tbody tr {
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.modern-table tbody tr:hover {
+  background-color: #f8fafe;
+  box-shadow: inset 4px 0 0 #1a237e;
+}
+
+.vendor-link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.vendor-link.main-link {
+  font-weight: 700;
+  color: #1a237e;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.badge-regimen {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.sin-registro a {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+.email-cell .email-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.email-cell .email-link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+}
+
+/* Status Cell Styling */
+.status-cell {
+  font-weight: 600;
+  padding: 8px !important;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.status-text {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.icon-status {
+  font-size: 18px;
+}
+
+/* Status Colors */
+.status-empty .status-content {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.status-pending .status-content {
+  background-color: #fff8e1;
+  color: #f57f17;
+  border: 1px solid #ffecb3;
+}
+
+.status-valid .status-content {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+/* Empresa Premium */
+.premium-empresa {
+  background: linear-gradient(135deg, #7c4dff, #536dfe);
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
 }

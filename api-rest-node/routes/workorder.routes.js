@@ -17,6 +17,7 @@ router.put("/invoice-status/:id", md_auth.ensureAuth, WorkOrderController.update
 router.get("/invoice-details/:id", md_auth.ensureAuth, WorkOrderController.getInvoiceXMLDetails);
 // Rutas de Contratos en ODT
 router.post("/upload-contrato-wo/:id", md_auth.ensureAuth, WorkOrderController.uploadContrato);
+router.post("/upload-anexo-wo/:id", md_auth.ensureAuth, WorkOrderController.uploadAnexo);
 router.put("/status-contrato-wo/:id", md_auth.ensureAuth, WorkOrderController.validateContrato);
 router.put("/request-mod-contrato-wo/:id", md_auth.ensureAuth, WorkOrderController.requestContratoMod);
 router.put("/approve-mod-contrato-wo/:id", md_auth.ensureAuth, WorkOrderController.approveContratoMod);

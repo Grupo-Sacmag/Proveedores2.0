@@ -15,6 +15,8 @@ export class Proveedor{
         public userAlta: string,
         public verificado: boolean,
         public fechaAlta: Date,
+        public userVerifico?: string,
+        public fechaVerificado?: Date,
         public archivosRequeridos?: number[]
     ){
 

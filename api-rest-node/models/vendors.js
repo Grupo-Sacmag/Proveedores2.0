@@ -17,7 +17,9 @@ var VendorSchema = Schema({
   empresa: [String],
   userAlta: String,
   verificado: { type: Boolean, default: false }, //
+  userVerifico: String,
   fechaAlta: Date,
+  fechaVerificado: Date,
   archivosRequeridos: { type: [Number], default: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] }
 });
 

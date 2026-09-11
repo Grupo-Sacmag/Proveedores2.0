@@ -681,11 +681,12 @@ var controller = {
         usuario: vendorSearch.userAlta?.toLowerCase().trim(),
       });
 
-      // CORREGIDO: Usamos deleteMany (no remove)
-      const archivesRemoved = await Archives.deleteMany({
-        rfc: projectRfc.toLowerCase().trim(),
-        empresa: empresa.toLowerCase().trim()
-      });
+      // CORREGIDO: Ya no borramos los archivos, solo rechazamos
+      // const archivesRemoved = await Archives.deleteMany({
+      //   rfc: projectRfc.toLowerCase().trim(),
+      //   empresa: empresa.toLowerCase().trim()
+      // });
+      const archivesRemoved = []; // Dejamos esto vacío para que no rompa el return de abajo
 
       await Vendors.updateOne(
         { rfc: projectRfc.toLowerCase() },
@@ -1260,15 +1261,20 @@ var controller = {
         params.correo = params.correo.trim().toLowerCase();
         if (params.password) params.password = params.password.trim();
         newPass = newPass.trim();
-        const userFound = await Users.findOne({
+        const query = {
           rfc: params.rfc,
           correo: params.correo,
-        });
+        };
+        if (params.empresa && params.empresa.trim().toLowerCase() !== "todas") {
+          query.empresa = params.empresa.trim().toLowerCase();
+        }
+
+        const userFound = await Users.findOne(query);
 
         if (userFound == null) {
-          return res.status(500).send({
+          return res.status(404).send({
             message:
-              "Ocurrió un error: La información proporcionada es incorrecta",
+              "Ocurrió un error: Los datos ingresados (Correo, RFC/CURP o Empresa) no coinciden.",
           });
         }
         if (params.password) {
@@ -1290,13 +1296,13 @@ var controller = {
               });
             });
             const userUpdated = await Users.updateOne(
-              { rfc: params.rfc },
+              { _id: userFound._id },
               { $set: { password: hashedPassword } }
             );
             return res.status(200).send({ userUpdated });
           } else {
             return res.status(500).send({
-              message: "Ocurrió un error: La información no coincide",
+              message: "Ocurrió un error: La contraseña actual no coincide.",
             });
           }
         } else {
@@ -1307,7 +1313,7 @@ var controller = {
             });
           });
           const userUpdated = await Users.updateOne(
-            { rfc: params.rfc },
+            { _id: userFound._id },
             { $set: { password: hashedPassword } }
           );
           return res.status(200).send({ userUpdated });

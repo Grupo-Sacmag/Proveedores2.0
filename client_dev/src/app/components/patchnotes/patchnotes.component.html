@@ -46,9 +46,14 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="email">Email (opcional)</label>
-          <input id="email" type="email" formControlName="email" class="form-control" placeholder="Tu correo para que podamos contactarte" />
-          <div class="muted">Para que podamos brindarte seguimiento si es necesario</div>
+          <label class="form-label" for="userName">Usuario / Empresa (Auto-completado)</label>
+          <input id="userName" type="text" formControlName="userName" class="form-control" style="background-color: #f5f5f5; cursor: not-allowed;" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email (Auto-completado)</label>
+          <input id="email" type="email" formControlName="email" class="form-control" style="background-color: #f5f5f5; cursor: not-allowed;" />
+          <div class="muted">Datos cargados desde tu sesión activa</div>
         </div>
 
         <div class="form-group">

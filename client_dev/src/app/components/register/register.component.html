@@ -80,9 +80,44 @@
           </div>
         </div>
 
+        <!-- Preguntar si es S.C., REPSE o Ninguno (Solo para Persona Moral) -->
+        <div
+          *ngIf="vendor.regimenFiscal === 'moral' && tipoPersonaMoral === null"
+          class="boton"
+        >
+          <label>¿Es constituida como S.C., cuenta con REPSE o Ninguno?</label>
+          <div class="confirm-buttons">
+            <button type="button" class="btn-opcion" (click)="seleccionarTipoMoral('SC')">
+              S.C.
+            </button>
+            <button type="button" class="btn-opcion" (click)="seleccionarTipoMoral('REPSE')">
+              REPSE
+            </button>
+            <button type="button" class="btn-opcion" (click)="seleccionarTipoMoral('NINGUNO')">
+              Ninguno
+            </button>
+          </div>
+        </div>
+
+        <!-- Preguntar si tiene Registro Patronal (para Moral una vez seleccionada la opción) -->
+        <div
+          *ngIf="vendor.regimenFiscal === 'moral' && tipoPersonaMoral !== null && tieneRegistroPatronal === null"
+          class="boton"
+        >
+          <label>¿Cuenta con Registro Patronal?</label>
+          <div class="confirm-buttons">
+            <button type="button" class="btn-sí" (click)="confirmarRegistroPatronal(true)">
+              Sí
+            </button>
+            <button type="button" class="btn-no" (click)="confirmarRegistroPatronal(false)">
+              No
+            </button>
+          </div>
+        </div>
+
         <!-- Registro Patronal -->
         <div
-          *ngIf="(vendor.regimenFiscal === 'fisica' && tieneRegistroPatronal !== null) || vendor.regimenFiscal === 'moral'"
+          *ngIf="tieneRegistroPatronal !== null"
           class="boton"
         >
           <label for="regP">Registro patronal</label>
@@ -106,8 +141,8 @@
           </span>
         </div>
 
-        <!-- Todo el resto del formulario: si es moral no se requiere preguntar registro patronal -->
-        <div *ngIf="vendor.regimenFiscal === 'moral' || tieneRegistroPatronal !== null">
+        <!-- Todo el resto del formulario: visible una vez respondida la pregunta previa -->
+        <div *ngIf="tieneRegistroPatronal !== null">
           <div class="boton">
             <label for="rfc">Rfc</label>
             <input
@@ -230,12 +265,38 @@
             ></textarea>
           </div>
 
-          <div style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
-            <label style="font-weight: bold; display: block; margin-bottom: 10px; color: #555;">📋 Archivos Requeridos para el Alta</label>
-            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background-color: #fcfcfc;">
-              <label *ngFor="let doc of catalogoDocumentos" style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; font-weight: normal; color: #333; margin: 0;">
-                <input type="checkbox" [checked]="isArchivoRequerido(doc.id)" (change)="toggleRequisito(doc.id)" />
-                {{ doc.id }}. {{ doc.nombre }}
+          <div style="margin-top: 25px; margin-bottom: 25px; text-align: left;">
+            <label style="font-weight: 700; display: block; margin-bottom: 12px; color: #333; font-size: 15px; border-bottom: 2px solid #1976d2; padding-bottom: 5px;">
+              📋 Selección de Archivos para el Alta
+            </label>
+            <p style="font-size: 12px; color: #666; margin-bottom: 15px;">
+              Los documentos con etiqueta <strong style="color: #c62828;">🔒 Obligatorio</strong> son indispensables y no pueden desmarcarse. Puedes seleccionar o retirar los documentos opcionales según el caso.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-height: 380px; overflow-y: auto; padding-right: 5px;">
+              <label *ngFor="let doc of catalogoDocumentos" 
+                     style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; padding: 12px 14px; border-radius: 8px; border: 1px solid #e0e0e0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);"
+                     [style.cursor]="isArchivoObligatorio(doc.id) ? 'not-allowed' : 'pointer'"
+                     [style.background-color]="isArchivoObligatorio(doc.id) ? '#fdf8f8' : (isArchivoRequerido(doc.id) ? '#f4f9ff' : '#fff')"
+                     [style.border-color]="isArchivoObligatorio(doc.id) ? '#ef9a9a' : (isArchivoRequerido(doc.id) ? '#1976d2' : '#e0e0e0')">
+                
+                <input type="checkbox" 
+                       [checked]="isArchivoRequerido(doc.id)"
+                       [disabled]="isArchivoObligatorio(doc.id)"
+                       (change)="toggleRequisito(doc.id)" 
+                       style="width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0;"
+                       [style.accent-color]="isArchivoObligatorio(doc.id) ? '#d32f2f' : '#1976d2'" />
+                
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                  <span [style.font-weight]="isArchivoRequerido(doc.id) ? '600' : '400'" 
+                        [style.color]="isArchivoObligatorio(doc.id) ? '#b71c1c' : (isArchivoRequerido(doc.id) ? '#1565c0' : '#555')"
+                        style="line-height: 1.3;">
+                    {{ doc.id }}. {{ doc.nombre }}
+                  </span>
+                  <span *ngIf="isArchivoObligatorio(doc.id)" style="font-size: 11px; font-weight: 700; color: #d32f2f;">
+                    🔒 Obligatorio
+                  </span>
+                </div>
               </label>
             </div>
           </div>

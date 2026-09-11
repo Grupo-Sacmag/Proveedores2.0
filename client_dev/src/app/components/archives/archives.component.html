@@ -4,14 +4,14 @@
     <span style="color: #1976d2">{{ vendor.razonSocial | uppercase }}</span>
   </h1>
 
-  <!-- Pestañas de Empresa si el proveedor pertenece a más de una -->
-  <div *ngIf="vendor.empresa && vendor.empresa.length > 1 && (identity.rol === 'administrador_premium' || identity.rol === 'proveedor' || (identity.rol === 'administrador' && identity.empresa.toLowerCase().trim() === 'todas'))" 
+  <!-- Pestañas de Empresa si el proveedor pertenece a más de una (Cuentas Legacy) -->
+  <div *ngIf="vendor.empresa && vendor.empresa.length > 1 && (identity.rol === 'administrador_premium' || identity.rol === 'proveedor' || (identity.rol === 'administrador' && identity.empresa?.toLowerCase().trim() === 'todas'))" 
        style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px;">
     <button 
       *ngFor="let emp of vendor.empresa" 
       (click)="cambiarEmpresaActiva(emp)"
-      [style.background-color]="empresaActiva === emp.toLowerCase().trim() ? '#1976d2' : '#f0f0f0'"
-      [style.color]="empresaActiva === emp.toLowerCase().trim() ? '#fff' : '#333'"
+      [style.background-color]="empresaActiva === (emp || '').toLowerCase().trim() ? '#1976d2' : '#f0f0f0'"
+      [style.color]="empresaActiva === (emp || '').toLowerCase().trim() ? '#fff' : '#333'"
       style="padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
     >
       🏢 {{ emp }}
@@ -80,6 +80,7 @@
       </button>
 
       <button
+        *ngIf="identity && identity.rol"
         class="btn-accion btn-secundario"
         style="background-color: #673ab7; color: white;"
         (click)="irAWorkOrders()"
@@ -112,17 +113,30 @@
       <!-- Lado izquierdo -->
       <div class="perfil-info">
         <h5>ℹ️ Información del Proveedor</h5>
-        <br />
-        <br />
-        <br />
+        <div *ngIf="identity && identity.rol !== 'proveedor'" class="trazabilidad-info" style="margin: 15px 0; padding: 12px 15px; background: #f8f9fa; border-radius: 8px; font-size: 13px; border-left: 4px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <p style="margin: 4px 0;"><strong>👤 Dado de alta por:</strong> <span style="color: #1976d2; font-weight: 500;">{{ vendor.userAlta || 'No registrado' }}</span></p>
+          <p style="margin: 4px 0;">
+            <strong>📅 Fecha de alta:</strong> {{ (getFechaCreacion(vendor) | date:'dd/MM/yyyy HH:mm') || 'No registrada' }}
+          </p>
+          <p style="margin: 4px 0;" *ngIf="vendor.verificado">
+            <strong>✅ Verificado por:</strong> <span style="color: #2e7d32; font-weight: 500;">{{ vendor.userVerifico || 'Administrador' }}</span>
+            <span *ngIf="vendor.fechaVerificado" style="color: #666; font-size: 11px;"> ({{ vendor.fechaVerificado | date:'dd/MM/yyyy HH:mm' }})</span>
+          </p>
+          <p style="margin: 4px 0;" *ngIf="!vendor.verificado">
+            <strong>⏳ Estatus verificación:</strong> <span style="color: #e65100;">Pendiente de validación</span>
+          </p>
+        </div>
+
         <form (ngSubmit)="onSubmitU()" #vendorForm="ngForm">
           <label for="rfc">RFC</label>
           <input
             type="text"
             id="rfc"
             name="rfc"
-            [value]="vendor.rfc | uppercase"
-            readonly
+            [(ngModel)]="vendor.rfc"
+            [readonly]="!canEditAdmin"
+            [style.background-color]="!canEditAdmin ? '#f5f5f5' : '#ffffff'"
+            [style.cursor]="!canEditAdmin ? 'not-allowed' : 'text'"
           />
 
           <label for="regpat">Registro patronal</label>
@@ -130,8 +144,10 @@
             type="text"
             id="regpat"
             name="registroPatronal"
-            [value]="vendor.registroPatronal | uppercase"
-            readonly
+            [(ngModel)]="vendor.registroPatronal"
+            [readonly]="!canEditAdmin"
+            [style.background-color]="!canEditAdmin ? '#f5f5f5' : '#ffffff'"
+            [style.cursor]="!canEditAdmin ? 'not-allowed' : 'text'"
           />
 
           <label for="razon">Razón social</label>
@@ -139,8 +155,10 @@
             type="text"
             id="razon"
             name="razonSocial"
-            [value]="vendor.razonSocial | uppercase"
-            readonly
+            [(ngModel)]="vendor.razonSocial"
+            [readonly]="!canEditAdmin"
+            [style.background-color]="!canEditAdmin ? '#f5f5f5' : '#ffffff'"
+            [style.cursor]="!canEditAdmin ? 'not-allowed' : 'text'"
           />
 
           <label for="nombre">Nombre del contacto</label>

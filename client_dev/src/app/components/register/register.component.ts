@@ -22,6 +22,8 @@ export class RegisterComponent implements OnInit {
   public tipoMensaje: 'error' | 'exito' | 'info' = 'info';
   public esFisica: boolean = false;
   public tieneRegistroPatronal: boolean | null = null;
+  public esSociedadCivil: boolean | null = null;
+  public tipoPersonaMoral: 'SC' | 'REPSE' | 'NINGUNO' | null = null;
   tieneRegistro: boolean | null = null;
 
 
@@ -32,6 +34,7 @@ export class RegisterComponent implements OnInit {
   ) {
     this.vendor = new Proveedor('', '', '', '', '', '', '', '', 0, '', false, [''], '', false, new Date());
     this.vendor.archivosRequeridos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    this.asegurarArchivosObligatorios();
     this.url = Global.url;
     this.title = "Registrar";
   }
@@ -226,8 +229,8 @@ export class RegisterComponent implements OnInit {
     rfc = rfc?.toUpperCase().trim();
     razonSocial = razonSocial?.toUpperCase().trim();
 
-    // Caso especial: persona física sin registro
-    if (regimenFiscal === "fisica" && patronal === "SINREGISTRO") {
+    // Caso especial: persona física o moral (S.C.) sin registro
+    if ((regimenFiscal === "fisica" || regimenFiscal === "moral") && patronal === "SINREGISTRO") {
       return { valido: true };
     }
 
@@ -280,6 +283,7 @@ export class RegisterComponent implements OnInit {
   onRegimenChange(event: any) {
     const regimen = event.target.value;
     this.vendor.regimenFiscal = regimen; // aseguramos que se guarde
+    this.asegurarArchivosObligatorios();
 
     // Asegurar que el input esté habilitado si se deshabilitó previamente
     const input = document.getElementById('regP') as HTMLInputElement;
@@ -287,14 +291,20 @@ export class RegisterComponent implements OnInit {
 
     if (regimen === 'fisica') {
       this.esFisica = true;
+      this.esSociedadCivil = null;
+      this.tipoPersonaMoral = null;
       this.tieneRegistroPatronal = null; // Resetear para que aparezca la pregunta en HTML
       this.vendor.registroPatronal = '';
     } else if (regimen === 'moral') {
       this.esFisica = false;
-      this.tieneRegistroPatronal = true; // Moral siempre tiene, habilitar input directamente
+      this.tipoPersonaMoral = null; // Resetear para que aparezca la pregunta de SC/REPSE/Ninguno
+      this.esSociedadCivil = null;
+      this.tieneRegistroPatronal = null;
       this.vendor.registroPatronal = '';
     } else {
       this.esFisica = false;
+      this.tipoPersonaMoral = null;
+      this.esSociedadCivil = null;
       this.tieneRegistroPatronal = null;
       this.vendor.registroPatronal = ''; // limpio campo si no es fisica ni moral
     }
@@ -314,6 +324,15 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  seleccionarTipoMoral(tipo: 'SC' | 'REPSE' | 'NINGUNO') {
+    this.tipoPersonaMoral = tipo;
+    this.esSociedadCivil = (tipo === 'SC');
+    this.tieneRegistroPatronal = null; // Resetea para preguntar si cuenta o no con Registro Patronal
+    this.vendor.registroPatronal = '';
+
+    this.asegurarArchivosObligatorios();
+  }
+
   confirmarRegistroPatronal(tiene: boolean) {
     this.tieneRegistroPatronal = tiene;
 
@@ -327,6 +346,31 @@ export class RegisterComponent implements OnInit {
 
     } else {
       // Limpiar y permitir que lo escriba
+      this.vendor.registroPatronal = "";
+
+      const input = document.getElementById('regP') as HTMLInputElement;
+      if (input) input.disabled = false;
+    }
+
+    this.asegurarArchivosObligatorios();
+    this.confirmando = false;
+  }
+
+  confirmarSociedadCivil(esSC: boolean) {
+    this.esSociedadCivil = esSC;
+
+    if (esSC) {
+      // Es S.C. -> No tiene registro patronal (igual que física sin registro)
+      this.tieneRegistroPatronal = false;
+      this.vendor.registroPatronal = "SINREGISTRO";
+
+      // Bloquear input para que el usuario no escriba
+      const input = document.getElementById('regP') as HTMLInputElement;
+      if (input) input.disabled = true;
+
+    } else {
+      // No es S.C. -> Moral normal con registro patronal
+      this.tieneRegistroPatronal = true;
       this.vendor.registroPatronal = "";
       const input = document.getElementById('regP') as HTMLInputElement;
       if (input) input.disabled = false;
@@ -360,9 +404,73 @@ export class RegisterComponent implements OnInit {
     return this.vendor.archivosRequeridos.indexOf(id) !== -1;
   }
 
-  toggleRequisito(id: number) {
+  isArchivoObligatorio(id: number): boolean {
+    // Documentos base siempre obligatorios para cualquier proveedor:
+    // 2. CSF SAT, 4. INE, 6. Comprobante domicilio, 7. Estado de cuenta, 8. Opinión 32D SAT, 14. Código de ética
+    const siempreObligatorios = [2, 4, 6, 7, 8, 14];
+    if (siempreObligatorios.includes(id)) {
+      return true;
+    }
+
+    // 5. Acta constitutiva y poder (obligatorio si es Persona Moral)
+    if (id === 5 && this.vendor.regimenFiscal === 'moral') {
+      return true;
+    }
+
+    // 3. Alta IMSS Registro Patronal (obligatorio si cuenta con Registro Patronal)
+    if (id === 3 && this.tieneRegistroPatronal === true) {
+      return true;
+    }
+
+    // 12. Registro REPSE (obligatorio si es REPSE)
+    if (id === 12 && this.tipoPersonaMoral === 'REPSE') {
+      return true;
+    }
+
+    return false;
+  }
+
+  asegurarArchivosObligatorios() {
     if (!this.vendor.archivosRequeridos) {
       this.vendor.archivosRequeridos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    }
+
+    // Asegurar que todos los obligatorios estén presentes
+    for (const doc of this.catalogoDocumentos) {
+      if (this.isArchivoObligatorio(doc.id)) {
+        if (!this.vendor.archivosRequeridos.includes(doc.id)) {
+          this.vendor.archivosRequeridos.push(doc.id);
+        }
+      }
+    }
+
+    // Si es física, retirar acta constitutiva (id: 5)
+    if (this.vendor.regimenFiscal === 'fisica') {
+      const idx5 = this.vendor.archivosRequeridos.indexOf(5);
+      if (idx5 !== -1) {
+        this.vendor.archivosRequeridos.splice(idx5, 1);
+      }
+    }
+
+    // Si no tiene registro patronal, retirar id: 3
+    if (this.tieneRegistroPatronal === false) {
+      const idx3 = this.vendor.archivosRequeridos.indexOf(3);
+      if (idx3 !== -1) {
+        this.vendor.archivosRequeridos.splice(idx3, 1);
+      }
+    }
+
+    this.vendor.archivosRequeridos.sort((a, b) => a - b);
+  }
+
+  toggleRequisito(id: number) {
+    // Si es obligatorio, no se permite desmarcar
+    if (this.isArchivoObligatorio(id)) {
+      return;
+    }
+
+    if (!this.vendor.archivosRequeridos) {
+      this.vendor.archivosRequeridos = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
     }
     const idx = this.vendor.archivosRequeridos.indexOf(id);
     if (idx !== -1) {

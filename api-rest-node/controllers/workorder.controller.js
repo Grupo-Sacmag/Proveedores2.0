@@ -42,6 +42,19 @@ function verificarFacturaSAT(rfcEmisor, rfcReceptor, total, uuid) {
   });
 }
 
+// Catálogo de RFCs oficiales por empresa (modificable para pruebas y producción)
+const EMPRESAS_RFC = {
+  sacmag: "SAC850101AA1",
+  supervisa: "SUP850101BB2",
+  cordina: "COR850101CC3",
+  geoambiente: "GEO940715AL2",
+  control: "CON850101DD4",
+  epesa: "EPE850101EE5",
+  consulte: "CSU850101FF6",
+  ingenial: "ING850101GG7",
+  supter: "SPT850101HH8"
+};
+
 var controller = {
   // Crear una nueva Orden de Trabajo
   createWorkOrder: async function (req, res) {
@@ -53,12 +66,32 @@ var controller = {
         return res.status(400).send({ message: "Faltan campos obligatorios" });
       }
 
+      // 2. Número de proyecto: puro número, no más de 5 dígitos
+      var numeroProyecto = (params.numeroProyecto || "").toString().trim();
+      if (!numeroProyecto || !/^\d{1,5}$/.test(numeroProyecto)) {
+        return res.status(400).send({ message: "El número de proyecto es obligatorio, debe ser numérico y contener máximo 5 dígitos." });
+      }
+
+      // 3. Descripción de trabajo: máximo 210 caracteres
+      var descripcion = (params.descripcion || "").toString().trim().toUpperCase();
+      if (descripcion.length > 210) {
+        return res.status(400).send({ message: "La descripción del trabajo no puede exceder los 210 caracteres." });
+      }
+
+      // 4. Monto inicial / tope: únicamente números positivos
+      var montoTotal = parseFloat(params.montoTotal);
+      if (isNaN(montoTotal) || montoTotal <= 0) {
+        return res.status(400).send({ message: "El monto inicial debe ser un número positivo mayor a cero." });
+      }
+
+      // 1. Todo en mayúsculas
       var newWorkOrder = new WorkOrder({
-        folio: params.folio.toUpperCase().trim(),
-        rfcProveedor: params.rfcProveedor.toLowerCase().trim(),
-        empresa: params.empresa.toLowerCase().trim(),
-        descripcion: params.descripcion,
-        montoTotal: params.montoTotal || 0,
+        folio: params.folio.toString().toUpperCase().trim(),
+        numeroProyecto: numeroProyecto,
+        rfcProveedor: params.rfcProveedor.toString().toLowerCase().trim(),
+        empresa: params.empresa.toString().toLowerCase().trim(),
+        descripcion: descripcion,
+        montoTotal: montoTotal,
         estatus: 'Activa'
       });
 
@@ -148,7 +181,21 @@ var controller = {
 
       var rfcEmisor = cfdiEmisor["@_Rfc"].toLowerCase().trim();
       if (rfcEmisor !== rfc) {
-        return res.status(400).send({ message: "El RFC del Emisor en el XML no coincide con tu perfil de proveedor." });
+        return res.status(400).send({ message: "El RFC del Emisor en el XML (" + cfdiEmisor["@_Rfc"] + ") no coincide con tu perfil de proveedor (" + rfc.toUpperCase() + ")." });
+      }
+
+      // 9. Validación del RFC de la empresa (Receptor)
+      if (!cfdiReceptor || !cfdiReceptor["@_Rfc"]) {
+        return res.status(400).send({ message: "El XML no contiene información del Receptor." });
+      }
+
+      var rfcReceptorXml = cfdiReceptor["@_Rfc"].toLowerCase().trim();
+      var rfcEmpresaEsperado = (EMPRESAS_RFC[empresa] || "").toLowerCase().trim();
+
+      if (rfcEmpresaEsperado && rfcReceptorXml !== rfcEmpresaEsperado) {
+        return res.status(400).send({
+          message: `El RFC del Receptor en el XML (${cfdiReceptor["@_Rfc"]}) no coincide con el RFC oficial de la empresa ${empresa.toUpperCase()} (${EMPRESAS_RFC[empresa]}).`
+        });
       }
 
       var uuid = timbreFiscal ? timbreFiscal["@_UUID"] : "SIN-UUID-" + Date.now();
@@ -248,9 +295,14 @@ var controller = {
   uploadContrato: async function (req, res) {
     try {
       var workOrderId = req.params.id;
+      var costo = parseFloat(req.body.costo);
+      var fechaTermino = req.body.fechaTermino;
 
       if (!req.files || !req.files.pdf) {
         return res.status(400).send({ message: "Debe enviar el archivo PDF del contrato." });
+      }
+      if (isNaN(costo) || !fechaTermino) {
+        return res.status(400).send({ message: "Debe proveer el costo y la fecha de término del contrato." });
       }
 
       var archivoPDF = req.files.pdf;
@@ -277,13 +329,75 @@ var controller = {
       var updated = await WorkOrder.findByIdAndUpdate(workOrderId, {
         archivoContrato: pdfHashName,
         estatusContrato: 'Pendiente de Validación',
-        observacionesContrato: ''
+        observacionesContrato: '',
+        costoContrato: costo,
+        fechaTerminoContrato: fechaTermino
       }, { new: true });
 
       return res.status(200).send({ workOrder: updated, message: "Contrato subido correctamente." });
     } catch (err) {
       console.error(err);
       return res.status(500).send({ message: "Error al subir el contrato." });
+    }
+  },
+
+  // Subir anexo de contrato (PDF)
+  uploadAnexo: async function (req, res) {
+    try {
+      var workOrderId = req.params.id;
+      var monto = parseFloat(req.body.monto);
+      var fechaTermino = req.body.fechaTermino;
+
+      if (!req.files || !req.files.pdf) {
+        return res.status(400).send({ message: "Debe enviar el archivo PDF del anexo." });
+      }
+      if (isNaN(monto) || !fechaTermino) {
+        return res.status(400).send({ message: "Debe proveer el nuevo monto y la fecha de término del anexo." });
+      }
+
+      var archivoPDF = req.files.pdf;
+
+      if (path.extname(archivoPDF.name).toLowerCase() !== '.pdf') {
+        return res.status(400).send({ message: "El archivo del anexo debe ser un PDF válido." });
+      }
+
+      var wo = await WorkOrder.findById(workOrderId);
+      if (!wo) return res.status(404).send({ message: "Orden de trabajo no encontrada." });
+      
+      if (!wo.archivoContrato) {
+        return res.status(400).send({ message: "Debe subir un contrato principal primero." });
+      }
+
+      const basePath = path.join(__dirname, "../uploads");
+      const pdfHashName = crypto.createHash("sha256").update("anexo_" + archivoPDF.name + Date.now().toString()).digest("hex") + ".pdf";
+      await archivoPDF.mv(path.join(basePath, pdfHashName));
+
+      let xmlHashName = null;
+      if (req.files && req.files.xml) {
+        var archivoXML = req.files.xml;
+        if (path.extname(archivoXML.name).toLowerCase() === '.xml') {
+          xmlHashName = crypto.createHash("sha256").update("anexo_xml_" + archivoXML.name + Date.now().toString()).digest("hex") + ".xml";
+          await archivoXML.mv(path.join(basePath, xmlHashName));
+        }
+      }
+
+      const nuevoAnexo = {
+        archivoAnexo: pdfHashName,
+        archivoXML: xmlHashName,
+        monto: monto,
+        fechaTermino: fechaTermino,
+        fechaSubida: new Date()
+      };
+
+      // Insertar el nuevo anexo al final del arreglo
+      var updated = await WorkOrder.findByIdAndUpdate(workOrderId, {
+        $push: { anexos: nuevoAnexo }
+      }, { new: true });
+
+      return res.status(200).send({ workOrder: updated, message: "Anexo subido correctamente." });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send({ message: "Error al subir el anexo." });
     }
   },
 

@@ -1,69 +1,143 @@
-<section class="recInfo">
+<section class="recInfo" style="min-height: 80vh; padding: 40px 15px;">
+    <div class="modal" style="width: 420px; max-width: 95vw; border-radius: 8px; padding: 25px 30px;">
+        <h4 style="text-align: center; margin-bottom: 8px;">Recuperar Contraseña</h4>
+        <p style="font-size: 13px; color: #666; text-align: center; margin-bottom: 25px;">
+            Ingresa los datos asociados a tu cuenta para verificar tu identidad y definir una nueva contraseña.
+        </p>
 
-    <div class="modal">
-
-
-        <h4>Cambiar contraseña</h4>
         <form #changeForm="ngForm" (ngSubmit)="onSubmit(changeForm)">
             <div class="input">
-                <label for="name">Rfc</label>
+                <label for="email"><strong>Correo electrónico</strong></label>
                 <div class="inputView">
-                    <input type="texto" id="rfc" name="rfc" #rfc="ngModel" [(ngModel)]="usuario.rfc" maxlength="13" minlength="12" required readonly>
-                    <span *ngIf="!rfc.valid && rfc.touched || rfc.value.trim() == ''" class="rojo">
-                        Rfc incorrecto
-                    </span>
-
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="correo" 
+                        #correo="ngModel" 
+                        [(ngModel)]="usuario.correo" 
+                        required 
+                        email 
+                        placeholder="ejemplo@dominio.com"
+                        style="width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                    >
                 </div>
-
-            </div>
-            <div class="input">
-                <label for="name">Correo</label>
-                <div class="inputView">
-                    <input type="email" id="email" name="correo" #correo="ngModel" [(ngModel)]="usuario.correo" required email readonly>
-
-
-                </div>
-                <span *ngIf="!correo.valid && correo.touched" class="rojo">
-                    Correo incorrecto
-                </span>
-
-            </div>
-            <div class="input" *ngIf="this.identity != '{}'">
-                <label for="name">Contraseña actual</label>
-                <div class="inputView">
-                    <input type="password" id="conActual" name="password" #password="ngModel" [(ngModel)]="usuario.password" minlength="8" maxlength="20" required>
-                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conActual')">
-
-                </div>
-                <span *ngIf="!password.valid && password.touched" class="rojo">
-                    Es obligatoria la contraseña, mínimo 8 caracteres
-                </span>
-
-            </div>
-            <div class="input">
-                <label for="name">Nueva contraseña</label>
-                <div class="inputView">
-                    <input type="password" id="conNue" name="newPassword" [(ngModel)]="newPassword" (keyup)="validate()" minlength="8" maxlength="20" required>
-                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conNue')">
-                </div>
-                <span *ngIf="validate1" class="rojo">
-                    Es obligatoria la contraseña, mínimo 8 caracteres
+                <span *ngIf="!correo.valid && correo.touched" class="rojo" style="font-size: 12px;">
+                    Ingresa un correo electrónico válido
                 </span>
             </div>
-            <div class="input">
-                <label for="name">Confirmar nueva contraseña</label>
-                <div class="inputView">
-                    <input type="password" id="conNueAfi" name="newPasswordCon" [(ngModel)]="newPasswordCon" (keyup)="validateNew()" minlength="8" maxlength="20" required>
-                    <img src="./../../../assets/img/eye.png" alt="" title="Ver" (click)="text('conNueAfi')">
 
+            <div class="input">
+                <label for="rfc"><strong>RFC o CURP asociado</strong></label>
+                <div class="inputView">
+                    <input 
+                        type="text" 
+                        id="rfc" 
+                        name="rfc" 
+                        #rfc="ngModel" 
+                        [(ngModel)]="usuario.rfc" 
+                        minlength="10" 
+                        maxlength="18" 
+                        required 
+                        placeholder="Ingresa tu RFC o CURP"
+                        style="width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; text-transform: uppercase;"
+                    >
                 </div>
-                <span *ngIf="validate2" class="rojo">
+                <span *ngIf="!rfc.valid && rfc.touched" class="rojo" style="font-size: 12px;">
+                    El RFC o CURP es obligatorio (mínimo 10 caracteres)
+                </span>
+            </div>
+
+            <div class="input">
+                <label for="empresa"><strong>Empresa</strong></label>
+                <div class="inputView">
+                    <select 
+                        id="empresa" 
+                        name="empresa" 
+                        #empresa="ngModel" 
+                        [(ngModel)]="usuario.empresa" 
+                        required
+                        style="width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; background: white;"
+                    >
+                        <option value="" disabled selected>Selecciona tu empresa</option>
+                        <option value="sacmag">SACMAG</option>
+                        <option value="cordina">CORDINA</option>
+                        <option value="assyr">ASSYR</option>
+                        <option value="todas">TODAS</option>
+                    </select>
+                </div>
+                <span *ngIf="!empresa.valid && empresa.touched" class="rojo" style="font-size: 12px;">
+                    Debes seleccionar una empresa
+                </span>
+            </div>
+
+            <div class="input" style="margin-top: 15px;">
+                <label for="conNue"><strong>Nueva contraseña</strong></label>
+                <div class="inputView" style="position: relative;">
+                    <input 
+                        type="password" 
+                        id="conNue" 
+                        name="newPassword" 
+                        [(ngModel)]="newPassword" 
+                        (keyup)="validate()" 
+                        minlength="8" 
+                        maxlength="20" 
+                        required 
+                        placeholder="Mínimo 8 caracteres"
+                        style="width: 100%; padding: 8px 35px 8px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                    >
+                    <img 
+                        src="./../../../assets/img/eye.png" 
+                        alt="Ver" 
+                        title="Ver contraseña" 
+                        (click)="text('conNue')"
+                        style="position: absolute; right: 10px; cursor: pointer; width: 18px; height: 18px;"
+                    >
+                </div>
+                <span *ngIf="validate1" class="rojo" style="font-size: 12px;">
+                    La contraseña debe tener mínimo 8 caracteres
+                </span>
+            </div>
+
+            <div class="input">
+                <label for="conNueAfi"><strong>Confirmar nueva contraseña</strong></label>
+                <div class="inputView" style="position: relative;">
+                    <input 
+                        type="password" 
+                        id="conNueAfi" 
+                        name="newPasswordCon" 
+                        [(ngModel)]="newPasswordCon" 
+                        (keyup)="validateNew()" 
+                        minlength="8" 
+                        maxlength="20" 
+                        required 
+                        placeholder="Confirma la nueva contraseña"
+                        style="width: 100%; padding: 8px 35px 8px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                    >
+                    <img 
+                        src="./../../../assets/img/eye.png" 
+                        alt="Ver" 
+                        title="Ver contraseña" 
+                        (click)="text('conNueAfi')"
+                        style="position: absolute; right: 10px; cursor: pointer; width: 18px; height: 18px;"
+                    >
+                </div>
+                <span *ngIf="validate2" class="rojo" style="font-size: 12px;">
                     Las contraseñas no coinciden
                 </span>
             </div>
-            <input type="submit" [disabled]="!changeForm.form.valid || validate2">
 
+            <input 
+                type="submit" 
+                value="Reestablecer Contraseña" 
+                [disabled]="!changeForm.form.valid || validate1 || validate2 || !usuario.empresa"
+                style="margin-top: 15px; width: 100%; padding: 10px; background-color: #0881C1; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;"
+            >
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a [routerLink]="['/inicio']" style="color: #0881C1; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    ← Volver a Iniciar Sesión
+                </a>
+            </div>
         </form>
     </div>
-
 </section>

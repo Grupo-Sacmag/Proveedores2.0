@@ -100,25 +100,43 @@ export class VendorsComponent implements OnInit {
       }
     )
   }
-getVendors() {
-  this._projectService.getVendorsWithArchives().subscribe(
-    response => {
-      if (response.vendorsWithArchives) {
-        this.vendors = response.vendorsWithArchives.map((item: any) => item.vendor);
-        this.originalVendors = [...this.vendors];
-
-        this.archivosMap = {};
-        response.vendorsWithArchives.forEach((item: any) => {
-          this.archivosMap[item.vendor.rfc.toLowerCase().trim()] = item.archive;
-         // console.log('Archivo para RFC ' + item.vendor.rfc + ':', item.archive);
-        });
-      }
-    },
-    error => {
-      console.log(error);
+  private shuffleArray(array: any[]): any[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-  );
-}
+    return shuffled;
+  }
+
+  trackByVendorId(index: number, vendor: any): string {
+    return vendor?._id || index.toString();
+  }
+
+  getVendors() {
+    this._projectService.getVendorsWithArchives().subscribe(
+      response => {
+        if (response.vendorsWithArchives) {
+          const listaDesordenada = this.shuffleArray(
+            response.vendorsWithArchives.map((item: any) => item.vendor)
+          );
+          this.vendors = [...listaDesordenada];
+          this.originalVendors = [...listaDesordenada];
+
+          this.archivosMap = {};
+          response.vendorsWithArchives.forEach((item: any) => {
+            const rfcKey = (item.vendor?.rfc || '').toLowerCase().trim();
+            if (rfcKey) {
+              this.archivosMap[rfcKey] = item.archive;
+            }
+          });
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  }
 
 
 

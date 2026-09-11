@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: proveedores_mongo
+    restart: unless-stopped
+    # Se oculta el puerto 27017 hacia afuera para evitar conflictos con tus otros contenedores
+    # El backend seguirá conectándose internamente sin problema.
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./api-rest-node
+    container_name: proveedores_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Conexión al contenedor de Mongo usando su nombre de servicio
+      - MONGO_URI=mongodb://mongo:27017/proveedores
+    volumes:
+      # Persistencia de los archivos (PDFs) subidos por los proveedores
+      - ./api-rest-node/uploads:/app/uploads
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./client_dev
+    container_name: proveedores_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+    name: proveedores_mongo_data

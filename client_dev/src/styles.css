@@ -9,6 +9,19 @@
   font-family: 'Roboto Condensed', sans-serif;
 }
 
+body, html {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+app-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .fa.fa-search {
   position: absolute;
   right: 5px;
@@ -964,10 +977,11 @@ footer {
   color: #111;
   text-align: center;
   width: 100%;
-  position: absolute;
+  margin-top: auto;
   background-color: rgb(34, 34, 34);
   padding: 3px;
   color: rgb(231, 231, 231);
+  z-index: 100;
 }
 
 footer p {
@@ -1369,3 +1383,226 @@ footer p {
     height: 40px;
   }
 }
+
+/* ===================================================
+   TEMA OSCURO GLOBAL (.dark-theme)
+   =================================================== */
+body.dark-theme,
+html.dark-theme {
+  background-color: #121214 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Barra de Navegación */
+body.dark-theme .main-header {
+  background: #1a1a22 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+  border-bottom: 1px solid #2d2d38 !important;
+}
+
+body.dark-theme .navigation {
+  background: #1a1a22 !important;
+}
+
+body.dark-theme .navigation a {
+  color: #cbd5e1 !important;
+}
+
+body.dark-theme .navigation a.active,
+body.dark-theme .navigation a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4) !important;
+}
+
+body.dark-theme .theme-toggle-btn {
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Centro de Ayuda */
+body.dark-theme .ayuda-container {
+  background: #121214 !important;
+}
+
+body.dark-theme .ayuda-header h1 {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .ayuda-header p {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .ayuda-card {
+  background: #1e1e26 !important;
+  border-color: #2d2d38 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-theme .ayuda-card h2 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .ayuda-card p {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .theme-switch-box {
+  background: #16161e !important;
+  border-color: #2d2d38 !important;
+}
+
+body.dark-theme .theme-mode-text {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .theme-mode-text.active-text {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .theme-hint {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .theme-hint strong {
+  color: #818cf8 !important;
+}
+
+body.dark-theme .extended-info > div {
+  background-color: #1a1a24 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Tablas y Listas de Proveedores */
+body.dark-theme table {
+  background-color: #1a1a22 !important;
+  border-color: #334155 !important;
+}
+
+body.dark-theme th {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+body.dark-theme td {
+  background-color: #16161e !important;
+  color: #e2e8f0 !important;
+  border-color: #2d2d38 !important;
+}
+
+body.dark-theme tr:hover td {
+  background-color: #20202c !important;
+}
+
+body.dark-theme td a {
+  color: #60a5fa !important;
+}
+
+body.dark-theme .stat-card,
+body.dark-theme .card,
+body.dark-theme .dashboard-card {
+  background: #1e1e26 !important;
+  border-color: #2d2d38 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Formularios, Inputs y Controles */
+body.dark-theme .register,
+body.dark-theme .form-container {
+  background: #1e1e26 !important;
+  border-color: #2d2d38 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .boton label {
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="file"]),
+body.dark-theme select,
+body.dark-theme textarea {
+  background-color: #14141a !important;
+  border: 1px solid #3b3b48 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme input:focus,
+body.dark-theme select:focus,
+body.dark-theme textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+}
+
+body.dark-theme select option {
+  background-color: #1e1e26 !important;
+  color: #f8fafc !important;
+}
+
+/* Modales y Notificaciones */
+body.dark-theme .confirm-content,
+body.dark-theme .mensaje-contenido {
+  background: #1e1e26 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #2d2d38 !important;
+}
+
+/* Expedientes y Acordeones */
+body.dark-theme details {
+  background: #181822 !important;
+  border-color: #2d2d38 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme summary {
+  background: #1e1e28 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .file-upload-container {
+  background: #16161e !important;
+  border-color: #3b3b48 !important;
+}
+
+/* Órdenes de Trabajo */
+body.dark-theme .wo-container {
+  background: #121214 !important;
+}
+
+body.dark-theme .wo-card {
+  background: #1e1e26 !important;
+  border-color: #2d2d38 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .wo-title {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .wo-table th {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-theme .wo-table td {
+  background-color: #16161e !important;
+  color: #e2e8f0 !important;
+  border-color: #2d2d38 !important;
+}
+
+body.dark-theme .wo-input {
+  background: #14141a !important;
+  border-color: #3b3b48 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .wo-upload-zone {
+  background: #181824 !important;
+  border-color: #312e81 !important;
+}
+

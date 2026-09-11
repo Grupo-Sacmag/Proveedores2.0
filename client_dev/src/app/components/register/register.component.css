@@ -138,6 +138,25 @@
   transform: translateY(-2px);
 }
 
+.confirm-buttons .btn-opcion {
+  padding: 10px 22px;
+  font-size: 0.95em;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.25);
+}
+
+.confirm-buttons .btn-opcion:hover {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+}
+
 /* ====== MODALES ====== */
 .mensaje-modal,
 .pantalla-carga,

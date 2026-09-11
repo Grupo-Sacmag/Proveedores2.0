@@ -60,11 +60,25 @@ export class WorkorderService {
   }
 
   // === Contratos ===
-  uploadContrato(token: any, workOrderId: string, filePDF: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('pdf', filePDF, filePDF.name);
+  uploadContrato(token: any, workOrderId: string, filePDF: File, costo: number, fechaTermino: string): Observable<any> {
     let headers = new HttpHeaders().set('Authorization', token);
+    const formData: FormData = new FormData();
+    formData.append('pdf', filePDF, filePDF.name);
+    formData.append('costo', costo.toString());
+    formData.append('fechaTermino', fechaTermino);
     return this._http.post(this.url + 'upload-contrato-wo/' + workOrderId, formData, { headers: headers });
+  }
+
+  uploadAnexo(token: any, workOrderId: string, filePDF: File, monto: number, fechaTermino: string, fileXML?: File | null): Observable<any> {
+    let headers = new HttpHeaders().set('Authorization', token);
+    const formData: FormData = new FormData();
+    formData.append('pdf', filePDF, filePDF.name);
+    if (fileXML) {
+      formData.append('xml', fileXML, fileXML.name);
+    }
+    formData.append('monto', monto.toString());
+    formData.append('fechaTermino', fechaTermino);
+    return this._http.post(this.url + 'upload-anexo-wo/' + workOrderId, formData, { headers: headers });
   }
 
   validateContrato(token: any, workOrderId: string, estatus: string, observaciones: string = ''): Observable<any> {

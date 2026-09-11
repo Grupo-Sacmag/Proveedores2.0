@@ -12,6 +12,71 @@ import Swal from 'sweetalert2';
   providers: [WorkorderService, ProjectService]
 })
 export class WorkordersComponent implements OnInit {
+
+  get presupuestoActivo(): number {
+    if (!this.selectedWorkOrder) return 0;
+    if (this.selectedWorkOrder.anexos && this.selectedWorkOrder.anexos.length > 0) {
+      return this.selectedWorkOrder.anexos[this.selectedWorkOrder.anexos.length - 1].monto;
+    }
+    if (this.selectedWorkOrder.costoContrato) {
+      return this.selectedWorkOrder.costoContrato;
+    }
+    return this.selectedWorkOrder.montoTotal || 0;
+  }
+
+  get fuentePresupuesto(): string {
+    if (!this.selectedWorkOrder) return '';
+    if (this.selectedWorkOrder.anexos && this.selectedWorkOrder.anexos.length > 0) {
+      return `Anexo #${this.selectedWorkOrder.anexos.length}`;
+    }
+    if (this.selectedWorkOrder.costoContrato) {
+      return 'Contrato Principal';
+    }
+    return 'Orden de Trabajo';
+  }
+
+  get fechaTerminoActiva(): Date | null {
+    if (!this.selectedWorkOrder) return null;
+    if (this.selectedWorkOrder.anexos && this.selectedWorkOrder.anexos.length > 0) {
+      return this.selectedWorkOrder.anexos[this.selectedWorkOrder.anexos.length - 1].fechaTermino;
+    }
+    if (this.selectedWorkOrder.fechaTerminoContrato) {
+      return this.selectedWorkOrder.fechaTerminoContrato;
+    }
+    return null;
+  }
+
+  get totalFacturadoAprobado(): number {
+    if (!this.invoices || this.invoices.length === 0) return 0;
+    return this.invoices
+      .filter(inv => inv.estatusValidacion === 'Aprobada')
+      .reduce((sum, inv) => sum + (parseFloat(inv.total) || 0), 0);
+  }
+
+  get montoRestante(): number {
+    return Math.max(0, this.presupuestoActivo - this.totalFacturadoAprobado);
+  }
+
+  get porcentajeEjecutado(): number {
+    if (this.presupuestoActivo <= 0) return 0;
+    return Math.min(100, Math.round((this.totalFacturadoAprobado / this.presupuestoActivo) * 100));
+  }
+
+  get canManageContratoAnexo(): boolean {
+    return (
+      this.identity &&
+      ['administrador', 'administrador_premium', 'usuario', 'proveedor'].includes(this.identity.rol)
+    );
+  }
+
+  filtrarNumeroProyecto(event: any) {
+    const input = event.target as HTMLInputElement;
+    if (input) {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 5);
+      this.newOT.numeroProyecto = input.value;
+    }
+  }
+
   public identity: any;
   public token: any;
   public rfc: string = '';
@@ -24,7 +89,7 @@ export class WorkordersComponent implements OnInit {
   
   // Para creación de OT
   public showCreateOT: boolean = false;
-  public newOT = { folio: '', descripcion: '', montoTotal: null };
+  public newOT = { folio: '', numeroProyecto: '', descripcion: '', montoTotal: null };
 
   // Archivos para upload
   public fileXML: File | null = null;
@@ -91,27 +156,50 @@ export class WorkordersComponent implements OnInit {
 
   // Creación de OT
   createWorkOrder() {
-    if(!this.newOT.folio || !this.newOT.descripcion) {
-      Swal.fire('Error', 'Faltan campos obligatorios', 'error');
+    const folio = (this.newOT.folio || '').toString().trim().toUpperCase();
+    const numeroProyecto = (this.newOT.numeroProyecto || '').toString().trim();
+    const descripcion = (this.newOT.descripcion || '').toString().trim().toUpperCase();
+    const monto = parseFloat(<any>this.newOT.montoTotal);
+
+    if (!folio) {
+      Swal.fire('Atención', 'El folio de la orden de trabajo es obligatorio.', 'warning');
       return;
     }
+    if (!numeroProyecto || !/^\d{1,5}$/.test(numeroProyecto)) {
+      Swal.fire('Atención', 'El número de proyecto es obligatorio, debe ser numérico y tener máximo 5 dígitos.', 'warning');
+      return;
+    }
+    if (!descripcion) {
+      Swal.fire('Atención', 'La descripción del trabajo es obligatoria.', 'warning');
+      return;
+    }
+    if (descripcion.length > 210) {
+      Swal.fire('Atención', 'La descripción no puede exceder los 210 caracteres.', 'warning');
+      return;
+    }
+    if (isNaN(monto) || monto <= 0) {
+      Swal.fire('Atención', 'El monto inicial / tope debe ser un número positivo mayor a 0.', 'warning');
+      return;
+    }
+
     const ot = {
-      folio: this.newOT.folio,
-      descripcion: this.newOT.descripcion,
-      montoTotal: this.newOT.montoTotal,
+      folio: folio,
+      numeroProyecto: numeroProyecto,
+      descripcion: descripcion,
+      montoTotal: monto,
       rfcProveedor: this.rfc,
       empresa: this.empresa
     };
 
     this._workorderService.createWorkOrder(this.token, ot).subscribe(
       (response: any) => {
-        Swal.fire('Éxito', 'Orden de trabajo creada', 'success');
+        Swal.fire('Éxito', 'Orden de trabajo creada correctamente.', 'success');
         this.getWorkOrders();
         this.showCreateOT = false;
-        this.newOT = { folio: '', descripcion: '', montoTotal: null };
+        this.newOT = { folio: '', numeroProyecto: '', descripcion: '', montoTotal: null };
       },
       (error: any) => {
-        Swal.fire('Error', 'No se pudo crear la Orden', 'error');
+        Swal.fire('Error', error.error?.message || 'No se pudo crear la Orden.', 'error');
         console.log(error);
       }
     );
@@ -297,28 +385,104 @@ export class WorkordersComponent implements OnInit {
   // === Contratos ODT ===
   public fileContrato: File | null = null;
   public isUploadingContrato: boolean = false;
+  public newContratoCosto: number | null = null;
+  public newContratoFecha: string = '';
 
   fileChangeEventContrato(fileInput: any) {
     this.fileContrato = <File>fileInput.target.files[0];
   }
 
   uploadContrato() {
-    if (!this.fileContrato) {
-      Swal.fire('Aviso', 'Debes seleccionar el archivo PDF del contrato.', 'warning');
+    if (!this.fileContrato || !this.newContratoCosto || !this.newContratoFecha) {
+      Swal.fire('Aviso', 'Debes seleccionar el archivo PDF, el monto y la fecha de término.', 'warning');
       return;
     }
     this.isUploadingContrato = true;
-    this._workorderService.uploadContrato(this.token, this.selectedWorkOrder._id, this.fileContrato).subscribe(
+    this._workorderService.uploadContrato(this.token, this.selectedWorkOrder._id, this.fileContrato, this.newContratoCosto, this.newContratoFecha).subscribe(
       (response: any) => {
         this.isUploadingContrato = false;
         Swal.fire('Éxito', 'Contrato subido correctamente. En espera de validación.', 'success');
         this.selectedWorkOrder.estatusContrato = response.workOrder.estatusContrato;
         this.selectedWorkOrder.archivoContrato = response.workOrder.archivoContrato;
+        this.selectedWorkOrder.costoContrato = response.workOrder.costoContrato;
+        this.selectedWorkOrder.fechaTerminoContrato = response.workOrder.fechaTerminoContrato;
         this.fileContrato = null;
+        this.newContratoCosto = null;
+        this.newContratoFecha = '';
       },
       error => {
         this.isUploadingContrato = false;
         Swal.fire('Error', error.error.message || 'Error al subir el contrato.', 'error');
+      }
+    );
+  }
+
+  promptUploadAnexo() {
+    Swal.fire({
+      title: 'Agregar Anexo al Contrato',
+      html: `
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Archivo PDF del Anexo (Obligatorio):</label>
+          <input type="file" id="swal-file-pdf" class="swal2-input" accept=".pdf" style="margin-top: 5px; padding: 6px;">
+        </div>
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Archivo XML de Presupuesto/Soporte (Opcional):</label>
+          <input type="file" id="swal-file-xml" class="swal2-input" accept=".xml" style="margin-top: 5px; padding: 6px;">
+        </div>
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Nuevo Presupuesto ($) (Puede ser mayor o menor):</label>
+          <input type="number" id="swal-monto" class="swal2-input" placeholder="Ej. 15000" style="margin-top: 5px;">
+        </div>
+        <div style="text-align: left;">
+          <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Fecha Estimada de Término:</label>
+          <input type="date" id="swal-fecha" class="swal2-input" style="margin-top: 5px;">
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Subir Anexo',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const filePdfInput = document.getElementById('swal-file-pdf') as HTMLInputElement;
+        const filePdf = filePdfInput.files ? filePdfInput.files[0] : null;
+        
+        const fileXmlInput = document.getElementById('swal-file-xml') as HTMLInputElement;
+        const fileXml = fileXmlInput.files ? fileXmlInput.files[0] : null;
+
+        const monto = (document.getElementById('swal-monto') as HTMLInputElement).value;
+        const fecha = (document.getElementById('swal-fecha') as HTMLInputElement).value;
+        
+        if (!filePdf) {
+          Swal.showValidationMessage('El archivo PDF del anexo es obligatorio.');
+          return false;
+        }
+        if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
+          Swal.showValidationMessage('El nuevo presupuesto debe ser un número positivo mayor a 0.');
+          return false;
+        }
+        if (!fecha) {
+          Swal.showValidationMessage('La fecha estimada de término es obligatoria.');
+          return false;
+        }
+        return { filePdf, fileXml, monto: parseFloat(monto), fecha };
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.uploadAnexo(result.value.filePdf, result.value.monto, result.value.fecha, result.value.fileXml);
+      }
+    });
+  }
+
+  uploadAnexo(file: File, monto: number, fechaTermino: string, fileXML?: File | null) {
+    Swal.fire({ title: 'Subiendo anexo...', allowOutsideClick: false });
+    Swal.showLoading();
+    this._workorderService.uploadAnexo(this.token, this.selectedWorkOrder._id, file, monto, fechaTermino, fileXML).subscribe(
+      (response: any) => {
+        Swal.fire('Éxito', 'Anexo subido correctamente.', 'success');
+        this.selectedWorkOrder.anexos = response.workOrder.anexos;
+      },
+      error => {
+        Swal.fire('Error', error.error?.message || 'Error al subir el anexo', 'error');
       }
     );
   }
@@ -387,6 +551,12 @@ export class WorkordersComponent implements OnInit {
   }
 
   goBack() {
-    this._router.navigate(['/proveedor', this.rfc]);
+    if (this.identity && this.identity.rol === 'proveedor') {
+      this._router.navigate(['/archivos']);
+    } else if (this.vendor && this.vendor._id) {
+      this._router.navigate(['/proveedor', this.vendor._id]);
+    } else {
+      this._router.navigate(['/proveedores']);
+    }
   }
 }

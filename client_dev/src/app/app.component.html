@@ -50,6 +50,18 @@
         />
         Archivos Globales
       </a>
+      <a
+        [routerLink]="['/ayuda']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+      >Ayuda</a>
+      <button 
+        type="button"
+        class="theme-toggle-btn"
+        (click)="toggleTheme()" 
+        [title]="isDarkMode ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'">
+        {{ isDarkMode ? '🌙' : '☀️' }}
+      </button>
       <a (click)="logOut()" href="#">Cerrar Sesión</a>
     </nav>
   </div>

@@ -78,6 +78,28 @@ export class ArchivesComponent implements OnInit {
     );
   }
 
+  get canEditAdmin(): boolean {
+    return (
+      this.identity &&
+      (this.identity.rol === 'administrador' || this.identity.rol === 'administrador_premium')
+    );
+  }
+
+  getFechaCreacion(vendor: any): Date | null {
+    if (vendor?.fechaAlta) {
+      return new Date(vendor.fechaAlta);
+    }
+    if (vendor?._id && typeof vendor._id === 'string' && vendor._id.length >= 8) {
+      try {
+        const timestamp = parseInt(vendor._id.substring(0, 8), 16) * 1000;
+        return new Date(timestamp);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   toggle() {
     this.mostrar = !this.mostrar;
   }
@@ -278,6 +300,7 @@ td {
     this._projectService.getVendor(id).subscribe(
       response => {
         this.vendor = response.vendor;
+        this.asegurarArchivosObligatorios(); // Garantiza obligatoriedad al cargar
 
         // Normaliza el RFC ANTES de cualquier transformación
         if (this.vendor && this.vendor.rfc) {
@@ -285,10 +308,10 @@ td {
           localStorage.setItem('rfc', rfcNormalizado);
 
           // Inicializar empresaActiva
-          if (this.identity && this.identity.rol === 'administrador' && this.identity.empresa.toLowerCase().trim() !== 'todas') {
-            this.empresaActiva = this.identity.empresa.toLowerCase().trim();
+          if (this.identity && this.identity.rol === 'administrador' && this.identity.empresa?.toLowerCase().trim() !== 'todas') {
+            this.empresaActiva = this.identity.empresa?.toLowerCase().trim();
           } else if (this.vendor.empresa && this.vendor.empresa.length > 0) {
-            this.empresaActiva = String(this.vendor.empresa[0]).toLowerCase().trim();
+            this.empresaActiva = this.vendor.empresa[0] ? String(this.vendor.empresa[0]).toLowerCase().trim() : 'todas';
           } else {
             this.empresaActiva = 'todas';
           }
@@ -307,8 +330,8 @@ td {
         if (this.vendor.observaciones) {
           this.vendor.observaciones = this.vendor.observaciones.toUpperCase();
         }
-        this.vendor.userAlta = this.vendor.userAlta.toLowerCase();
-        this.vendor.correo = this.vendor.correo.toLowerCase();
+        this.vendor.userAlta = this.vendor.userAlta ? this.vendor.userAlta.toLowerCase() : '';
+        this.vendor.correo = this.vendor.correo ? this.vendor.correo.toLowerCase() : '';
 
         if (this.vendor.regimenFiscal == 'fisica') {
           var ocultos = document.querySelectorAll('.ocultar');
@@ -327,6 +350,7 @@ td {
     this._projectService.getVendorRfc(rfc).subscribe(
       response => {
         this.vendor = response.vendor;
+        this.asegurarArchivosObligatorios();
 
         this.vendor.rfc = this.vendor.rfc.toUpperCase();
         this.vendor.registroPatronal = this.vendor.registroPatronal.toUpperCase();
@@ -342,10 +366,10 @@ td {
         localStorage.setItem('rfc', this.vendor.rfc);
 
         // Inicializar empresaActiva
-        if (this.identity && this.identity.rol === 'administrador' && this.identity.empresa.toLowerCase().trim() !== 'todas') {
-          this.empresaActiva = this.identity.empresa.toLowerCase().trim();
+        if (this.identity && this.identity.rol === 'administrador' && this.identity.empresa?.toLowerCase().trim() !== 'todas') {
+          this.empresaActiva = this.identity.empresa?.toLowerCase().trim();
         } else if (this.vendor.empresa && this.vendor.empresa.length > 0) {
-          this.empresaActiva = String(this.vendor.empresa[0]).toLowerCase().trim();
+          this.empresaActiva = this.vendor.empresa[0] ? String(this.vendor.empresa[0]).toLowerCase().trim() : 'todas';
         } else {
           this.empresaActiva = 'todas';
         }
@@ -460,7 +484,7 @@ td {
       if (opcion) {
         this.charge = true;
         this._uploadService.makeFileRequest(
-          Global.url + "subir-archivos/" + localStorage.getItem('rfc'),
+          Global.url + "subir-archivos/" + localStorage.getItem('rfc') + "/" + this.empresaActiva,
           [],
           this.filesToUpload
         )
@@ -1035,6 +1059,17 @@ td {
       return true; // Por defecto requiere todos
     }
     return this.vendor.archivosRequeridos.indexOf(id) !== -1;
+  }
+
+  isArchivoObligatorio(id: number): boolean {
+    return false;
+  }
+
+  asegurarArchivosObligatorios() {
+    if (!this.vendor) return;
+    let requeridos = this.vendor.archivosRequeridos || [];
+    requeridos.sort((a, b) => a - b);
+    this.vendor.archivosRequeridos = requeridos;
   }
 
   toggleRequisito(id: number) {

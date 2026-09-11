@@ -276,207 +276,98 @@
   </div>
 
   <!-- Vista Mosaico -->
-
-  <div *ngFor="let vendor of vendors | search : filtroValor">
-    <div
-      *ngIf="!mosaicoView"
-      class="proveedor"
-      [ngStyle]="{
-        'border-bottom-color': vendor.verificado ? '#0881C1' : '#FF0000'
-      }"
-    >
-      <a [routerLink]="['/proveedor', vendor._id]">
-        <div class="text">
-          <h2><br />{{ vendor.razonSocial.toUpperCase() }}</h2>
-          <h2>RFC: {{ vendor.rfc.toUpperCase() }}</h2>
-          <h2>REGIMEN: {{ vendor.regimenFiscal.toUpperCase() }}</h2>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <!-- Vista de tabla -->
-  <div *ngIf="mosaicoView" class="tabla-container">
-    <table style="overflow-x: auto">
-      <tr>
-        <th>Nombre</th>
-        <th>RFC</th>
-        <th>Regimen</th>
-        <th>Registro Patronal</th>
-        <th>Contacto</th>
-        <th>Telefono</th>
-        <th>Correo</th>
-        <th>Archivos</th>
-        <!--  <th *ngIf="identity.rol === 'administrador' ">RP correcto</th> -->
-        <th *ngIf="identity.rol === 'administrador_premium'">Empresa</th>
-
-        <!--<th>Empresa</th>-->
-      </tr>
-      <tr
-        *ngFor="let vendor of vendors | search : filtroValor"
+  <div *ngIf="!mosaicoView">
+    <div *ngFor="let vendor of vendors | search : filtroValor; trackBy: trackByVendorId">
+      <div
+        class="proveedor"
         [ngStyle]="{
           'border-bottom-color': vendor.verificado ? '#0881C1' : '#FF0000'
         }"
       >
-        <td style="text-align: left">
-          <a [routerLink]="['/proveedor', vendor._id]">{{
-            vendor.razonSocial.toUpperCase()
-          }}</a>
-        </td>
-        <td>
-          <a [routerLink]="['/proveedor', vendor._id]">{{
-            vendor.rfc.toUpperCase()
-          }}</a>
-        </td>
-        <td>
-          <a [routerLink]="['/proveedor', vendor._id]">{{
-            vendor.regimenFiscal.toUpperCase()
-          }}</a>
-        </td>
-        <td
-          [ngStyle]="{
-            color:
-              vendor.registroPatronal?.toUpperCase() === 'SINREGISTRO'
-                ? '#FF5C5C'
-                : 'inherit',
-            'font-weight':
-              vendor.registroPatronal?.toUpperCase() === 'SINREGISTRO'
-                ? 'bold'
-                : 'normal'
-          }"
-        >
-          <a [routerLink]="['/proveedor', vendor._id]">
-            {{ vendor.registroPatronal.toUpperCase() }}
-          </a>
-        </td>
+        <a [routerLink]="['/proveedor', vendor._id]">
+          <div class="text">
+            <h2><br />{{ (vendor.razonSocial || '').toUpperCase() }}</h2>
+            <h2>RFC: {{ (vendor.rfc || '').toUpperCase() }}</h2>
+            <h2>REGIMEN: {{ (vendor.regimenFiscal || '').toUpperCase() }}</h2>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
 
-        <td style="text-align: left">
-          <a [routerLink]="['/proveedor', vendor._id]">{{
-            vendor.nombreContacto.toUpperCase()
-          }}</a>
-        </td>
-        <td>
-          <a [routerLink]="['/proveedor', vendor._id]">{{
-            vendor.telefono.toString()
-          }}</a>
-        </td>
+  <!-- Vista de tabla -->
+  <div *ngIf="mosaicoView" class="tabla-container-modern">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>RFC</th>
+          <th>Régimen</th>
+          <th>Registro Patronal</th>
+          <th>Contacto</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>Archivos</th>
+          <th *ngIf="identity.rol === 'administrador_premium'">Empresa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let vendor of vendors | search : filtroValor; trackBy: trackByVendorId" class="table-row-hover">
+          <td class="text-left td-main">
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link main-link">{{ (vendor.razonSocial || '--').toUpperCase() }}</a>
+          </td>
+          <td>
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link">{{ (vendor.rfc || '--').toUpperCase() }}</a>
+          </td>
+          <td>
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link">
+              <span class="badge-regimen">{{ (vendor.regimenFiscal || '--').toUpperCase() }}</span>
+            </a>
+          </td>
+          <td [ngClass]="{'sin-registro': vendor.registroPatronal?.toUpperCase() === 'SINREGISTRO'}">
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link">
+              {{ (vendor.registroPatronal || '--').toUpperCase() }}
+            </a>
+          </td>
+          <td class="text-left">
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link">{{ (vendor.nombreContacto || '--').toUpperCase() }}</a>
+          </td>
+          <td>
+            <a [routerLink]="['/proveedor', vendor._id]" class="vendor-link">{{ vendor.telefono ? vendor.telefono.toString() : '--' }}</a>
+          </td>
+          <td class="email-cell">
+            <a *ngIf="vendor.correo" href="mailto:{{ vendor.correo }}" class="email-link">
+              <i class="fas fa-envelope mr-1"></i> {{ vendor.correo.toUpperCase() }}
+            </a>
+            <span *ngIf="!vendor.correo" style="color: #999;">--</span>
+          </td>
+          <td class="status-cell" [ngClass]="{
+              'status-empty': !archivosMap[vendor.rfc?.toLowerCase()?.trim()] || !archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id,
+              'status-pending': archivosMap[vendor.rfc?.toLowerCase()?.trim()] && archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id && !archivosMap[vendor.rfc?.toLowerCase()?.trim()].validar,
+              'status-valid': archivosMap[vendor.rfc?.toLowerCase()?.trim()] && archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id && archivosMap[vendor.rfc?.toLowerCase()?.trim()].validar === true
+            }">
+            <div class="status-content">
+              <ng-container *ngIf="!archivosMap[vendor.rfc?.toLowerCase()?.trim()] || !archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id">
+                <i class="fas fa-upload fa-lg icon-status"></i>
+                <span class="status-text">Sin Archivos</span>
+              </ng-container>
 
-        <td
-          style="
-            color: blue;
-            text-decoration: underline;
-            text-decoration-color: blue;
-            font-weight: bold;
-            text-align: left;
-          "
-        >
-          <a href="mailto:{{ vendor.correo }}" class="email-link">{{
-            vendor.correo.toUpperCase()
-          }}</a>
-        </td>
-        <!--Color de validado o no validado-->
-        <td
-          [ngStyle]="{
-            'border-left': '1.8px solid #000',
-            'border-bottom': '1.8px solid #000',
-            'border-right': '1.8px solid #000',
-            'border-top': '1.8px solid #000',
-            'text-align': 'center',
-            'background-color':
-              !archivosMap[vendor.rfc] || archivosMap[vendor.rfc]._id === ''
-                ? '#FF5C5C'
-                : archivosMap[vendor.rfc].validar === false
-                ? '#F4FF5C'
-                : archivosMap[vendor.rfc].validar === true
-                ? '#8DFF5C'
-                : '#F4FF5C'
-          }"
-        >
-          <!-- Vacío -->
-          <ng-container
-            *ngIf="
-              !archivosMap[vendor.rfc] || archivosMap[vendor.rfc]._id === ''
-            "
-          >
-            <i class="fas fa-upload fa-lg" style="color: #820000"></i><br />
-            <small>Sin Archivos</small>
-          </ng-container>
+              <ng-container *ngIf="archivosMap[vendor.rfc?.toLowerCase()?.trim()] && archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id && !archivosMap[vendor.rfc?.toLowerCase()?.trim()].validar">
+                <i class="fas fa-hourglass-half fa-lg icon-status"></i>
+                <span class="status-text">Pendiente</span>
+              </ng-container>
 
-          <!-- Pendiente -->
-          <ng-container
-            *ngIf="
-              archivosMap[vendor.rfc]?._id !== '' &&
-              archivosMap[vendor.rfc]?.validar === false
-            "
-          >
-            <i class="fas fa-hourglass-half fa-lg" style="color: #a7b300"></i
-            ><br />
-            <small>Revision de archivos pendiente</small>
-          </ng-container>
-
-          <!-- Aceptado -->
-          <ng-container
-            *ngIf="
-              archivosMap[vendor.rfc]?._id !== '' &&
-              archivosMap[vendor.rfc]?.validar === true
-            "
-          >
-            <i class="fas fa-check-circle fa-lg" style="color: #128700"></i
-            ><br />
-            <small>Aceptados</small>
-          </ng-container>
-
-          <!-- Caso extra: ninguno de los anteriores -->
-          <ng-container
-            *ngIf="
-              archivosMap[vendor.rfc] &&
-              archivosMap[vendor.rfc]._id !== '' &&
-              archivosMap[vendor.rfc].validar !== true &&
-              archivosMap[vendor.rfc].validar !== false
-            "
-          >
-            <i class="fas fa-hourglass-half fa-lg" style="color: #a7b300"></i
-            ><br />
-            <small>Revision de archivos pendiente</small>
-          </ng-container>
-        </td>
-
-        <!-- RP correcto
-        <td
-          *ngIf="identity.rol === 'administrador'"
-          [ngStyle]="{
-            'text-align': 'center',
-            'background-color':
-              esRFCyRegistroDiferente(vendor) === 'SI' ? 'orange' : 'purple',
-            color: 'white',
-            'font-weight': 'bold',
-            'font-size': '14px',
-            padding: '5px 10px'
-          }"
-        >
-          {{ esRFCyRegistroDiferente(vendor) }}
-        </td>-->
-
-        <!-- Empresa -->
-        <td
-          *ngIf="identity.rol === 'administrador_premium'"
-          style="
-            font-weight: bold;
-            text-align: center;
-            font-size: 10px;
-            background-color: rgb(162, 145, 253);
-            text-transform: uppercase;
-            border-color: black;
-            border-style: solid;
-            border-width: 3px;
-            border-right: 3px solid #000;
-            border-top: 3px solid #000;
-            border-bottom: 3px solid #000;
-          "
-        >
-          {{ vendor.empresa }}
-        </td>
-      </tr>
+              <ng-container *ngIf="archivosMap[vendor.rfc?.toLowerCase()?.trim()] && archivosMap[vendor.rfc?.toLowerCase()?.trim()]._id && archivosMap[vendor.rfc?.toLowerCase()?.trim()].validar === true">
+                <i class="fas fa-check-circle fa-lg icon-status"></i>
+                <span class="status-text">Aceptados</span>
+              </ng-container>
+            </div>
+          </td>
+          <td *ngIf="identity.rol === 'administrador_premium'" class="premium-empresa">
+            {{ vendor.empresa }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </section>
