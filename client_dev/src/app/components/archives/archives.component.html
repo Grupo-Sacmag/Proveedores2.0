@@ -269,25 +269,45 @@
 
         <!-- CONFIGURACION DE ARCHIVOS -->
         <div *ngIf="mostrarConfiguracion" style="animation: fadeIn 0.3s;">
-          <p style="font-size: 13px; color: #666; margin-bottom: 15px; font-weight: bold;">Selecciona los archivos obligatorios para este proveedor:</p>
-          
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #475569;">
+                🏷️ Perfil detectado:
+              </span>
+              <span style="font-size: 12px; font-weight: 800; color: #1e3a8a; background: #dbeafe; padding: 3px 10px; border-radius: 12px; border: 1px solid #bfdbfe;">
+                {{ getNombrePerfil() }}
+              </span>
+            </div>
+            <p style="font-size: 11px; color: #64748b; margin: 6px 0 0 0; line-height: 1.4;">
+              Los documentos con etiqueta <strong style="color: #c62828;">🔒 Obligatorio</strong> son indispensables para este tipo de persona y están bloqueados. Los demás pueden activarse o desactivarse libremente.
+            </p>
+          </div>
+
           <div style="display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; padding-right: 5px;">
             
             <label *ngFor="let doc of catalogoDocumentos" 
-                   style="display: flex; align-items: center; gap: 12px; font-size: 13px; cursor: pointer; padding: 12px 15px; border-radius: 6px; border: 1px solid #e0e0e0; transition: all 0.2s ease-in-out; user-select: none;"
-                   [style.background-color]="isArchivoRequerido(doc.id) ? '#f0f7ff' : '#fff'"
-                   [style.border-color]="isArchivoRequerido(doc.id) ? '#90caf9' : '#e0e0e0'"
-                   onmouseover="this.style.backgroundColor = this.querySelector('input').checked ? '#e3f2fd' : '#fafafa'"
-                   onmouseout="this.style.backgroundColor = this.querySelector('input').checked ? '#f0f7ff' : '#fff'">
+                   style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 10px 14px; border-radius: 6px; border: 1px solid; transition: all 0.2s ease-in-out; user-select: none;"
+                   [style.cursor]="isArchivoObligatorio(doc.id) ? 'not-allowed' : 'pointer'"
+                   [style.background-color]="isArchivoObligatorio(doc.id) ? '#fdf8f8' : (isArchivoRequerido(doc.id) ? '#f4f9ff' : '#fff')"
+                   [style.border-color]="isArchivoObligatorio(doc.id) ? '#ef9a9a' : (isArchivoRequerido(doc.id) ? '#1976d2' : '#e0e0e0')">
               
-              <input type="checkbox" 
-                     [checked]="isArchivoRequerido(doc.id)" 
-                     (change)="toggleRequisito(doc.id)" 
-                     style="width: 16px; height: 16px; cursor: pointer; accent-color: #1976d2; margin: 0;" />
-              
-              <span [style.font-weight]="isArchivoRequerido(doc.id) ? '600' : '400'" 
-                    [style.color]="isArchivoRequerido(doc.id) ? '#1565c0' : '#444'">
-                {{ doc.id }}. {{ doc.nombre }}
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" 
+                       [checked]="isArchivoRequerido(doc.id)" 
+                       [disabled]="isArchivoObligatorio(doc.id)"
+                       (change)="toggleRequisito(doc.id)" 
+                       style="width: 16px; height: 16px; margin: 0;"
+                       [style.cursor]="isArchivoObligatorio(doc.id) ? 'not-allowed' : 'pointer'"
+                       [style.accent-color]="isArchivoObligatorio(doc.id) ? '#d32f2f' : '#1976d2'" />
+                
+                <span [style.font-weight]="isArchivoObligatorio(doc.id) || isArchivoRequerido(doc.id) ? '600' : '400'" 
+                      [style.color]="isArchivoObligatorio(doc.id) ? '#b71c1c' : (isArchivoRequerido(doc.id) ? '#1565c0' : '#555')">
+                  {{ doc.id }}. {{ doc.nombre }}
+                </span>
+              </div>
+
+              <span *ngIf="isArchivoObligatorio(doc.id)" style="font-size: 11px; font-weight: 700; color: #d32f2f; background: #ffebee; padding: 3px 8px; border-radius: 4px; border: 1px solid #ffcdd2; white-space: nowrap;">
+                🔒 Obligatorio
               </span>
             </label>
 

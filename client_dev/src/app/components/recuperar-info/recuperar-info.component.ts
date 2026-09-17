@@ -32,7 +32,12 @@ export class RecuperarInfoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.identity = JSON.stringify(this._projectService.getIdentity());
+    const ident = this._projectService.getIdentity();
+    this.identity = JSON.stringify(ident);
+
+    if (ident && ident.empresa) {
+      this.usuario.empresa = String(ident.empresa).toLowerCase().trim();
+    }
 
     this._route.params.subscribe(params => {
       if (params.rfc) {

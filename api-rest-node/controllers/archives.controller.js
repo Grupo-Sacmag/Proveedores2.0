@@ -81,8 +81,8 @@ var ArchivesController = {
           port: 465,
           secure: true,
           auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
+            user: "corrigimail@gmail.com",
+            pass: "uaxotyjjontjofkt",
           },
           tls: {
             rejectUnauthorized: false,
@@ -101,7 +101,7 @@ var ArchivesController = {
         }
 
         let info = await transporter.sendMail({
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+          from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
           to: destinatarios,
           subject: `Archivos recibidos para RFC: ${rfc.toUpperCase()}`,
           html: `
@@ -399,13 +399,13 @@ var ArchivesController = {
           port: 465,
           secure: true,
           auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
+            user: "corrigimail@gmail.com",
+            pass: "uaxotyjjontjofkt",
           },
         });
 
         const mailOptions = {
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+          from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
           to: `${vendorSearch.correo}, ${userAlta?.correo}`,
           subject: `Archivos Rechazados ${vendorSearch.razonSocial.toUpperCase()}`,
           html: contentHtml,
@@ -472,8 +472,8 @@ var ArchivesController = {
                     port: 465,
                     secure: true,
                     auth: {
-                      user: "sacmag.proveedores@gmail.com",
-                      pass: "jvwezvognvounmdl",
+                      user: "corrigimail@gmail.com",
+                      pass: "uaxotyjjontjofkt",
                     },
                   });
 
@@ -486,7 +486,7 @@ var ArchivesController = {
                   `;
 
                   await transporter.sendMail({
-                    from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+                    from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
                     to: vendor.correo,
                     subject: "Validación exitosa de archivos",
                     html: contentHtml,
@@ -787,8 +787,8 @@ var ArchivesController = {
               port: 465,
               secure: true,
               auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
+                user: "corrigimail@gmail.com",
+                pass: "uaxotyjjontjofkt",
               },
             });
 
@@ -803,7 +803,7 @@ var ArchivesController = {
             `;
 
             await transporter.sendMail({
-              from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+              from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
               to: vendor.correo,
               subject: `Documento Rechazado: ${rejectedFileName}`,
               html: contentHtml,
@@ -859,8 +859,8 @@ var ArchivesController = {
               port: 465,
               secure: true,
               auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
+                user: "corrigimail@gmail.com",
+                pass: "uaxotyjjontjofkt",
               },
             });
             const contentHtml = `
@@ -873,7 +873,7 @@ var ArchivesController = {
                   <p>Correo enviado automáticamente, no responder.</p>
                 `;
             await transporter.sendMail({
-              from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+              from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
               to: vendor.correo,
               subject: "Validación exitosa de archivos",
               html: contentHtml,

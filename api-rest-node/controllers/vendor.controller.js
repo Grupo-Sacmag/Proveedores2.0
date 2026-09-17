@@ -250,12 +250,12 @@ var VendorController = {
             port: 465,
             secure: true,
             auth: {
-              user: "sacmag.proveedores@gmail.com",
-              pass: "jvwezvognvounmdl",
+              user: "corrigimail@gmail.com",
+              pass: "uaxotyjjontjofkt",
             },
           });
           let info = await transporter.sendMail({
-            from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
+            from: '"Proveedores Sacmag " <corrigimail@gmail.com>',
             to: `${correoP} , ${params.correo
               .toLowerCase()
               .trim()} , ${emailUser}`,
@@ -406,12 +406,12 @@ var VendorController = {
               port: 465,
               secure: true,
               auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
+                user: "corrigimail@gmail.com",
+                pass: "uaxotyjjontjofkt",
               },
             });
             let info = await transporter.sendMail({
-              from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
+              from: '"Proveedores Sacmag " <corrigimail@gmail.com>',
               to: `${correoP} , ${update.correo} , ${emailUser}`,
               subject: "Accesos para entrar a la plataforma de Proveedores",
               html: contentHtml,
@@ -556,8 +556,8 @@ var VendorController = {
       port: 465,
       secure: true,
       auth: {
-        user: "sacmag.proveedores@gmail.com",
-        pass: "jvwezvognvounmdl"
+        user: "corrigimail@gmail.com",
+        pass: "uaxotyjjontjofkt"
       }
     });
 
@@ -642,7 +642,7 @@ var VendorController = {
     `;
 
     let reportOptions = {
-      from: '"TICKET Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+      from: '"TICKET Proveedores Sacmag" <corrigimail@gmail.com>',
       to: correoP,
       subject: "Nuevo Reporte de Feedback - " + params.subject,
       html: reportHtml,
@@ -660,7 +660,7 @@ var VendorController = {
     if (params.email && params.email.trim()) {
       try {
         var mailOptions = {
-          from: '" Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+          from: '" Proveedores Sacmag" <corrigimail@gmail.com>',
           to: params.email,
           subject: "Reporte recibido - " + params.subject,
           html: `

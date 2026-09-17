@@ -190,13 +190,13 @@ var controller = {
               port: 465,
               secure: true, // true for 465, false for other ports
               auth: {
-                user: "sacmag.proveedores@gmail.com", // generated ethereal user
-                pass: "jvwezvognvounmdl", // generated ethereal password
+                user: "corrigimail@gmail.com", // generated ethereal user
+                pass: "uaxotyjjontjofkt", // generated ethereal password
               },
             });
             // send mail with defined transport object
             let info = await transporter.sendMail({
-              from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>', // sender address
+              from: '"Proveedores Sacmag " <corrigimail@gmail.com>', // sender address
               to: `${correoP} , ${params.correo.toLowerCase().trim()}`, // list of receivers
               subject: "Accesos para entrar a la plataforma de Proveedores", // Subject line
               html: contentHtml, // html body
@@ -298,8 +298,8 @@ var controller = {
           port: 465,
           secure: true, // true para 465
           auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
+            user: "corrigimail@gmail.com",
+            pass: "uaxotyjjontjofkt",
           },
           tls: {
             rejectUnauthorized: false, // Evita error certificado autofirmado
@@ -323,7 +323,7 @@ var controller = {
         // console.log("Destinatarios finales:", destinatarios);
 
         let info = await transporter.sendMail({
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+          from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
           to: destinatarios,
           subject: `Archivos recibidos para RFC: ${rfc.toUpperCase()}`,
           html: `
@@ -710,8 +710,8 @@ var controller = {
           port: 465,
           secure: true,
           auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
+            user: "corrigimail@gmail.com",
+            pass: "uaxotyjjontjofkt",
           },
           /* tls: {
           rejectUnauthorized: false, // CLAVE para evitar error del certificado
@@ -719,7 +719,7 @@ var controller = {
         });
 
         const mailOptions = {
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+          from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
           to: `${vendorSearch.correo}, ${userAlta?.correo}`,
           subject: `Archivos Rechazados ${vendorSearch.razonSocial.toUpperCase()}`,
           html: contentHtml,
@@ -925,15 +925,15 @@ var controller = {
               port: 465,
               secure: true, // true for 465, false for other ports
               auth: {
-                user: "sacmag.proveedores@gmail.com", // generated ethereal user
-                pass: "jvwezvognvounmdl", // generated ethereal password
+                user: "corrigimail@gmail.com", // generated ethereal user
+                pass: "uaxotyjjontjofkt", // generated ethereal password
               } /*tls: {
                       rejectUnauthorized: false,
                     },*/,
             });
             // send mail with defined transport object
             let info = await transporter.sendMail({
-              from: '"Proveedores sacmag " <sacmag.proveedores@gmail.com>', // sender address
+              from: '"Proveedores sacmag " <corrigimail@gmail.com>', // sender address
               to: `${correoP} , ${params.correo
                 .toLowerCase()
                 .trim()} , ${emailUser}`, // list of receivers
@@ -1129,13 +1129,13 @@ var controller = {
               port: 465,
               secure: true, // true for 465, false for other ports
               auth: {
-                user: "sacmag.proveedores@gmail.com", // generated ethereal user
-                pass: "jvwezvognvounmdl", // generated ethereal password
+                user: "corrigimail@gmail.com", // generated ethereal user
+                pass: "uaxotyjjontjofkt", // generated ethereal password
               },
             });
             // send mail with defined transport object
             let info = await transporter.sendMail({
-              from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>', // sender address
+              from: '"Proveedores Sacmag " <corrigimail@gmail.com>', // sender address
               to: `${correoP} , ${update.correo} , ${emailUser}`, // list of receivers
               subject: "Accesos para entrar a la plataforma de Proveedores", // Subject line
               html: contentHtml, // html body
@@ -1205,8 +1205,8 @@ var controller = {
                     port: 465,
                     secure: true,
                     auth: {
-                      user: "sacmag.proveedores@gmail.com",
-                      pass: "jvwezvognvounmdl",
+                      user: "corrigimail@gmail.com",
+                      pass: "uaxotyjjontjofkt",
                     },
                     /* tls: {
                       rejectUnauthorized: false,
@@ -1222,7 +1222,7 @@ var controller = {
                   `;
 
                   await transporter.sendMail({
-                    from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+                    from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
                     to: vendor.correo,
                     subject: "Validación exitosa de archivos",
                     html: contentHtml,
@@ -1353,13 +1353,13 @@ var controller = {
         port: 465,
         secure: true, // true for 465, false for other ports
         auth: {
-          user: "sacmag.proveedores@gmail.com", // generated ethereal user
-          pass: "jvwezvognvounmdl", // generated ethereal password
+          user: "corrigimail@gmail.com", // generated ethereal user
+          pass: "uaxotyjjontjofkt", // generated ethereal password
         },
       });
       // send mail with defined transport object
       let info = await transporter.sendMail({
-        from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>', // sender address
+        from: '"Proveedores Sacmag " <corrigimail@gmail.com>', // sender address
         to: `${userFound.correo}`, // list of receivers
         subject: "Cambio de contraseña", // Subject line
         html: contentHtml, // html body
@@ -1836,8 +1836,8 @@ toggleFileValidation: async function (req, res) {
             port: 465,
             secure: true,
             auth: {
-              user: "sacmag.proveedores@gmail.com",
-              pass: "jvwezvognvounmdl",
+              user: "corrigimail@gmail.com",
+              pass: "uaxotyjjontjofkt",
             },
           });
 
@@ -1852,7 +1852,7 @@ toggleFileValidation: async function (req, res) {
           `;
 
           await transporter.sendMail({
-            from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+            from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
             to: vendor.correo,
             subject: `Documento Rechazado: ${rejectedFileName}`,
             html: contentHtml,
@@ -1908,8 +1908,8 @@ toggleFileValidation: async function (req, res) {
             port: 465,
             secure: true,
             auth: {
-              user: "sacmag.proveedores@gmail.com",
-              pass: "jvwezvognvounmdl",
+              user: "corrigimail@gmail.com",
+              pass: "uaxotyjjontjofkt",
             },
           });
           const contentHtml = `
@@ -1922,7 +1922,7 @@ toggleFileValidation: async function (req, res) {
                 <p>Correo enviado automáticamente, no responder.</p>
               `;
           await transporter.sendMail({
-            from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+            from: '"Proveedores Sacmag" <corrigimail@gmail.com>',
             to: vendor.correo,
             subject: "Validación exitosa de archivos",
             html: contentHtml,
@@ -2043,8 +2043,8 @@ saveFeedback: function (req, res) {
     port: 465,
     secure: true,
     auth: {
-      user: "sacmag.proveedores@gmail.com",
-      pass: "jvwezvognvounmdl"
+      user: "corrigimail@gmail.com",
+      pass: "uaxotyjjontjofkt"
     }
   });
 
@@ -2075,7 +2075,7 @@ saveFeedback: function (req, res) {
   `;
 
   let reportOptions = {
-    from: '"TICKET Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+    from: '"TICKET Proveedores Sacmag" <corrigimail@gmail.com>',
     to: correoP,
     subject: 'Nuevo Reporte de Feedback - ' + params.subject,
     html: reportHtml,
@@ -2094,7 +2094,7 @@ saveFeedback: function (req, res) {
   if (params.email && params.email.trim()) {
     try {
       var mailOptions = {
-        from: '" Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+        from: '" Proveedores Sacmag" <corrigimail@gmail.com>',
         to: params.email,
         subject: 'Reporte recibido - ' + params.subject,
         html: `

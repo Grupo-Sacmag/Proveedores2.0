@@ -426,10 +426,6 @@ export class WorkordersComponent implements OnInit {
           <input type="file" id="swal-file-pdf" class="swal2-input" accept=".pdf" style="margin-top: 5px; padding: 6px;">
         </div>
         <div style="text-align: left; margin-bottom: 12px;">
-          <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Archivo XML de Presupuesto/Soporte (Opcional):</label>
-          <input type="file" id="swal-file-xml" class="swal2-input" accept=".xml" style="margin-top: 5px; padding: 6px;">
-        </div>
-        <div style="text-align: left; margin-bottom: 12px;">
           <label style="font-size: 12px; font-weight: bold; color: #4b5563;">Nuevo Presupuesto ($) (Puede ser mayor o menor):</label>
           <input type="number" id="swal-monto" class="swal2-input" placeholder="Ej. 15000" style="margin-top: 5px;">
         </div>
@@ -445,9 +441,6 @@ export class WorkordersComponent implements OnInit {
       preConfirm: () => {
         const filePdfInput = document.getElementById('swal-file-pdf') as HTMLInputElement;
         const filePdf = filePdfInput.files ? filePdfInput.files[0] : null;
-        
-        const fileXmlInput = document.getElementById('swal-file-xml') as HTMLInputElement;
-        const fileXml = fileXmlInput.files ? fileXmlInput.files[0] : null;
 
         const monto = (document.getElementById('swal-monto') as HTMLInputElement).value;
         const fecha = (document.getElementById('swal-fecha') as HTMLInputElement).value;
@@ -464,11 +457,11 @@ export class WorkordersComponent implements OnInit {
           Swal.showValidationMessage('La fecha estimada de término es obligatoria.');
           return false;
         }
-        return { filePdf, fileXml, monto: parseFloat(monto), fecha };
+        return { filePdf, monto: parseFloat(monto), fecha };
       }
     }).then((result) => {
       if (result.isConfirmed && result.value) {
-        this.uploadAnexo(result.value.filePdf, result.value.monto, result.value.fecha, result.value.fileXml);
+        this.uploadAnexo(result.value.filePdf, result.value.monto, result.value.fecha);
       }
     });
   }

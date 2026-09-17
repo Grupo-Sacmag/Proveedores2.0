@@ -70,12 +70,9 @@ export class UploadService{
                if(i==14){
                 archivo = 'archivo15';
                }
-               if(i == 4 && files[4]== undefined){
+               if (!files[i] || files[i].length === 0 || !files[i][0]) {
                    continue;
                }
-
-
-
 
                formData.append(archivo, files[i][0], files[i][0].name);
 

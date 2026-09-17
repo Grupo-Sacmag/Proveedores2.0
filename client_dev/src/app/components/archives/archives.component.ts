@@ -474,12 +474,10 @@ td {
     }
   }
   onSubmit() {
-    // Verificar que todos los campos de archivos tengan al menos un archivo seleccionado
-    const allFilesSelected = Array.from({ length: 15 }).every((_, i) =>
-      this.filesToUpload[i] && this.filesToUpload[i].length > 0
-    );
+    // Verificar que al menos un archivo haya sido seleccionado
+    const tieneArchivos = this.filesToUpload && this.filesToUpload.some(f => f && f.length > 0);
 
-    if (allFilesSelected) {
+    if (tieneArchivos) {
       const opcion = confirm("¿Estás seguro de enviar la información?");
       if (opcion) {
         this.charge = true;
@@ -500,7 +498,7 @@ td {
           });
       }
     } else {
-      alert('Recuerda llenar todos los campos, si un archivo no aplica a tu caso, selecciona un archivo PDF en blanco. Si estas actualizando, ignora este mensaje');
+      alert('Debes seleccionar al menos un archivo para enviar.');
     }
   }
 
@@ -1054,6 +1052,57 @@ td {
     { id: 15, nombre: 'Última declaración anual' }
   ];
 
+  getTipoProveedorPerfil(): 'MORAL_REPSE' | 'MORAL_SC' | 'MORAL_MORAL' | 'FISICA_CON_RP' | 'FISICA_SIN_RP' {
+    if (!this.vendor) return 'MORAL_MORAL';
+
+    const regimen = (this.vendor.regimenFiscal || '').toLowerCase().trim();
+    const rp = (this.vendor.registroPatronal || '').toUpperCase().trim();
+    const tieneRP = rp !== '' && rp !== 'SINREGISTRO';
+    const razon = (this.vendor.razonSocial || '').toUpperCase();
+    const obs = (this.vendor.observaciones || '').toUpperCase();
+    const tipoProv = (this.vendor.tipoProveedor || '').toLowerCase();
+
+    // Si es FÍSICA
+    if (regimen === 'fisica') {
+      return tieneRP ? 'FISICA_CON_RP' : 'FISICA_SIN_RP';
+    }
+
+    // Si es MORAL o REPSE (legacy)
+    const esRepse = regimen === 'repse' || 
+                    tipoProv.includes('repse') || 
+                    obs.includes('REPSE') || 
+                    razon.includes('REPSE') ||
+                    (this.vendor.archivosRequeridos && this.vendor.archivosRequeridos.includes(12));
+
+    if (esRepse) {
+      return 'MORAL_REPSE';
+    }
+
+    const esSC = razon.includes('S.C.') || 
+                 razon.includes('S. C.') || 
+                 razon.includes('S.C') || 
+                 razon.includes('SOCIEDAD CIVIL') || 
+                 rp === 'SINREGISTRO';
+
+    if (esSC) {
+      return 'MORAL_SC';
+    }
+
+    return 'MORAL_MORAL';
+  }
+
+  getNombrePerfil(): string {
+    const tipo = this.getTipoProveedorPerfil();
+    switch (tipo) {
+      case 'MORAL_REPSE': return 'Moral con REPSE';
+      case 'MORAL_SC': return 'Moral S.C.';
+      case 'MORAL_MORAL': return 'Moral Moral (Estándar)';
+      case 'FISICA_CON_RP': return 'Física con Registro Patronal';
+      case 'FISICA_SIN_RP': return 'Física sin Registro Patronal';
+      default: return 'General';
+    }
+  }
+
   isArchivoRequerido(id: number): boolean {
     if (!this.vendor || !this.vendor.archivosRequeridos) {
       return true; // Por defecto requiere todos
@@ -1062,17 +1111,74 @@ td {
   }
 
   isArchivoObligatorio(id: number): boolean {
+    if (!this.vendor) return false;
+
+    // Documentos base siempre obligatorios para cualquier tipo:
+    // 2. CSF SAT, 4. INE, 6. Comprobante domicilio, 7. Estado de cuenta, 8. Opinión 32D SAT, 14. Código de ética
+    const siempreObligatorios = [2, 4, 6, 7, 8, 14];
+    if (siempreObligatorios.includes(id)) {
+      return true;
+    }
+
+    const perfil = this.getTipoProveedorPerfil();
+
+    // 5. Acta constitutiva y poder rep legal
+    // OBLIGATORIO para las 3 Morales (Moral Moral, Moral REPSE, Moral SC)
+    if (id === 5 && (perfil === 'MORAL_MORAL' || perfil === 'MORAL_REPSE' || perfil === 'MORAL_SC')) {
+      return true;
+    }
+
+    // 3. Alta IMSS registro patronal
+    // OBLIGATORIO si cuenta con Registro Patronal (Física con RP, Moral Moral, Moral con REPSE)
+    if (id === 3 && (perfil === 'FISICA_CON_RP' || perfil === 'MORAL_MORAL' || perfil === 'MORAL_REPSE')) {
+      return true;
+    }
+
+    // 12. Registro REPSE
+    // OBLIGATORIO para Moral con REPSE
+    if (id === 12 && perfil === 'MORAL_REPSE') {
+      return true;
+    }
+
     return false;
   }
 
   asegurarArchivosObligatorios() {
     if (!this.vendor) return;
-    let requeridos = this.vendor.archivosRequeridos || [];
-    requeridos.sort((a, b) => a - b);
-    this.vendor.archivosRequeridos = requeridos;
+    if (!this.vendor.archivosRequeridos) {
+      this.vendor.archivosRequeridos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    }
+
+    // Asegurar que todos los obligatorios de su perfil estén incluidos
+    for (const doc of this.catalogoDocumentos) {
+      if (this.isArchivoObligatorio(doc.id)) {
+        if (!this.vendor.archivosRequeridos.includes(doc.id)) {
+          this.vendor.archivosRequeridos.push(doc.id);
+        }
+      }
+    }
+
+    const perfil = this.getTipoProveedorPerfil();
+
+    // Si es física, asegurar que acta constitutiva (id: 5) no esté forzada
+    if (perfil === 'FISICA_SIN_RP' || perfil === 'FISICA_CON_RP') {
+      const idx5 = this.vendor.archivosRequeridos.indexOf(5);
+      if (idx5 !== -1) this.vendor.archivosRequeridos.splice(idx5, 1);
+    }
+
+    // Si no tiene registro patronal (Física sin RP), retirar id: 3 si no lo tiene
+    if (perfil === 'FISICA_SIN_RP') {
+      const idx3 = this.vendor.archivosRequeridos.indexOf(3);
+      if (idx3 !== -1) this.vendor.archivosRequeridos.splice(idx3, 1);
+    }
+
+    this.vendor.archivosRequeridos.sort((a, b) => a - b);
   }
 
   toggleRequisito(id: number) {
+    if (this.isArchivoObligatorio(id)) {
+      return; // No se puede alterar un archivo obligatorio
+    }
     if (!this.vendor.archivosRequeridos) {
       this.vendor.archivosRequeridos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
     }
@@ -1087,9 +1193,11 @@ td {
 
   guardarRequisitos() {
     if (!this.vendor || !this.vendor._id) return;
+    this.asegurarArchivosObligatorios();
     this._projectService.updateVendor(this.vendor, false).subscribe(
       response => {
         alert('Requisitos de archivos actualizados correctamente.');
+        this.mostrarConfiguracion = false;
       },
       error => {
         console.error('Error al actualizar requisitos:', error);

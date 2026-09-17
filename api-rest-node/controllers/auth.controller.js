@@ -179,12 +179,12 @@ var AuthController = {
               port: 465,
               secure: true,
               auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
+                user: "corrigimail@gmail.com",
+                pass: "uaxotyjjontjofkt",
               },
             });
             let info = await transporter.sendMail({
-              from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
+              from: '"Proveedores Sacmag " <corrigimail@gmail.com>',
               to: `${correoP} , ${params.correo.toLowerCase().trim()}`,
               subject: "Accesos para entrar a la plataforma de Proveedores",
               html: contentHtml,
@@ -348,12 +348,12 @@ var AuthController = {
         port: 465,
         secure: true,
         auth: {
-          user: "sacmag.proveedores@gmail.com",
-          pass: "jvwezvognvounmdl",
+          user: "corrigimail@gmail.com",
+          pass: "uaxotyjjontjofkt",
         },
       });
       let info = await transporter.sendMail({
-        from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
+        from: '"Proveedores Sacmag " <corrigimail@gmail.com>',
         to: `${userFound.correo}`,
         subject: "Cambio de contraseña",
         html: contentHtml,
