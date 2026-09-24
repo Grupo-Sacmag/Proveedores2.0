@@ -5,10 +5,10 @@ var port = 3000; // coincide con Nginx
 
 mongoose.Promise = global.Promise;
 
-// var user = encodeURIComponent('ContaVendorsDB@');        // Usuario codificado
-// var password = encodeURIComponent('velocivieja99@.16');   // Contraseña codificada
-// var uri = `mongodb://${user}:${password}@127.0.0.1:27017/proveedores?authSource=admin`;
-var uri = 'mongodb://127.0.0.1:27017/proveedores';
+ var user = encodeURIComponent('ContaVendorsDB@');        // Usuario codificado
+ var password = encodeURIComponent('velocivieja99@.16');   // Contraseña codificada
+ var uri = `mongodb://${user}:${password}@213.218.240.167:27017/admin`;
+//var uri = 'mongodb://127.0.0.1:27017/proveedores';
 
 mongoose.connect(uri, {
     useNewUrlParser: true,

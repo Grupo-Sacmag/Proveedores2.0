@@ -17,6 +17,7 @@ import { RegisterUsuariosComponent } from './components/register-usuarios/regist
 //Serviccios
 import { ProjectService } from './services/project.service';
 import {UserGuard} from './services/user.guard';
+import { AdminPremiumGuard } from './services/admin-premium.guard';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 /*Angular material*/
@@ -31,6 +32,9 @@ import { PatchNotesComponent } from './components/patch-notes/patch-notes.compon
 import { PatchnotesComponent } from './components/patchnotes/patchnotes.component';
 import { WorkordersComponent } from './components/workorders/workorders.component';
 import { AyudaComponent } from './components/ayuda/ayuda.component';
+
+import { AdminTicketsDashboardComponent } from './components/admin-tickets-dashboard/admin-tickets-dashboard.component';
+import { MisTicketsComponent } from './components/mis-tickets/mis-tickets.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +53,9 @@ import { AyudaComponent } from './components/ayuda/ayuda.component';
     PatchNotesComponent,
     PatchnotesComponent,
     WorkordersComponent,
-    AyudaComponent
+    AyudaComponent,
+    AdminTicketsDashboardComponent,
+    MisTicketsComponent
   ],
   imports: [
     //Modulos
@@ -66,7 +72,8 @@ import { AyudaComponent } from './components/ayuda/ayuda.component';
     //Servicios
     appRoutingProviders,
     ProjectService,
-    UserGuard
+    UserGuard,
+    AdminPremiumGuard
   ],
   bootstrap: [AppComponent]
 })

@@ -51,6 +51,19 @@
         Archivos Globales
       </a>
       <a
+        [routerLink]="['/mis-tickets']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+        >Mis Tickets</a
+      >
+      <a
+        [routerLink]="['/admin/tickets']"
+        [routerLinkActive]="['active']"
+        (click)="menu()"
+        *ngIf="rol == 'administrador_premium'"
+        >Dashboard de Tickets</a
+      >
+      <a
         [routerLink]="['/ayuda']"
         [routerLinkActive]="['active']"
         (click)="menu()"

@@ -1,0 +1,85 @@
+<div class="mis-tickets">
+  <div class="encabezado">
+    <h1>Mis Tickets</h1>
+    <button (click)="toggleFormulario()">
+      {{ mostrarFormulario ? 'Cancelar' : '+ Nuevo Ticket' }}
+    </button>
+  </div>
+
+  <p *ngIf="error" class="error">{{ error }}</p>
+  <p *ngIf="exito" class="exito">{{ exito }}</p>
+
+  <div class="formulario-nuevo" *ngIf="mostrarFormulario">
+    <h2>Reportar un problema</h2>
+
+    <label>Asunto</label>
+    <input type="text" [(ngModel)]="nuevoAsunto" placeholder="Resumen breve del problema">
+
+    <label>Descripción</label>
+    <textarea [(ngModel)]="nuevaDescripcion" placeholder="Describe qué pasó, dónde y cómo reproducirlo"></textarea>
+
+    <label>Módulo o pantalla (opcional)</label>
+    <input type="text" [(ngModel)]="nuevoModulo" placeholder="Ej. Carga de archivos, Órdenes de trabajo...">
+
+    <label>Prioridad</label>
+    <select [(ngModel)]="nuevaPrioridad">
+      <option *ngFor="let p of prioridades" [value]="p">{{ p }}</option>
+    </select>
+
+    <button (click)="crearTicket()" [disabled]="enviando">
+      {{ enviando ? 'Enviando...' : 'Enviar ticket' }}
+    </button>
+  </div>
+
+  <p *ngIf="cargando">Cargando tus tickets...</p>
+
+  <table class="tabla-tickets" *ngIf="!cargando && tickets.length > 0">
+    <thead>
+      <tr>
+        <th>Folio</th>
+        <th>Asunto</th>
+        <th>Prioridad</th>
+        <th>Estatus</th>
+        <th>Fecha</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of tickets">
+        <td>{{ t.folio }}</td>
+        <td>{{ t.asunto }}</td>
+        <td>{{ t.prioridad }}</td>
+        <td><span class="badge-estatus" [ngClass]="t.estatus || ''">{{ t.estatus }}</span></td>
+        <td>{{ t.fechaCreacion | date:'short' }}</td>
+        <td><button (click)="verDetalle(t)">Ver</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!cargando && tickets.length === 0">Todavía no has levantado ningún ticket.</p>
+
+  <div class="detalle-overlay" *ngIf="ticketSeleccionado" (click)="cerrarDetalle()">
+    <div class="detalle-panel" (click)="$event.stopPropagation()">
+      <button class="cerrar" (click)="cerrarDetalle()">✕</button>
+
+      <p *ngIf="cargandoDetalle">Cargando detalle...</p>
+
+      <ng-container *ngIf="!cargandoDetalle && ticketSeleccionado">
+        <h2>{{ ticketSeleccionado.folio }} — {{ ticketSeleccionado.asunto }}</h2>
+        <p><strong>Estatus:</strong> {{ ticketSeleccionado.estatus }}</p>
+        <p><strong>Descripción:</strong></p>
+        <p class="descripcion">{{ ticketSeleccionado.descripcion }}</p>
+
+        <h3>Historial de correos</h3>
+        <div class="hilo-mensajes">
+          <div class="mensaje" *ngFor="let m of mensajes">
+            <div class="mensaje-header">
+              <strong>{{ m.tipo }}</strong> — {{ m.fecha | date:'short' }}
+            </div>
+            <div class="mensaje-html" [innerHTML]="m.cuerpoHtml"></div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

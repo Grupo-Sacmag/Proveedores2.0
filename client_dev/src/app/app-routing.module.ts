@@ -1,7 +1,7 @@
-
 import { ModuleWithProviders, Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {UserGuard} from './services/user.guard'
+import { AdminPremiumGuard } from './services/admin-premium.guard';
 
 
 import { IndexComponent } from './components/index/index.component';
@@ -20,6 +20,9 @@ import { PatchnotesComponent } from './components/patchnotes/patchnotes.componen
 
 import { WorkordersComponent } from './components/workorders/workorders.component';
 import { AyudaComponent } from './components/ayuda/ayuda.component';
+import { AdminTicketsDashboardComponent } from './components/admin-tickets-dashboard/admin-tickets-dashboard.component';
+import { MisTicketsComponent } from './components/mis-tickets/mis-tickets.component';
+
 const routes: Routes = [
   { path: '', component: IndexComponent },
   { path: 'inicio', component: IndexComponent },
@@ -55,6 +58,16 @@ const routes: Routes = [
   { path: 'patchnotes', component: PatchNotesComponent },
   { path: 'feedback', component: PatchnotesComponent },
   { path: 'ayuda', component: AyudaComponent },
+  {
+    path: 'mis-tickets',
+    component: MisTicketsComponent,
+    canActivate: [UserGuard],
+  },
+  {
+    path: 'admin/tickets',
+    component: AdminTicketsDashboardComponent,
+    canActivate: [UserGuard, AdminPremiumGuard],
+  },
   { path: '**', component: IndexComponent },
 ];
 

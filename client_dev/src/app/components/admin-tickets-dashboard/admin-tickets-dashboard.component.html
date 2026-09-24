@@ -1,0 +1,91 @@
+<div class="tickets-dashboard">
+  <h1>Dashboard de Tickets</h1>
+
+  <div class="filtros">
+    <select [(ngModel)]="filtroEstatus" (change)="cargarTickets()">
+      <option value="">Todos los estatus</option>
+      <option *ngFor="let e of estatusDisponibles" [value]="e">{{ e }}</option>
+    </select>
+
+    <input type="text" placeholder="Empresa" [(ngModel)]="filtroEmpresa" (keyup.enter)="cargarTickets()">
+    <input type="text" placeholder="Usuario / solicitante" [(ngModel)]="filtroUsuario" (keyup.enter)="cargarTickets()">
+    <input type="date" [(ngModel)]="filtroDesde" (change)="cargarTickets()">
+    <input type="date" [(ngModel)]="filtroHasta" (change)="cargarTickets()">
+
+    <button (click)="cargarTickets()">Filtrar</button>
+    <button (click)="limpiarFiltros()">Limpiar</button>
+  </div>
+
+  <p *ngIf="error" class="error">{{ error }}</p>
+  <p *ngIf="cargando">Cargando tickets...</p>
+
+  <table class="tabla-tickets" *ngIf="!cargando && tickets.length > 0">
+    <thead>
+      <tr>
+        <th>Folio</th>
+        <th>Asunto</th>
+        <th>Solicitante</th>
+        <th>Empresa</th>
+        <th>Prioridad</th>
+        <th>Estatus</th>
+        <th>Fecha</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of tickets">
+        <td>{{ t.folio }}</td>
+        <td>{{ t.asunto }}</td>
+        <td>{{ t.usuario }}</td>
+        <td>{{ t.empresa }}</td>
+        <td>{{ t.prioridad }}</td>
+        <td><span class="badge-estatus" [ngClass]="t.estatus || ''">{{ t.estatus }}</span></td>
+        <td>{{ t.fechaCreacion | date:'short' }}</td>
+        <td><button (click)="verDetalle(t)">Ver</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!cargando && tickets.length === 0">No hay tickets con los filtros seleccionados.</p>
+
+  <!-- Panel de detalle: historial completo del hilo de correos (Criterio 4) -->
+  <div class="detalle-overlay" *ngIf="ticketSeleccionado" (click)="cerrarDetalle()">
+    <div class="detalle-panel" (click)="$event.stopPropagation()">
+      <button class="cerrar" (click)="cerrarDetalle()">✕</button>
+
+      <p *ngIf="cargandoDetalle">Cargando detalle...</p>
+
+      <ng-container *ngIf="!cargandoDetalle && ticketSeleccionado">
+        <h2>{{ ticketSeleccionado.folio }} — {{ ticketSeleccionado.asunto }}</h2>
+        <p><strong>Solicitante:</strong> {{ ticketSeleccionado.usuario }} ({{ ticketSeleccionado.correoSolicitante }})</p>
+        <p><strong>Empresa:</strong> {{ ticketSeleccionado.empresa }}</p>
+        <p><strong>Estatus:</strong> {{ ticketSeleccionado.estatus }}</p>
+        <p><strong>Descripción:</strong></p>
+        <p class="descripcion">{{ ticketSeleccionado.descripcion }}</p>
+
+        <h3>Historial de correos</h3>
+        <div class="hilo-mensajes">
+          <div class="mensaje" *ngFor="let m of mensajes">
+            <div class="mensaje-header">
+              <strong>{{ m.tipo }}</strong> — {{ m.autor }} — {{ m.fecha | date:'short' }}
+              <span *ngIf="!m.enviado" class="no-enviado" [title]="m.errorEnvio || ''">⚠ no se pudo enviar</span>
+            </div>
+            <div class="mensaje-html" [innerHTML]="m.cuerpoHtml"></div>
+          </div>
+        </div>
+
+        <div class="responder">
+          <h3>Responder</h3>
+          <textarea [(ngModel)]="mensajeRespuesta" placeholder="Escribe tu respuesta al proveedor..."></textarea>
+          <select [(ngModel)]="estatusRespuesta">
+            <option value="">Mantener estatus actual</option>
+            <option *ngFor="let e of estatusDisponibles" [value]="e">Cambiar a: {{ e }}</option>
+          </select>
+          <button (click)="enviarRespuesta()" [disabled]="enviandoRespuesta || !mensajeRespuesta.trim()">
+            {{ enviandoRespuesta ? 'Enviando...' : 'Enviar respuesta' }}
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

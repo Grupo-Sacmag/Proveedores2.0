@@ -324,5 +324,54 @@ validateSingleArchive(rfc: string, archivoKey: string): Observable<any> {
     return this._http.post(this.url + 'feedback', formData);
   }
 
-  // ...existing code...
+  crearTicket(ticket: any): Observable<any> {
+  let params = JSON.stringify(ticket);
+  let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+    return this._http.post(this.url + 'ticket', params, { headers: headers });
+  }
+
+  getMisTickets(): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+    return this._http.get(this.url + 'mis-tickets', { headers: headers });
+  }
+
+  getTicketDetail(id: string): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+    return this._http.get(this.url + 'ticket/' + id, { headers: headers });
+  }
+
+  getAllTicketsAdmin(filtros: any = {}): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+
+    let query = Object.keys(filtros)
+      .filter(key => filtros[key])
+      .map(key => `${key}=${encodeURIComponent(filtros[key])}`)
+      .join('&');
+
+    let url = this.url + 'admin/tickets' + (query ? '?' + query : '');
+    return this._http.get(url, { headers: headers });
+  }
+
+  responderTicket(id: string, mensaje: string, estatus?: string): Observable<any> {
+    let body: any = { mensaje: mensaje };
+    if (estatus) body.estatus = estatus;
+    let params = JSON.stringify(body);
+    let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+    return this._http.post(this.url + 'admin/ticket/' + id + '/responder', params, { headers: headers });
+  }
+
+  cambiarEstatusTicket(id: string, estatus: string, observaciones?: string): Observable<any> {
+    let body: any = { estatus: estatus };
+    if (observaciones) body.observaciones = observaciones;
+    let params = JSON.stringify(body);
+    let headers = new HttpHeaders().set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + this.getToken());
+    return this._http.put(this.url + 'admin/ticket/' + id + '/estatus', params, { headers: headers });
+  }
+
 }
