@@ -7,8 +7,8 @@ mongoose.Promise = global.Promise;
 
  var user = encodeURIComponent('ContaVendorsDB@');        // Usuario codificado
  var password = encodeURIComponent('velocivieja99@.16');   // Contraseña codificada
- var uri = `mongodb://${user}:${password}@213.218.240.167:27017/admin`;
-//var uri = 'mongodb://127.0.0.1:27017/proveedores';
+ //var uri = `mongodb://${user}:${password}@213.218.240.167:27017/admin`;
+ var uri = 'mongodb://localhost:27017/ProveedoresLocal';
 
 mongoose.connect(uri, {
     useNewUrlParser: true,

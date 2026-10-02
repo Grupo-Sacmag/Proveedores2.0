@@ -36,7 +36,6 @@ async function enviarYRegistrarMensaje({ ticket, tipo, destinatarios, asunto, ht
       to: destinatarios.join(", "),
       subject: asunto,
       html: html,
-      attachments: [mailer.LOGO_ATTACHMENT],
     });
     mensaje.enviado = true;
   } catch (err) {

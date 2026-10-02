@@ -2,164 +2,778 @@
 
 var URL_PORTAL = "https://proveedores-grupo-sacmag.com.mx";
 
-function renderFilas(filas) {
-  var rows = "";
-  for (var i = 0; i < filas.length; i += 2) {
-    var izq = filas[i];
-    var der = filas[i + 1];
-    rows += `
-      <tr>
-          <td width="50%" valign="top" style="padding-bottom: 20px;">
-              <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">${izq.label}</p>
-              <p style="margin: 0; font-size: 15px; color: #333333;">${izq.value}</p>
-          </td>
-          ${der
-            ? `<td width="50%" valign="top" style="padding-bottom: 20px;">
-              <p style="font-size: 11px; margin: 0 0 5px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">${der.label}</p>
-              <p style="margin: 0; font-size: 15px; color: #333333;">${der.value}</p>
-          </td>`
-            : `<td width="50%"></td>`
-          }
-      </tr>`;
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+
+function escapeHtml(value) {
+
+  if (value === null || value === undefined) {
+    return "";
   }
-  return rows;
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-/**
- * Layout base compartido por los correos de tickets. Todo el CSS va inline
- * a propósito (nada de <style> en el head) para que sobreviva a Gmail/Outlook.
- */
-function layoutTicket(opts) {
-  var filasHtml = renderFilas(opts.filas || []);
-  var ctaHtml = opts.ctaUrl
-    ? `
-      <div style="text-align: center; margin-top: 30px;">
-          <a href="${opts.ctaUrl}" style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 12px 25px; font-weight: bold; border-radius: 4px; font-size: 14px;">${opts.ctaText || "Ver ticket"}</a>
-      </div>`
-    : "";
+
+function textoHtml(value) {
+
+  return escapeHtml(value)
+    .replace(/\r?\n/g, "<br>");
+}
+
+
+/* ============================================================
+   TARJETA DE DATO
+   ============================================================ */
+
+function tarjetaDato(label, value, color) {
 
   return `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; color: #333333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <div style="background-color: #1a237e; color: #ffffff; padding: 40px 30px; text-align: center;">
-            <p style="font-size: 12px; margin: 0 0 10px 0; color: #9fa8da; letter-spacing: 1px; text-transform: uppercase;">
-                PORTAL DE PROVEEDORE<span style="background-color: #ffeb3b; color: #1a237e; padding: 0 2px;">S -</span> GRUPO SACMAG
-            </p>
-            <h1 style="margin: 0; font-size: 28px; font-weight: normal; font-family: 'Times New Roman', Times, serif;">
-                ${opts.tituloPlano} <span style="background-color: #ffeb3b; color: #1a237e; padding: 0 5px; font-weight: bold;">${opts.tituloResaltado}</span>
-            </h1>
+    <td width="50%" valign="top" style="padding:6px;">
+
+      <div style="
+        background-color:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-radius:9px;
+        padding:15px;
+      ">
+
+        <div style="
+          font-size:10px;
+          font-weight:bold;
+          letter-spacing:1px;
+          color:#64748b;
+          text-transform:uppercase;
+          margin-bottom:7px;
+        ">
+          ${escapeHtml(label)}
         </div>
 
-        <div style="background-color: #e8eaf6; padding: 20px 30px;">
-            <p style="font-size: 12px; margin: 0 0 5px 0; color: #7986cb; letter-spacing: 1px; font-weight: bold;">FOLIO DE TICKET</p>
-            <h2 style="margin: 0; font-size: 24px; color: #1a237e; font-family: 'Times New Roman', Times, serif; letter-spacing: 1px;">
-                ${opts.folio}
-            </h2>
+        <div style="
+          font-size:15px;
+          font-weight:bold;
+          color:${color || "#1e293b"};
+          line-height:1.4;
+        ">
+          ${escapeHtml(value || "N/A")}
         </div>
 
-        <div style="padding: 30px;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
-                ${filasHtml}
-            </table>
+      </div>
 
-            <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 20px 0 25px 0;" />
-
-            ${opts.mensajeHtml || ""}
-            ${ctaHtml}
-        </div>
-
-        <div style="background-color: #f5f5f5; padding: 20px; text-align: center;">
-            <p style="margin: 0; font-size: 12px; color: #999999;">
-                Mensaje automático — Portal de Proveedores - Grupo SACMAG
-            </p>
-        </div>
-    </div>
+    </td>
   `;
 }
 
-// --- Correo: ticket recién creado (notificación al equipo de administradores) ---
+
+/* ============================================================
+   RENDER DE DATOS
+   ============================================================ */
+
+function renderDatos(datos) {
+
+  var html = "";
+
+  for (var i = 0; i < datos.length; i += 2) {
+
+    var primero = datos[i];
+    var segundo = datos[i + 1];
+
+    html += `
+      <tr>
+        ${tarjetaDato(
+          primero.label,
+          primero.value,
+          primero.color
+        )}
+
+        ${
+          segundo
+            ? tarjetaDato(
+                segundo.label,
+                segundo.value,
+                segundo.color
+              )
+            : `
+              <td width="50%" style="padding:6px;"></td>
+            `
+        }
+      </tr>
+    `;
+  }
+
+  return html;
+}
+
+
+/* ============================================================
+   LAYOUT GENERAL
+   ============================================================ */
+
+function layoutTicket(opts) {
+
+  var datosHtml = renderDatos(opts.datos || []);
+
+  var contenidoPrincipal = "";
+
+  /* ----------------------------------------------------------
+     ASUNTO + DESCRIPCIÓN
+     Se utilizan únicamente cuando el correo los necesita.
+     ---------------------------------------------------------- */
+
+  if (opts.asunto) {
+
+    contenidoPrincipal += `
+      <div style="
+        margin-top:24px;
+        padding:18px 20px;
+        background-color:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-radius:9px;
+      ">
+
+        <div style="
+          font-size:10px;
+          color:#64748b;
+          font-weight:bold;
+          letter-spacing:1.2px;
+          margin-bottom:8px;
+        ">
+          ASUNTO
+        </div>
+
+        <div style="
+          font-size:16px;
+          color:#0f172a;
+          font-weight:bold;
+          line-height:1.4;
+        ">
+          ${escapeHtml(opts.asunto)}
+        </div>
+
+      </div>
+    `;
+  }
+
+
+  if (opts.descripcion) {
+
+    contenidoPrincipal += `
+      <div style="margin-top:24px;">
+
+        <div style="
+          font-size:10px;
+          color:#64748b;
+          font-weight:bold;
+          letter-spacing:1.2px;
+          margin-bottom:9px;
+        ">
+          DESCRIPCIÓN DEL REPORTE
+        </div>
+
+        <div style="
+          background-color:#ffffff;
+          border-left:4px solid #2563eb;
+          border-top:1px solid #e2e8f0;
+          border-right:1px solid #e2e8f0;
+          border-bottom:1px solid #e2e8f0;
+          border-radius:0 8px 8px 0;
+          padding:18px 20px;
+          font-size:14px;
+          line-height:1.65;
+          color:#475569;
+        ">
+          ${opts.descripcion}
+        </div>
+
+      </div>
+    `;
+  }
+
+
+  /* ----------------------------------------------------------
+     MENSAJE
+     Para el correo de confirmación al solicitante.
+     ---------------------------------------------------------- */
+
+  if (opts.mensaje) {
+
+    contenidoPrincipal += `
+      <div style="
+        margin-top:25px;
+        font-size:15px;
+        line-height:1.7;
+        color:#475569;
+      ">
+        ${opts.mensaje}
+      </div>
+    `;
+  }
+
+
+  /* ----------------------------------------------------------
+     BOTÓN
+     ---------------------------------------------------------- */
+
+  var ctaHtml = "";
+
+  if (opts.ctaUrl) {
+
+    ctaHtml = `
+      <div style="
+        text-align:center;
+        margin-top:30px;
+      ">
+
+        <a href="${escapeHtml(opts.ctaUrl)}"
+           style="
+             display:inline-block;
+             background-color:#1d4ed8;
+             color:#ffffff;
+             text-decoration:none;
+             padding:13px 28px;
+             border-radius:7px;
+             font-size:14px;
+             font-weight:bold;
+           ">
+          ${escapeHtml(opts.ctaText || "Ver ticket")}
+        </a>
+
+      </div>
+    `;
+  }
+
+
+  /* ==========================================================
+     HTML COMPLETO
+     ========================================================== */
+
+  return `
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>${escapeHtml(opts.tituloPlano || "Ticket")}</title>
+
+</head>
+
+
+<body style="
+  margin:0;
+  padding:0;
+  background-color:#f1f5f9;
+  font-family:Arial, Helvetica, sans-serif;
+  color:#1e293b;
+">
+
+
+<table width="100%"
+       cellpadding="0"
+       cellspacing="0"
+       border="0"
+       style="
+         background-color:#f1f5f9;
+         padding:30px 15px;
+       ">
+
+<tr>
+
+<td align="center">
+
+
+<!-- ========================================================
+     TARJETA PRINCIPAL
+     ======================================================== -->
+
+<table width="650"
+       cellpadding="0"
+       cellspacing="0"
+       border="0"
+       style="
+         width:100%;
+         max-width:650px;
+         background-color:#ffffff;
+         border-radius:14px;
+         overflow:hidden;
+         border:1px solid #e2e8f0;
+       ">
+
+
+<!-- ========================================================
+     ENCABEZADO
+     ======================================================== -->
+
+<tr>
+
+<td style="
+  background-color:#172554;
+  padding:28px 32px;
+">
+
+
+<div style="
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:1.5px;
+  color:#93c5fd;
+  text-transform:uppercase;
+  margin-bottom:8px;
+">
+  PORTAL DE PROVEEDORES
+</div>
+
+
+<div style="
+  font-size:22px;
+  font-weight:bold;
+  color:#ffffff;
+  line-height:1.3;
+">
+
+  ${escapeHtml(opts.tituloPlano || "")}
+
+  <span style="
+    color:#facc15;
+  ">
+    ${escapeHtml(opts.tituloResaltado || "")}
+  </span>
+
+</div>
+
+
+</td>
+
+</tr>
+
+
+<!-- ========================================================
+     FOLIO
+     ======================================================== -->
+
+<tr>
+
+<td style="
+  background-color:#eff6ff;
+  border-bottom:1px solid #dbeafe;
+  padding:20px 32px;
+">
+
+
+<div style="
+  font-size:10px;
+  color:#64748b;
+  font-weight:bold;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-bottom:5px;
+">
+  FOLIO DEL TICKET
+</div>
+
+
+<div style="
+  font-size:25px;
+  color:#1e3a8a;
+  font-weight:bold;
+  letter-spacing:1px;
+">
+  ${escapeHtml(opts.folio)}
+</div>
+
+
+</td>
+
+</tr>
+
+
+<!-- ========================================================
+     CONTENIDO
+     ======================================================== -->
+
+<tr>
+
+<td style="
+  padding:26px;
+">
+
+
+<!-- DATOS -->
+
+<table width="100%"
+       cellpadding="0"
+       cellspacing="0"
+       border="0">
+
+  ${datosHtml}
+
+</table>
+
+
+<!-- CONTENIDO ADICIONAL -->
+
+${contenidoPrincipal}
+
+
+<!-- BOTÓN -->
+
+${ctaHtml}
+
+
+</td>
+
+</tr>
+
+
+<!-- ========================================================
+     PIE
+     ======================================================== -->
+
+<tr>
+
+<td style="
+  background-color:#f8fafc;
+  border-top:1px solid #e2e8f0;
+  padding:20px 25px;
+  text-align:center;
+">
+
+
+<div style="
+  font-size:11px;
+  color:#94a3b8;
+  line-height:1.6;
+">
+
+  Este mensaje fue generado automáticamente por el
+
+  <strong style="color:#64748b;">
+    Portal de Proveedores - Grupo SACMAG
+  </strong>.
+
+  <br>
+
+  Por favor, no respondas directamente a este correo.
+
+</div>
+
+
+</td>
+
+</tr>
+
+
+</table>
+
+
+</td>
+
+</tr>
+
+</table>
+
+
+</body>
+
+</html>
+`;
+}
+
+
+/* ============================================================
+   NUEVO TICKET → DESARROLLO / SOPORTE
+   ============================================================ */
+
 function emailNuevoTicketAdmin(ticket) {
+
   var html = layoutTicket({
+
     tituloPlano: "Nuevo",
     tituloResaltado: "Ticket Registrado",
+
     folio: ticket.folio,
-    filas: [
-      { label: "SOLICITANTE", value: ticket.usuario.toUpperCase() },
-      { label: "EMPRESA", value: (ticket.empresa || "N/A").toUpperCase() },
-      { label: "PRIORIDAD", value: ticket.prioridad },
-      { label: "MÓDULO", value: ticket.modulo || "N/A" },
+
+    datos: [
+
+      {
+        label: "SOLICITANTE",
+        value: (ticket.usuario || "N/A").toUpperCase(),
+        color: "#1e293b"
+      },
+
+      {
+        label: "EMPRESA",
+        value: (ticket.empresa || "N/A").toUpperCase(),
+        color: "#1e293b"
+      },
+
+      {
+        label: "PRIORIDAD",
+        value: ticket.prioridad || "N/A",
+        color: "#dc2626"
+      },
+
+      {
+        label: "MÓDULO",
+        value: ticket.modulo || "N/A",
+        color: "#7c3aed"
+      }
+
     ],
-    mensajeHtml: `
-      <p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">ASUNTO</p>
-      <p style="margin: 0 0 20px 0; font-size: 15px; color: #333333;">${ticket.asunto}</p>
-      <p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">DESCRIPCIÓN</p>
-      <div style="background-color: #fafafa; border-left: 4px solid #1a237e; padding: 15px; font-size: 14px; color: #444; white-space: pre-wrap;">${ticket.descripcion}</div>
-    `,
-    ctaText: "Ver en el Dashboard",
-    ctaUrl: URL_PORTAL + "/admin/tickets/" + ticket._id,
+
+    asunto: ticket.asunto || "Sin asunto",
+
+    descripcion:
+      textoHtml(ticket.descripcion || "Sin descripción"),
+
+    ctaText: "Ver ticket en el Dashboard",
+
+    ctaUrl:
+      URL_PORTAL +
+      "/admin/tickets/" +
+      ticket._id
   });
-  return { subject: `[Ticket ${ticket.folio}] Nuevo reporte: ${ticket.asunto}`, html: html };
+
+
+  return {
+
+    subject:
+      `[Ticket ${ticket.folio}] Nuevo reporte: ${ticket.asunto}`,
+
+    html: html
+
+  };
 }
 
-// --- Correo: confirmación de recepción al solicitante ---
+
+/* ============================================================
+   CONFIRMACIÓN → SOLICITANTE
+   ============================================================ */
+
 function emailConfirmacionSolicitante(ticket) {
+
   var html = layoutTicket({
+
     tituloPlano: "Ticket",
     tituloResaltado: "Recibido",
+
     folio: ticket.folio,
-    filas: [
-      { label: "ESTATUS", value: ticket.estatus },
-      { label: "PRIORIDAD", value: ticket.prioridad },
+
+    datos: [
+
+      {
+        label: "ESTATUS",
+        value: ticket.estatus || "Pendiente",
+        color: "#2563eb"
+      },
+
+      {
+        label: "PRIORIDAD",
+        value: ticket.prioridad || "N/A",
+        color: "#dc2626"
+      }
+
     ],
-    mensajeHtml: `<p style="font-size: 15px; color: #555; line-height: 1.5;">Hemos recibido tu reporte y quedó registrado con el folio <strong>${ticket.folio}</strong>. Nuestro equipo lo revisará y te notificaremos por este medio cualquier avance.</p>`,
+
+    mensaje:
+      `Hemos recibido tu reporte y quedó registrado con el folio
+      <strong style="color:#1e3a8a;">
+        ${escapeHtml(ticket.folio)}
+      </strong>.
+      <br><br>
+      Nuestro equipo lo revisará y te notificaremos por este medio
+      cualquier avance.`,
+
     ctaText: "Ver mi ticket",
-    ctaUrl: URL_PORTAL + "/mis-tickets/" + ticket._id,
+
+    ctaUrl:
+      URL_PORTAL +
+      "/mis-tickets/" +
+      ticket._id
   });
-  return { subject: `[Ticket ${ticket.folio}] Hemos recibido tu reporte`, html: html };
+
+
+  return {
+
+    subject:
+      `[Ticket ${ticket.folio}] Hemos recibido tu reporte`,
+
+    html: html
+
+  };
 }
 
-// --- Correo: respuesta de un administrador al solicitante ---
-function emailRespuestaTicket(ticket, mensajeAdmin, autorAdmin) {
+
+/* ============================================================
+   RESPUESTA DEL ADMIN → SOLICITANTE
+   ============================================================ */
+
+function emailRespuestaTicket(
+  ticket,
+  mensajeAdmin,
+  autorAdmin
+) {
+
   var html = layoutTicket({
+
     tituloPlano: "Respuesta a tu",
     tituloResaltado: "Ticket",
+
     folio: ticket.folio,
-    filas: [
-      { label: "ESTATUS ACTUAL", value: ticket.estatus },
-      { label: "ATENDIDO POR", value: autorAdmin.toUpperCase() },
+
+    datos: [
+
+      {
+        label: "ESTATUS",
+        value: ticket.estatus || "N/A",
+        color: "#2563eb"
+      },
+
+      {
+        label: "PRIORIDAD",
+        value: ticket.prioridad || "N/A",
+        color: "#dc2626"
+      }
+
     ],
-    mensajeHtml: `
-      <p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">MENSAJE</p>
-      <div style="background-color: #fafafa; border-left: 4px solid #1a237e; padding: 15px; font-size: 14px; color: #444; white-space: pre-wrap;">${mensajeAdmin}</div>
-    `,
+
+    asunto: ticket.asunto || "Sin asunto",
+
+    descripcion:
+      `
+      <strong style="color:#1e3a8a;">
+        ${escapeHtml(autorAdmin)}
+      </strong>
+      respondió a tu ticket:
+      <br><br>
+      ${textoHtml(mensajeAdmin)}
+      `,
+
     ctaText: "Ver conversación completa",
-    ctaUrl: URL_PORTAL + "/mis-tickets/" + ticket._id,
+
+    ctaUrl:
+      URL_PORTAL +
+      "/mis-tickets/" +
+      ticket._id
   });
-  return { subject: `[Ticket ${ticket.folio}] Nueva respuesta a tu reporte`, html: html };
+
+
+  return {
+
+    subject:
+      `[Ticket ${ticket.folio}] Nueva respuesta a tu reporte`,
+
+    html: html
+
+  };
 }
 
-// --- Correo: cambio de estatus ---
-function emailCambioEstatusTicket(ticket, estatusAnterior, observaciones) {
+
+/* ============================================================
+   CAMBIO DE ESTATUS → SOLICITANTE
+   ============================================================ */
+
+function emailCambioEstatusTicket(
+  ticket,
+  estatusAnterior,
+  observaciones
+) {
+
+  var descripcionHtml = "";
+
+  if (observaciones) {
+
+    descripcionHtml = `
+      <strong style="color:#64748b;">
+        Observaciones:
+      </strong>
+
+      <br><br>
+
+      ${textoHtml(observaciones)}
+    `;
+
+  } else {
+
+    descripcionHtml =
+      "El estatus de tu ticket ha sido actualizado.";
+
+  }
+
+
   var html = layoutTicket({
+
     tituloPlano: "Actualización de",
     tituloResaltado: "Estatus",
+
     folio: ticket.folio,
-    filas: [
-      { label: "ESTATUS ANTERIOR", value: estatusAnterior },
-      { label: "ESTATUS NUEVO", value: ticket.estatus },
+
+    datos: [
+
+      {
+        label: "ESTATUS",
+        value: ticket.estatus || "N/A",
+        color: "#2563eb"
+      },
+
+      {
+        label: "PRIORIDAD",
+        value: ticket.prioridad || "N/A",
+        color: "#dc2626"
+      }
+
     ],
-    mensajeHtml: observaciones
-      ? `<p style="font-size: 11px; margin: 0 0 10px 0; color: #9e9e9e; font-weight: bold; letter-spacing: 1px;">OBSERVACIONES</p>
-         <div style="background-color: #fafafa; border-left: 4px solid #1a237e; padding: 15px; font-size: 14px; color: #444; white-space: pre-wrap;">${observaciones}</div>`
-      : "",
+
+    descripcion: descripcionHtml,
+
     ctaText: "Ver mi ticket",
-    ctaUrl: URL_PORTAL + "/mis-tickets/" + ticket._id,
+
+    ctaUrl:
+      URL_PORTAL +
+      "/mis-tickets/" +
+      ticket._id
   });
-  return { subject: `[Ticket ${ticket.folio}] Cambio de estatus: ${ticket.estatus}`, html: html };
+
+
+  return {
+
+    subject:
+      `[Ticket ${ticket.folio}] Cambio de estatus: ${ticket.estatus}`,
+
+    html: html
+
+  };
 }
 
+
+/* ============================================================
+   EXPORTACIONES
+   ============================================================ */
+
 module.exports = {
-  emailNuevoTicketAdmin: emailNuevoTicketAdmin,
-  emailConfirmacionSolicitante: emailConfirmacionSolicitante,
-  emailRespuestaTicket: emailRespuestaTicket,
-  emailCambioEstatusTicket: emailCambioEstatusTicket,
+
+  emailNuevoTicketAdmin:
+    emailNuevoTicketAdmin,
+
+  emailConfirmacionSolicitante:
+    emailConfirmacionSolicitante,
+
+  emailRespuestaTicket:
+    emailRespuestaTicket,
+
+  emailCambioEstatusTicket:
+    emailCambioEstatusTicket
+
 };
