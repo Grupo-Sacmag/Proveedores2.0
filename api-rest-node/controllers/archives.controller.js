@@ -4,12 +4,14 @@ var oldArchives = require("../models/oldArchives");
 var Archives = require("../models/archives");
 var Vendors = require("../models/vendors");
 var Users = require("../models/user");
+const mailer = require("../services/mailer");
 var archiver = require("archiver");
 var fechArchivo = require("../models/fechArchivo");
 const fs = require("fs");
 const fsa = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
+
 
 var ArchivesController = {
 
@@ -76,57 +78,19 @@ var ArchivesController = {
       }
 
       try {
-        let transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 465,
-          secure: true,
-          auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
-          },
-          tls: {
-            rejectUnauthorized: false,
-          },
+        const correo = supplierEmailTemplates.emailDocumentosPendientesAdmin({
+          rfc,
+          razonSocial: vendor?.razonSocial || "Proveedor",
+          empresa: vendor?.empresa || empresa,
+          proveedorId: vendorId,
         });
 
-        const vendor = await Vendors.findOne({ rfc });
-        const vendorId = vendor ? vendor._id : "";
-
-        let destinatarios = ["desarrollo.conta@grupo-sacmag.com.mx"];
-        if (
-          vendor &&
-          String(vendor.empresa).toLowerCase().trim() === "sacmag"
-        ) {
-          destinatarios.push("rosaaaaddsfd.sanchez@grupo-sacmag.com.mx");
-        }
-
-        let info = await transporter.sendMail({
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
-          to: destinatarios,
-          subject: `Archivos recibidos para RFC: ${rfc.toUpperCase()}`,
-          html: `
-          <img src="cid:unique@kreata.ee">
-          <h1>Proveedores Sacmag</h1>
-          <p>Se han recibido archivos para el RFC: <b>${rfc.toUpperCase()}</b></p>
-          <p>Por favor, ingrese a la plataforma para validarlos.</p>           
-          <p>
-            Click aquí para ir a la página ➜ 
-            <a href="https://proveedores-grupo-sacmag.com.mx/proveedor/${vendorId}">
-              https://proveedores-grupo-sacmag.com.mx/proveedor/${vendorId}
-            </a>
-          </p>
-          <p>Correo enviado automáticamente, no responder.</p>
-        `,
-          attachments: [
-            {
-              filename: "image.png",
-              path: __dirname + "/logo.png",
-              cid: "unique@kreata.ee",
-            },
-          ],
-        });
-
-        console.log("Correo de aceptación enviado", info.envelope);
+      await mailer.sendMail({
+        to: destinatarios.join(","),
+        subject: correo.subject,
+        html: correo.html,
+        text: correo.text,
+      });
       } catch (correoError) {
         console.error("Error enviando correo:", correoError);
       }
@@ -349,10 +313,18 @@ var ArchivesController = {
   refuseArchives: async function (req, res) {
     const projectRfc = req.params.rfc;
     const empresa = req.params.empresa;
-    const mensaje = req.params.mensaje?.toLowerCase().trim();
+
+    const mensaje =
+      req.params.mensaje?.trim() ||
+      "No se especificó motivo.";
+
     const rol_usuario = req.user.rol;
 
-    if (rol_usuario !== "administrador" && rol_usuario !== "administrador_premium" && rol_usuario !== "usuario") {
+    if (
+      rol_usuario !== "administrador" &&
+      rol_usuario !== "administrador_premium" &&
+      rol_usuario !== "usuario"
+    ) {
       return res
         .status(403)
         .send({ message: "No tienes permisos suficientes" });
@@ -362,72 +334,71 @@ var ArchivesController = {
       const vendorSearch = await Vendors.findOne({
         rfc: projectRfc.toLowerCase().trim(),
       });
+
       if (!vendorSearch) {
-        return res.status(404).send({ message: "Proveedor no encontrado" });
+        return res
+          .status(404)
+          .send({ message: "Proveedor no encontrado" });
       }
 
       const userAlta = await Users.findOne({
         usuario: vendorSearch.userAlta?.toLowerCase().trim(),
       });
 
-      // Ya no borramos los archivos
-      // const archivesRemoved = await Archives.deleteMany({
-      //   rfc: projectRfc.toLowerCase().trim(),
-      //   empresa: empresa.toLowerCase().trim()
-      // });
-      const archivesRemoved = []; // Dejamos esto vacío para que no rompa el return
+      const archivesRemoved = [];
 
       await Vendors.updateOne(
         { rfc: projectRfc.toLowerCase() },
         { verificado: false }
       );
 
-      const contentHtml = `
-      <img src="cid:unique@kreata.ee">
-      <h1>Proveedores Sacmag</h1>
-      <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank">Click aquí para entrar al Sitio Web</a>
-      <br><br>
-      <h4>Rechazo de archivos</h4>
-      <p>Buen día, debido a: <b>${mensaje}</b> fueron rechazados los archivos subidos al sistema. 
-      Deberás subir correctamente la documentación para la validación.</p>
-      <p>Correo enviado automáticamente, no responder.</p>
-    `;
-
       try {
-        let transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 465,
-          secure: true,
-          auth: {
-            user: "sacmag.proveedores@gmail.com",
-            pass: "jvwezvognvounmdl",
-          },
+        const correo =
+          supplierEmailTemplates.emailEstatusVerificacion({
+            razonSocial: vendorSearch.razonSocial,
+            estatus: "RECHAZADO",
+            motivo: mensaje,
+          });
+
+        const destinatarios = [
+          vendorSearch.correo,
+        ];
+
+        if (userAlta?.correo) {
+          destinatarios.push(userAlta.correo);
+        }
+
+        await mailer.sendMail({
+          to: destinatarios.join(","),
+          subject: correo.subject,
+          html: correo.html,
+          text: correo.text,
         });
 
-        const mailOptions = {
-          from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
-          to: `${vendorSearch.correo}, ${userAlta?.correo}`,
-          subject: `Archivos Rechazados ${vendorSearch.razonSocial.toUpperCase()}`,
-          html: contentHtml,
-          attachments: [
-            {
-              filename: "image.png",
-              path: __dirname + "/logo.png",
-              cid: "unique@kreata.ee",
-            },
-          ],
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Correo de rechazo enviado:", info.envelope);
+        console.log(
+          `Correo de rechazo enviado a: ${destinatarios.join(", ")}`
+        );
       } catch (mailErr) {
-        console.error("Error enviando correo:", mailErr);
+        console.error(
+          "Error enviando correo:",
+          mailErr
+        );
       }
 
-      return res.status(200).send({ archives: archivesRemoved });
+      return res.status(200).send({
+        archives: archivesRemoved,
+      });
+
     } catch (error) {
-      console.error("Error en rechazo:", error);
-      return res.status(500).send({ message: "Ocurrió un error", error });
+      console.error(
+        "Error en rechazo:",
+        error
+      );
+
+      return res.status(500).send({
+        message: "Ocurrió un error",
+        error,
+      });
     }
   },
 
@@ -477,27 +448,15 @@ var ArchivesController = {
                     },
                   });
 
-                  const contentHtml = `
-                    <img src="cid:unique@kreata.ee">
-                    <h1>Proveedores Sacmag</h1>
-                    <p>¡Tus archivos han sido validados exitosamente!</p>
-                    <p>Ya eres proveedor autorizado en la plataforma.</p>
-                    <p>Correo enviado automáticamente, no responder.</p>
-                  `;
-
-                  await transporter.sendMail({
-                    from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
-                    to: vendor.correo,
-                    subject: "Validación exitosa de archivos",
-                    html: contentHtml,
-                    attachments: [
-                      {
-                        filename: "image.png",
-                        path: __dirname + "/logo.png",
-                        cid: "unique@kreata.ee",
-                      },
-                    ],
-                  });
+                  const correo = supplierEmailTemplates.emailEstatusVerificacion({
+                    razonSocial: vendor.razonSocial, 
+                    estatus: "APROBADO", });
+                    await mailer.sendMail({
+                      to: vendor.correo,
+                      subject: correo.subject, 
+                      html: correo.html,
+                      text: correo.text,
+                    });
                 }
               } catch (mailErr) {
                 console.error("Error enviando correo de validación:", mailErr);
@@ -792,32 +751,18 @@ var ArchivesController = {
               },
             });
 
-            const contentHtml = `
-              <img src="cid:unique@kreata.ee">
-              <h1>Proveedores Sacmag</h1>
-              <br>
-              <p>Uno de tus documentos ha sido <b>rechazado</b>.</p>
-              <p><strong>Documento:</strong> ${rejectedFileName}</p>
-              <p>Por favor ingresa a la plataforma y actualizalo.</p>
-              <p>Correo enviado automáticamente, no responder.</p>
-            `;
-
-            await transporter.sendMail({
-              from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+            const correo = supplierEmailTemplates.emailDocumentoRechazado({
+              razonSocial: vendor.razonSocial,
+              documento: rejectedFileName,
+            });
+            await mailer.sendMail({
               to: vendor.correo,
-              subject: `Documento Rechazado: ${rejectedFileName}`,
-              html: contentHtml,
-              attachments: [
-                {
-                  filename: "image.png",
-                  path: __dirname + "/logo.png",
-                  cid: "unique@kreata.ee",
-                },
-              ],
+              subject: correo.subject,
+              html: correo.html,
+              text: correo.text,
             });
 
-            console.log(
-              `Correo de rechazo enviado a ${vendor.correo} por archivo: ${rejectedFileName}`
+            console.log(`Correo de rechazo enviado a ${vendor.correo} por archivo: ${rejectedFileName}`
             );
           } catch (mailErr) {
             console.error("Error enviando correo de rechazo:", mailErr);
@@ -863,27 +808,15 @@ var ArchivesController = {
                 pass: "jvwezvognvounmdl",
               },
             });
-            const contentHtml = `
-                  <img src="cid:unique@kreata.ee">
-                  <h1>Proveedores Sacmag</h1>
-                  <br>
-                  
-                  <p>¡Tus archivos han sido validados exitosamente!</p>
-                  <p>Ya eres proveedor autorizado en la plataforma.</p>
-                  <p>Correo enviado automáticamente, no responder.</p>
-                `;
-            await transporter.sendMail({
-              from: '"Proveedores Sacmag" <sacmag.proveedores@gmail.com>',
+            const correo = supplierEmailTemplates.emailEstatusVerificacion({
+              razonSocial: vendor.razonSocial,
+              estatus: "APROBADO",
+            });
+            await mailer.sendMail({
               to: vendor.correo,
-              subject: "Validación exitosa de archivos",
-              html: contentHtml,
-              attachments: [
-                {
-                  filename: "image.png",
-                  path: __dirname + "/logo.png",
-                  cid: "unique@kreata.ee",
-                },
-              ],
+              subject: correo.subject,
+              html: correo.html,
+              text: correo.text,
             });
             console.log(
               "Correo de validación completa enviado a:",

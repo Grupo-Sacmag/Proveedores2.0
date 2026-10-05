@@ -9,6 +9,8 @@ var moment = require("moment");
 const fs = require("fs");
 const fsa = require("fs").promises;
 const path = require("path");
+const mailer = require("../services/mailer");
+const supplierEmailTemplates = require("../services/emailTemplates/supplierEmailTemplates");
 
 const nombresArchivosParaCorreo = [
   "Formato requisitado para alta del proveedor",
@@ -213,63 +215,21 @@ var VendorController = {
           var saveInformation = await login.save();
           saveInformation.password = undefined;
           var vendorInformation = await vendor.save();
-          var contentHtml = `
-              <img src="cid:unique@kreata.ee">
-              <h1>Proveedores Sacmag</h1>
-               <h2>Bienvenid@ a la plataforma ${params.razonSocial}</h2>
-                
-                  <br>
-                  <h4>Datos del Usuario Para Entrar Al Sistema (${params.empresa.toUpperCase()})</h4>
-                  <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank" >Click aquí para entrar al Sitio Web</a>
+          const correo = supplierEmailTemplates.emailBienvenida({
+            empresa: params.empresa,
+            razonSocial: params.razonSocial,
+            usuario: finalUsername,
+            password: pass,
+            archivosRequeridos:
+            vendor.archivosRequeridos,
+          });
 
-                  <ul>
-                 
-                  <br>
-                  <li><b>Usuario: ${finalUsername}</b></li>
-                  <li><b>Contraseña ${pass}</b></li>
-              <ul>
-                  <br>
-                  <br>
-                  <h4>Archivos a enviar</h4>
-                  ${generarListaHtmlArchivos(vendor.archivosRequeridos)}
-                  
-                  <h4>Notas</h4>
-                  <ol>
-                  <li>Todos los campos son requeridos</li>
-                  <li>Sólo puedes subir archivos pdf y con un peso máximo de 5 MB por archivo</li>
-                  <li>En caso de que algún archivo no aplique, subir un archivo PDF con nombre "No aplica" vacío</li>
-                  </ol>
-                  
-                  <br><br><br><br><br><br>
-                  <p>Recuerda subir todos tus archivos al sistema para validarte como proveedor autorizado</p>
-                  <h5>Correo enviado automáticamente, no responder correo<h5>
-              
-              `;
-          let transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-              user: "sacmag.proveedores@gmail.com",
-              pass: "jvwezvognvounmdl",
-            },
+          await mailer.sendMail({
+            to: `${correoP}, ${params.correo.toLowerCase().trim()}, ${emailUser}`,
+            subject: correo.subject,
+            html: correo.html,
+            text: correo.text,
           });
-          let info = await transporter.sendMail({
-            from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
-            to: `${correoP} , ${params.correo
-              .toLowerCase()
-              .trim()} , ${emailUser}`,
-            subject: "Accesos para entrar a la plataforma de Proveedores (" + params.empresa.toUpperCase() + ")",
-            html: contentHtml,
-            attachments: [
-              {
-                filename: "image.png",
-                path: __dirname + "/logo.png",
-                cid: "unique@kreata.ee",
-              },
-            ],
-          });
-          console.log("Mensaje enviado", info.envelope);
           return res.status(200).send({
             vendor: vendorInformation,
             user: saveInformation,
@@ -354,8 +314,7 @@ var VendorController = {
             }
           if (send === 'true' || send === true) {
             var pass = "";
-            var characters =
-              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             for (var i = 0; i < 8; i++) {
               pass += characters.charAt(
                 Math.floor(Math.random() * characters.length)
@@ -371,59 +330,26 @@ var VendorController = {
               { rfc: update.rfc },
               { $set: { password: hashedPassword } }
             );
-            var contentHtml = `
-                        <img src="cid:unique@kreata.ee">
-                        <h1>Proveedores Sacmag</h1>
-                        <br><br>
-                        <h2>Proveedor Actualizado.</h2>
-                        <h4>Datos del Usuario Para Entrar Al Sistema</h4>
-                        <a href="https://proveedores-grupo-sacmag.com.mx/" target="_blank" >Click aquí para entrar al Sitio Web</a>
-                        <h5>Nuevo Proveedor de ${update.empresa}</h5>
-                        <ul>
-
-                            <li><b>Usuario: ${update.rfc}</b></li>
-                            <li><b>Contraseña ${pass}</b></li>
-                        </ul>
-                        <br>
-                        <br>
-                        <h4>Archivos a enviar</h4>
-                        ${generarListaHtmlArchivos(update.archivosRequeridos)}
-                    
-                        <h4>Notas</h4>
-                        <ol>
-                        <li>Todos los campos son requeridos</li>
-                        <li>Sólo puedes subir archivos pdf y con un peso máximo de 2 MB por archivo</li>
-                        <li>En caso de que algún archivo no aplique, subir un archivo PDF con nombre "No aplica" vacío</li>
-                        </ol>
-                    
-                        <br><br><br><br><br><br>
-                        <p>Recuerda subir todos tus archivos al sistema para validarte como proveedor autorizado</p>
-                        <p>Correo enviado automáticamente, no responder correo<p>
-                            `;
-
-            let transporter = nodemailer.createTransport({
-              host: "smtp.gmail.com",
-              port: 465,
-              secure: true,
-              auth: {
-                user: "sacmag.proveedores@gmail.com",
-                pass: "jvwezvognvounmdl",
-              },
+            const usuarioProveedor = await Users.findOne({
+              rfc: update.rfc,
             });
-            let info = await transporter.sendMail({
-              from: '"Proveedores Sacmag " <sacmag.proveedores@gmail.com>',
-              to: `${correoP} , ${update.correo} , ${emailUser}`,
-              subject: "Accesos para entrar a la plataforma de Proveedores",
-              html: contentHtml,
-              attachments: [
-                {
-                  filename: "image.png",
-                  path: __dirname + "/logo.png",
-                  cid: "unique@kreata.ee",
-                },
-              ],
+            const correo = supplierEmailTemplates.emailBienvenida({
+              empresa: update.empresa,
+              razonSocial: update.razonSocial,
+              usuario: usuarioProveedor?.usuario || update.rfc,
+              password: pass,
+              archivosRequeridos:
+                update.archivosRequeridos || [],
             });
-            console.log("Mensaje enviado", info.envelope);
+
+            await mailer.sendMail({
+              to: `${correoP}, ${update.correo}, ${emailUser}`,
+              subject: correo.subject,
+              html: correo.html,
+              text: correo.text,
+            });
+
+          console.log(`Correo de acceso reenviado a ${update.correo}`);
           }
 
           return res.status(200).send({ project: projectUpdated });
@@ -549,17 +475,7 @@ var VendorController = {
     const fileName = `feedback_${timestamp}.json`;
     const filePath = path.join(feedbackFolderPath, fileName);
 
-    fs.writeFileSync(filePath, JSON.stringify(feedbackData, null, 2));
-
-    let transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "sacmag.proveedores@gmail.com",
-        pass: "jvwezvognvounmdl"
-      }
-    });
+    fs.writeFileSync(filePath, JSON.stringify(feedbackData, null, 2));   
 
     let attachments = [];
     if (savedImages.length > 0) {
