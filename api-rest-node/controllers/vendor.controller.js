@@ -43,6 +43,31 @@ function generarListaHtmlArchivos(archivosRequeridos) {
   return html;
 }
 
+// Archivos obligatorios del sistema (alta de proveedores)
+const ARCHIVOS_OBLIGATORIOS_BASE = [2, 4, 6, 7, 8, 14];
+
+function aplicarArchivosObligatorios(archivosRequeridos, regimenFiscal, registroPatronal) {
+  const obligatorios = ARCHIVOS_OBLIGATORIOS_BASE.slice();
+
+  // 5. Acta constitutiva: solo persona moral
+  if (String(regimenFiscal || "").toLowerCase().trim() === "moral") {
+    obligatorios.push(5);
+  }
+
+  // 3. Alta IMSS: solo si cuenta con registro patronal
+  const patronal = String(registroPatronal || "").toLowerCase().trim();
+  if (patronal && patronal !== "sinregistro") {
+    obligatorios.push(3);
+  }
+
+  const recibidos = Array.isArray(archivosRequeridos) ? archivosRequeridos : [];
+  const validos = recibidos
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n >= 1 && n <= 15);
+
+  return Array.from(new Set(validos.concat(obligatorios))).sort((a, b) => a - b);
+}
+
 var VendorController = {
 
   getVendors: function (req, res) {
@@ -130,23 +155,14 @@ var VendorController = {
     var emailUser = req.user.correo;
     var userAlta = req.user.usuario;
     if (rol_usuario == "administrador" || rol_usuario == "administrador_premium" || rol_usuario == "usuario") {
-      if (
-        params.rfc &&
-        params.registroPatronal &&
-        params.razonSocial &&
-        params.tipoProveedor &&
-        params.regimenFiscal &&
-        params.nombreContacto &&
-        params.correo &&
-        params.empresa
-      ) {
-        try {
-          const resProv = await Vendors.find({
-            rfc: params.rfc.toLowerCase().trim(),
-            empresa: params.empresa.toLowerCase().trim()
-          }).exec();
-          
-          if (resProv != "") {
+      if (params.rfc && params.registroPatronal && params.razonSocial && params.tipoProveedor && params.regimenFiscal && params.nombreContacto && params.correo && params.empresa) 
+        {
+          try {
+            const resProv = await Vendors.find({
+              rfc: params.rfc.toLowerCase().trim(),
+              empresa: params.empresa.toLowerCase().trim()
+            }).exec();          
+            if (resProv != "") {
              return res.status(500).send({
                message: "El proveedor ya está registrado para la empresa " + params.empresa,
              });
@@ -178,8 +194,12 @@ var VendorController = {
           vendor.telefono = params.telefono;
           vendor.empresa = params.empresa.toLowerCase().trim();
           vendor.userAlta = userAlta.toLowerCase().trim();
-          if (params.archivosRequeridos && Array.isArray(params.archivosRequeridos)) {
-            vendor.archivosRequeridos = params.archivosRequeridos;
+          if (Array.isArray(params.archivosRequeridos)) {
+            vendor.archivosRequeridos = aplicarArchivosObligatorios(
+              params.archivosRequeridos,
+              vendor.regimenFiscal,
+              vendor.registroPatronal
+            );
           }
           if (params.observaciones != null) {
             if (params.observaciones.trim() != "")
