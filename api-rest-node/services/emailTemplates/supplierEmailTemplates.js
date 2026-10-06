@@ -12,15 +12,7 @@ function escapeHtml(value = "") {
 }
 function card(content) {
   return `
-    <div
-      style="
-        background:#f7f9fc;
-        border:1px solid #d9e2ec;
-        border-radius:8px;
-        padding:20px;
-        margin:20px 0;
-      "
-    >
+    <div style="background:#f7f9fc; border:1px solid #d9e2ec; border-radius:8px; padding:20px; margin:20px 0; " >
       ${content}
     </div>
   `;
@@ -35,105 +27,38 @@ function layoutProveedor({
   return `
   <!DOCTYPE html>
   <html>
-    <body
-      style="
-        margin:0;
-        padding:0;
-        background:#f3f6fa;
-        font-family:Arial, Helvetica, sans-serif;
-      "
-    >
-
-      <table
-        width="100%"
-        cellpadding="0"
-        cellspacing="0"
-        style="
-          background:#f3f6fa;
-          padding:30px 10px;
-        "
-      >
+    <body style="margin:0; padding:0; background:#f3f6fa; font-family:Arial, Helvetica, sans-serif; " >
+      <table width="100%" cellpadding="0" cellspacing="0" style=" background:#f3f6fa; padding:30px 10px; " >
         <tr>
           <td align="center">
-
-            <table
-              width="100%"
-              cellpadding="0"
-              cellspacing="0"
-              style="
-                max-width:650px;
-                width:100%;
-                background:#ffffff;
-                border-radius:12px;
-                overflow:hidden;
-                box-shadow:0 3px 12px rgba(0,0,0,0.08);
-              "
-            >
-
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width:650px; width:100%; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 3px 12px rgba(0,0,0,0.08); " >
               <tr>
-                <td
-                  style="background:#003b75; border-bottom:5px solid #f9a825; text-align:center; padding:30px;" >
+                <td style="background:#003b75; border-bottom:5px solid #f9a825; text-align:center; padding:30px;" >
                   <img src="cid:${LOGO_CID}" alt="Grupo SACMAG" style="max-width:220px; height:auto; display:block; margin:0 auto;">
                 </td>
               </tr>
-
               <tr>
-                <td
-                  style="
-                    padding:40px;
-                    font-size:15px;
-                    line-height:1.7;
-                    color:#444444;
-                  "
-                >
-
-                  <h2
-                    style="
-                      color:#003b75;
-                      margin-top:0;
-                      margin-bottom:25px;
-                      font-size:26px;
-                      line-height:1.3;
-                    "
-                  >
+                <td style="padding:40px; font-size:15px; line-height:1.7; color:#444444; " >
+                  <h2 style="color:#003b75; margin-top:0; margin-bottom:25px; font-size:26px; line-height:1.3; ">
                     ${titulo}
                   </h2>
-
-                  ${contenido}
-
+                    ${contenido}
                   ${
                     botonUrl
                       ? `
-                        <div
-                          style="
-                            margin-top:30px;
-                            text-align:center;
-                          "
-                        >
-
+                        <div style="margin-top:30px; text-align:center; ">
                           ${botonUrl}
-                            ${botonTexto}
+                          ${botonTexto}
                           </a>
-
                         </div>
-                      `
-                      : ""
-                  }
-
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    background:#f1f1f1;
-                    padding:25px;
-                    text-align:center;
-                    color:#666666;
-                    font-size:12px;
-                    line-height:1.6;
-                  "
-                >
+                        `
+                        : ""
+                      
+                      }
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:#f1f1f1; padding:25px; text-align:center; color:#666666; font-size:12px; line-height:1.6;" >
 
                   <strong>
                     Portal de Proveedores

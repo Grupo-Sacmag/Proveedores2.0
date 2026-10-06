@@ -1006,8 +1006,10 @@ td {
     this._router.navigate(['/cheque', rfc]);
   }
 
-  irAHistorial(rfc: string) {
-    this._router.navigate(['/historial-archivos', rfc]);
+   irAHistorial(rfc: string) {
+    this._router.navigate(['/historial-archivos', rfc], {
+      queryParams: { empresa: this.empresaActiva }
+    });
   }
 
   irAWorkOrders() {
